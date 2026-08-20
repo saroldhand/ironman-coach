@@ -1,5 +1,7 @@
 # 70.3 Training Tracker
 
+**Live:** https://saroldhand.github.io/ironman-coach/
+
 Static training site for an Ironman 70.3 on 2027-06-05. No build step, no dependencies.
 
 ## What is here
