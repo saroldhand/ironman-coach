@@ -1,0 +1,107 @@
+:root {
+  --bg: #12141a;
+  --card: #1a1d25;
+  --line: #2a2f3a;
+  --text: #e6e8ee;
+  --dim: #9aa1b1;
+  --swim: #4aa3df;
+  --bike: #e2a03f;
+  --run: #6bbf59;
+  --strength: #a97bd6;
+  --done: #6bbf59;
+  --partial: #e2a03f;
+  --missed: #d1495b;
+  --warn: #e2a03f;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 16px/1.5 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+.topbar {
+  display: flex; align-items: center; gap: 1rem;
+  padding: .75rem 1rem;
+  border-bottom: 1px solid var(--line);
+  position: sticky; top: 0; background: var(--bg); z-index: 2;
+}
+.brand { font-weight: 700; letter-spacing: .05em; }
+.views { display: flex; gap: .25rem; margin-left: auto; }
+.views a {
+  color: var(--dim); text-decoration: none;
+  padding: .35rem .7rem; border-radius: 999px; font-size: .9rem;
+}
+.views a.active { color: var(--text); background: var(--card); }
+.countdown { color: var(--dim); font-size: .85rem; white-space: nowrap; }
+
+.banner {
+  margin: .75rem 1rem 0; padding: .6rem .8rem;
+  border: 1px solid var(--warn); border-left-width: 4px;
+  border-radius: 6px; color: var(--warn); font-size: .9rem;
+}
+
+main { padding: 1rem; max-width: 780px; margin: 0 auto; }
+
+.daymeta { color: var(--dim); font-size: .9rem; }
+h1 { font-size: 1.4rem; margin: .2rem 0 1rem; }
+
+.card {
+  background: var(--card); border: 1px solid var(--line);
+  border-radius: 10px; padding: 1rem; margin-bottom: 1rem;
+  border-left: 4px solid var(--line);
+}
+.card.swim { border-left-color: var(--swim); }
+.card.bike { border-left-color: var(--bike); }
+.card.run { border-left-color: var(--run); }
+.card.strength { border-left-color: var(--strength); }
+
+.card h2 { margin: 0; font-size: 1.05rem; display: flex; align-items: center; gap: .5rem; }
+.prescribed { margin-left: auto; color: var(--dim); font-weight: 400; font-size: .9rem; }
+.effort { color: var(--dim); font-size: .9rem; margin: .4rem 0 .6rem; }
+.setlines { margin: .5rem 0; padding-left: 1.1rem; }
+.setlines li { margin: .15rem 0; }
+.detail { color: var(--dim); font-size: .9rem; margin: .5rem 0 0; padding-left: 1.1rem; }
+
+.tag {
+  font-size: .72rem; text-transform: uppercase; letter-spacing: .06em;
+  padding: .15rem .45rem; border-radius: 4px; border: 1px solid currentColor;
+}
+.tag.done { color: var(--done); }
+.tag.partial { color: var(--partial); }
+.tag.missed { color: var(--missed); }
+.tag.optional { color: var(--dim); }
+.tag.recovery { color: var(--swim); }
+
+.actual { margin-top: .6rem; padding-top: .6rem; border-top: 1px dashed var(--line); font-size: .9rem; }
+.actual a { color: var(--swim); }
+
+.placeholder { color: var(--dim); font-style: italic; }
+
+.weekgrid { display: grid; grid-template-columns: repeat(7, 1fr); gap: .5rem; }
+.weekgrid .cell {
+  background: var(--card); border: 1px solid var(--line); border-radius: 8px;
+  padding: .5rem; min-height: 88px; font-size: .8rem;
+}
+.weekgrid .cell.today { border-color: var(--text); }
+.weekgrid .cell .dow { color: var(--dim); text-transform: uppercase; font-size: .7rem; }
+.dot { display: inline-block; width: .5rem; height: .5rem; border-radius: 50%; }
+.dot.done { background: var(--done); }
+.dot.partial { background: var(--partial); }
+.dot.missed { background: var(--missed); }
+
+.season { display: flex; flex-direction: column; gap: .35rem; }
+.seasonrow { display: flex; align-items: center; gap: .5rem; font-size: .85rem; }
+.seasonrow .bar { height: .55rem; border-radius: 3px; background: var(--line); flex: 1; }
+.seasonrow .bar > span { display: block; height: 100%; border-radius: 3px; background: var(--done); }
+.seasonrow.recovery .label { color: var(--swim); }
+.seasonrow.current { outline: 1px solid var(--text); outline-offset: 3px; border-radius: 4px; }
+.blockhead { margin: 1rem 0 .35rem; color: var(--dim); font-size: .8rem; text-transform: uppercase; letter-spacing: .08em; }
+
+@media (max-width: 620px) {
+  .weekgrid { grid-template-columns: repeat(2, 1fr); }
+  .countdown { display: none; }
+}
