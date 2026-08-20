@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { dayForDate } from '../assets/plan-model.js';
+import { dayForDate, planStart } from '../assets/plan-model.js';
 
 const plan = JSON.parse(readFileSync(new URL('../data/plan.json', import.meta.url)));
 
@@ -75,6 +75,11 @@ test('block order in plan.json does not affect the result', () => {
   // And the out-of-plan reasons must still be the right way round.
   assert.deepEqual(dayForDate(shuffled, '2026-08-23'), { inPlan: false, reason: 'before-start' });
   assert.deepEqual(dayForDate(shuffled, '2027-06-07'), { inPlan: false, reason: 'after-end' });
+});
+
+test('planStart is the earliest block regardless of array order', () => {
+  assert.equal(planStart(plan), '2026-08-24');
+  assert.equal(planStart({ ...plan, blocks: [...plan.blocks].reverse() }), '2026-08-24');
 });
 
 import { resolveWeek } from '../assets/plan-model.js';

@@ -1,13 +1,16 @@
+import { planStart } from './plan-model.js';
+
 const DOW = { mon: 'Monday', tue: 'Tuesday', wed: 'Wednesday', thu: 'Thursday',
               fri: 'Friday', sat: 'Saturday', sun: 'Sunday' };
 
 export function el(tag, attrs = {}, children = []) {
   const node = document.createElement(tag);
   for (const [k, v] of Object.entries(attrs)) {
+    if (v === null || v === undefined) continue;
     if (k === 'class') node.className = v;
-    else if (v !== null && v !== undefined) node.setAttribute(k, v);
+    else node.setAttribute(k, v);
   }
-  for (const c of [].concat(children)) {
+  for (const c of [children].flat(Infinity)) {
     if (c === null || c === undefined) continue;
     node.append(typeof c === 'string' ? document.createTextNode(c) : c);
   }
@@ -63,7 +66,7 @@ export function renderToday(ctx) {
 
   if (!day.inPlan) {
     const msg = day.reason === 'before-start'
-      ? `Plan starts ${plan.blocks[0].start}.`
+      ? `Plan starts ${planStart(plan)}.`
       : 'Past the end of the plan.';
     out.append(el('h1', {}, 'Not in the plan'), el('p', { class: 'placeholder' }, msg));
     return out;
