@@ -7,9 +7,6 @@ function phaseFor(block, week) {
 }
 
 export function dayForDate(plan, iso) {
-  const first = plan.blocks[0];
-  if (daysBetween(first.start, iso) < 0) return { inPlan: false, reason: 'before-start' };
-
   for (const block of plan.blocks) {
     const offset = daysBetween(block.start, iso);
     if (offset < 0 || offset >= block.weeks * 7) continue;
@@ -30,5 +27,11 @@ export function dayForDate(plan, iso) {
     };
   }
 
-  return { inPlan: false, reason: 'after-end' };
+  // No block contains this date. Which side of the plan is it on?
+  // Derived from the earliest block, not blocks[0], so the result does not
+  // depend on the order blocks happen to appear in plan.json.
+  const earliest = plan.blocks.reduce((a, b) => (daysBetween(b.start, a.start) <= 0 ? a : b));
+  return daysBetween(earliest.start, iso) < 0
+    ? { inPlan: false, reason: 'before-start' }
+    : { inPlan: false, reason: 'after-end' };
 }

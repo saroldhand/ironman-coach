@@ -62,3 +62,17 @@ test('arc weeks carry a phase label', () => {
   assert.equal(dayForDate(plan, '2027-05-10').phaseLabel, 'Taper');
   assert.equal(dayForDate(plan, '2026-08-24').phaseLabel, null);
 });
+
+test('block order in plan.json does not affect the result', () => {
+  const shuffled = { ...plan, blocks: [...plan.blocks].reverse() };
+
+  // A prep date must still resolve, even with arc listed first.
+  const d = dayForDate(shuffled, '2026-08-24');
+  assert.equal(d.inPlan, true);
+  assert.equal(d.blockId, 'prep');
+  assert.equal(d.week, 1);
+
+  // And the out-of-plan reasons must still be the right way round.
+  assert.deepEqual(dayForDate(shuffled, '2026-08-23'), { inPlan: false, reason: 'before-start' });
+  assert.deepEqual(dayForDate(shuffled, '2027-06-07'), { inPlan: false, reason: 'after-end' });
+});
