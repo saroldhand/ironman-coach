@@ -1,2 +1,5 @@
 node_modules/
 .DS_Store
+
+# Personal training notes — kept local, not published
+70.3-*.md
