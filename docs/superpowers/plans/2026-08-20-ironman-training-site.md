@@ -56,7 +56,7 @@
 
 **Interfaces:**
 - Consumes: nothing.
-- Produces: `parseISO(iso) -> Date`, `toISO(date) -> string`, `addDays(iso, n) -> string`, `daysBetween(a, b) -> number`, `weekdayKey(iso) -> string`, `mondayOf(iso) -> string`. All ISO arguments and returns are `YYYY-MM-DD` strings.
+- Produces: `addDays(iso, n) -> string`, `daysBetween(a, b) -> number`, `weekdayKey(iso) -> string`, `todayISO() -> string`, `hoursSince(isoTimestamp, now?) -> number`. All ISO arguments and returns are `YYYY-MM-DD` strings. `parseISO` and `toISO` stay module-private — nothing outside this file may construct a `Date`.
 
 - [ ] **Step 1: Create `package.json`**
 
@@ -79,7 +79,7 @@ Create `tests/date-utils.test.js`:
 ```js
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { addDays, daysBetween, weekdayKey, mondayOf } from '../assets/date-utils.js';
+import { addDays, daysBetween, weekdayKey, todayISO, hoursSince } from '../assets/date-utils.js';
 
 test('addDays moves forward and backward', () => {
   assert.equal(addDays('2026-08-24', 6), '2026-08-30');
@@ -108,10 +108,20 @@ test('weekdayKey maps Monday-first', () => {
   assert.equal(weekdayKey('2027-06-05'), 'sat');
 });
 
-test('mondayOf returns the Monday of the containing week', () => {
-  assert.equal(mondayOf('2026-08-24'), '2026-08-24');
-  assert.equal(mondayOf('2026-08-30'), '2026-08-24');
-  assert.equal(mondayOf('2026-08-27'), '2026-08-24');
+test('hoursSince measures elapsed hours against an explicit now', () => {
+  const now = Date.parse('2026-08-26T12:00:00Z');
+  assert.equal(hoursSince('2026-08-26T00:00:00Z', now), 12);
+  assert.equal(hoursSince('2026-08-24T12:00:00Z', now), 48);
+});
+
+test('todayISO returns a well-formed local calendar date', () => {
+  const iso = todayISO();
+  assert.match(iso, /^\d{4}-\d{2}-\d{2}$/);
+  // Must agree with the local clock, not UTC — a UTC-derived date is off by one
+  // for several hours a day in US timezones.
+  const now = new Date();
+  const expected = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  assert.equal(iso, expected);
 });
 ```
 
@@ -135,11 +145,11 @@ Create `assets/date-utils.js`:
 const DAY_MS = 86400000;
 const KEYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
 
-export function parseISO(iso) {
+function parseISO(iso) {
   return new Date(`${iso}T12:00:00Z`);
 }
 
-export function toISO(date) {
+function toISO(date) {
   return date.toISOString().slice(0, 10);
 }
 
@@ -156,8 +166,18 @@ export function weekdayKey(iso) {
   return KEYS[(parseISO(iso).getUTCDay() + 6) % 7];
 }
 
-export function mondayOf(iso) {
-  return addDays(iso, -KEYS.indexOf(weekdayKey(iso)));
+// Elapsed hours since a full ISO timestamp (not a calendar date).
+// `now` is injectable so this is testable without freezing the clock.
+export function hoursSince(isoTimestamp, now = Date.now()) {
+  return (now - new Date(isoTimestamp).getTime()) / 3600000;
+}
+
+// The local calendar date. Deliberately NOT derived from toISO(), which is
+// UTC-based: "what date is it here, now" is a different question from
+// "what does this ISO string mean".
+export function todayISO() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 ```
 
@@ -167,7 +187,7 @@ export function mondayOf(iso) {
 node --test tests/date-utils.test.js
 ```
 
-Expected: PASS, 6 tests.
+Expected: PASS, 7 tests.
 
 - [ ] **Step 6: Commit**
 
@@ -186,7 +206,7 @@ git commit -m "feat: add ISO date utilities anchored at UTC noon"
 
 **Interfaces:**
 - Consumes: nothing.
-- Produces: the `plan` object shape consumed by every later task. Keys: `race`, `blocks[]`, `skeleton{}`, `progression{}`, `recovery{}`, `swimSets{}`, `nutrition{}`.
+- Produces: the `plan` object shape consumed by every later task. Keys: `race`, `blocks[]`, `skeleton{}`, `progression{}`, `recovery{}`, `sets{}`, `nutrition{}`.
 
 **Content source:** `70.3-base-phase-weeks-1-8.md` and `70.3-training-context-handoff.md`, already in the repo root.
 
@@ -377,7 +397,7 @@ Expected: FAIL — `ENOENT: no such file or directory ... data/plan.json`.
     "skipStrength": true
   },
 
-  "swimSets": {
+  "sets": {
     "monTechnique": [
       "300 easy free",
       "8 x 50 drill - 20s rest (rotate: fingertip drag, catch-up, single-arm, 6-3-6)",
@@ -731,11 +751,11 @@ Then append the rest to `assets/plan-model.js`:
 const DAY_KEYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
 
 function swimSetLines(plan, template, dayKey, progression) {
-  if (dayKey === 'mon') return [...plan.swimSets.monTechnique];
-  if (dayKey === 'fri') return [...plan.swimSets.friMixed];
+  if (dayKey === 'mon') return [...plan.sets.monTechnique];
+  if (dayKey === 'fri') return [...plan.sets.friMixed];
   if (dayKey === 'wed') {
     if (progression.wedStructureOverride) return [...progression.wedStructureOverride];
-    const { warmup, cooldown } = plan.swimSets.wedMain;
+    const { warmup, cooldown } = plan.sets.wedMain;
     return [...warmup, `MAIN SET: ${progression.wedMainSet}`, ...cooldown];
   }
   return [];
@@ -768,7 +788,7 @@ function buildSession(plan, template, ctx) {
     s.setLines = swimSetLines(plan, template, dayKey, progression);
   }
 
-  if (template.setRef === 'strength') s.setLines = [...plan.swimSets.strength];
+  if (template.setRef === 'strength') s.setLines = [...plan.sets.strength];
 
   if (isRecovery) {
     if (dayKey === 'tue') s.prescribed.value = plan.recovery.tue.durationMin;
@@ -1131,7 +1151,7 @@ Expected: PASS, 15 tests.
 npm test
 ```
 
-Expected: PASS, 48 tests across four files.
+Expected: PASS, 49 tests across four files.
 
 - [ ] **Step 6: Commit**
 
@@ -1516,13 +1536,21 @@ export function renderWeek(ctx) {
 
 - [ ] **Step 2: Append `renderSeason` to `assets/render.js`**
 
+First add this import at the **top** of `assets/render.js` — `render.js` must not construct a `Date` of its own (Global Constraints):
+
+```js
+import { addDays } from './date-utils.js';
+```
+
+Then append:
+
 ```js
 export function renderSeason(ctx) {
   const { plan, entries, today, resolveWeek, weekCompletion } = ctx;
   const out = el('div');
   out.append(el('h1', {}, 'Season'));
 
-  const todayWeekStart = w => w.startDate <= today && today < addDaysLocal(w.startDate, 7);
+  const todayWeekStart = w => w.startDate <= today && today < addDays(w.startDate, 7);
 
   for (const block of plan.blocks) {
     out.append(el('div', { class: 'blockhead' },
@@ -1556,12 +1584,6 @@ export function renderSeason(ctx) {
 
   return out;
 }
-
-// Local helper so render.js does not import date-utils just for one call.
-function addDaysLocal(iso, n) {
-  const d = new Date(`${iso}T12:00:00Z`);
-  return new Date(d.getTime() + n * 86400000).toISOString().slice(0, 10);
-}
 ```
 
 - [ ] **Step 3: Commit**
@@ -1594,19 +1616,13 @@ Behaviour required by the spec:
 import { dayForDate, resolveWeek } from './plan-model.js';
 import { weekCompletion } from './log-model.js';
 import { renderToday, renderWeek, renderSeason } from './render.js';
-import { daysBetween } from './date-utils.js';
+import { daysBetween, todayISO, hoursSince } from './date-utils.js';
 
 const STALE_HOURS = 36;
 
 const main = document.getElementById('main');
 const bannerEl = document.getElementById('banner');
 const countdownEl = document.getElementById('countdown');
-
-function todayISO() {
-  // Local calendar date, formatted without touching UTC.
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-}
 
 async function loadJSON(path) {
   const res = await fetch(`${path}?t=${Date.now()}`, { cache: 'no-store' });
@@ -1618,10 +1634,6 @@ function banner(messages) {
   if (!messages.length) { bannerEl.hidden = true; return; }
   bannerEl.hidden = false;
   bannerEl.textContent = messages.join('  ·  ');
-}
-
-function hoursSince(isoTimestamp) {
-  return (Date.now() - new Date(isoTimestamp).getTime()) / 3600000;
 }
 
 function syncMessages(status, logFailed) {
@@ -1780,7 +1792,7 @@ git commit -m "feat: wire data loading, routing, and staleness banners"
 - Create: `scripts/sync-runbook.md`
 
 **Interfaces:**
-- Consumes: `data/plan.json`, `data/log.json`, and the same matching rules implemented in `assets/log-model.js`.
+- Consumes: `data/plan.json`, `data/log.json`, and the exported `dayForDate`/`resolveWeek`/`matchDay`/`mergeEntries` functions, invoked directly via node.
 - Produces: updated `data/log.json` and `data/sync-status.json`, committed and pushed.
 
 This file is the instruction set the scheduled task follows. It is read by Claude, not executed.
@@ -1800,42 +1812,56 @@ Working directory: the repo root.
 
 ## Steps
 
-1. **Read `data/plan.json`.** For each target date, work out the block, week, day key,
-   and prescribed sessions. The rules are implemented in `assets/plan-model.js` — if you
-   are unsure, run `node -e` against `resolveWeek` rather than re-deriving them by hand.
-
-2. **Query Strava MCP** for activities on the target date. Use the activity's
+1. **Query Strava MCP** for activities on the target date. Use each activity's
    `start_date_local` to decide which date it belongs to. Never use a UTC timestamp.
 
-3. **Match** activities to sessions by discipline:
-   `Swim → swim`, `Ride/VirtualRide/GravelRide/MountainBikeRide → bike`,
-   `Run/TrailRun/VirtualRun → run`, `WeightTraining/Workout → strength`.
-   Wednesday is a brick and expects two activities. Match in session order; the first
-   unused activity of a matching discipline wins.
+2. **Write the raw activities** to a scratch file as a JSON array, one entry per activity,
+   keeping at least `id`, `type`, `name`, `moving_time`, `distance`, `average_heartrate`,
+   `start_date_local`.
 
-4. **Score** each matched session against its prescribed metric — swims on distance,
-   bike and run on moving time:
-   - `done` at ≥85%
-   - `partial` at 40–85%
-   - `missed` below 40%, or when a non-optional session has no activity
-   Optional sessions (Monday swim, Friday strength) are never `missed`; if there is no
-   activity, write no entry at all.
+3. **Run the matching and merging code** — do not restate its rules by hand. The
+   thresholds, discipline mapping, and merge identity all live in tested modules, and a
+   prose copy of them will drift:
 
-5. **Record leftovers.** Any activity that matched no session becomes an entry with
-   `planKey: null` and `status: "extra"`. Never discard an activity.
+   ```bash
+   node --input-type=module -e '
+     import { readFileSync, writeFileSync } from "node:fs";
+     import { resolveWeek, dayForDate } from "./assets/plan-model.js";
+     import { matchDay, mergeEntries } from "./assets/log-model.js";
 
-6. **Merge into `data/log.json`.** Identity is the Strava activity id when present,
-   otherwise `date` + `planKey`. Re-running a date must not duplicate entries, and must
-   not overwrite a non-empty `note` on an existing entry.
+     const [date, actPath] = process.argv.slice(1);
+     const plan = JSON.parse(readFileSync("data/plan.json"));
+     const log  = JSON.parse(readFileSync("data/log.json"));
+     const activities = JSON.parse(readFileSync(actPath));
 
-7. **Write `data/sync-status.json`:**
+     const day = dayForDate(plan, date);
+     if (!day.inPlan || !day.authored) {
+       console.log(JSON.stringify({ skipped: true, reason: day.reason ?? "unauthored" }));
+       process.exit(0);
+     }
+
+     const week = resolveWeek(plan, day.blockId, day.week);
+     const resolvedDay = week.days.find(d => d.dayKey === day.dayKey);
+     const entries = matchDay(resolvedDay, activities, { elapsed: true });
+
+     log.entries = mergeEntries(log.entries, entries);
+     writeFileSync("data/log.json", JSON.stringify(log, null, 2) + "\n");
+     console.log(JSON.stringify({ added: entries.length }));
+   ' "<date>" "<scratch-activities.json>"
+   ```
+
+   Optional sessions with no activity produce no entry. Unmatched activities become
+   `status: "extra"` entries — the code never discards one. Re-running a date is
+   idempotent and preserves any hand-written `note`.
+
+4. **Write `data/sync-status.json`:**
 
    ```json
    { "lastRun": "<ISO timestamp>", "lastSuccess": "<ISO timestamp or previous value>",
      "ok": true, "reason": null, "activitiesFound": 2 }
    ```
 
-8. **Commit and push:**
+5. **Commit and push:**
 
    ```bash
    git add data/log.json data/sync-status.json
@@ -1935,7 +1961,7 @@ ask Claude in this repo: "sync the last 7 days from Strava".
 npm test
 ```
 
-Expected: PASS, 48 tests. Do not publish on a red suite.
+Expected: PASS, 49 tests. Do not publish on a red suite.
 
 - [ ] **Step 4: Commit**
 
@@ -2013,6 +2039,6 @@ git push
 
 - **Strava MCP is not connected yet.** Tasks 1–8 do not need it. Task 10 step 9 does. If it
   is still unconnected, complete everything else and leave step 9 open.
-- **The 48-test count** assumes 6 + 8 + 19 + 15. If your counts differ, something was skipped.
+- **The 49-test count** assumes 7 + 8 + 19 + 15. If your counts differ, something was skipped.
 - **Bridge weeks must be authored before 2026-10-19**, or the site correctly shows seven weeks
   of "not written yet".

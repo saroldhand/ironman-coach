@@ -1,0 +1,160 @@
+{
+  "race": { "name": "TBD 70.3", "date": "2027-06-05" },
+
+  "blocks": [
+    { "id": "prep", "label": "Prep", "start": "2026-08-24", "weeks": 8, "authored": true,
+      "note": "The written base phase, weeks 1-8." },
+    { "id": "bridge", "label": "Bridge", "start": "2026-10-19", "weeks": 7, "authored": false,
+      "note": "Extended aerobic base. Not authored yet - written before 2026-10-19." },
+    { "id": "arc", "label": "Arc", "start": "2026-12-07", "weeks": 26, "authored": false,
+      "note": "The documented 26-week plan. Authored block by block as it approaches.",
+      "phases": [
+        { "label": "Base", "from": 1, "to": 8 },
+        { "label": "Build", "from": 9, "to": 16 },
+        { "label": "Race-specific", "from": 17, "to": 22 },
+        { "label": "Taper", "from": 23, "to": 26 }
+      ]
+    }
+  ],
+
+  "skeleton": {
+    "mon": [
+      { "discipline": "swim", "title": "Technique swim", "optional": true,
+        "prescribed": { "metric": "distance", "value": 1800, "unit": "m" },
+        "effort": "Easy throughout. Technique is the point, not the distance.",
+        "setRef": "monTechnique",
+        "detail": ["Alternative: full rest, if last week was hard.",
+                   "Pick ONE cue for the whole session."] }
+    ],
+    "tue": [
+      { "discipline": "bike", "title": "Easy-steady bike",
+        "prescribed": { "metric": "duration", "value": 60, "unit": "min" },
+        "effort": "Zone 2 - 65-75% max HR - cadence 85-95",
+        "detail": ["Conversational the whole way.",
+                   "The most common way to ruin base is letting this drift into moderately hard."] }
+    ],
+    "wed": [
+      { "discipline": "swim", "title": "Main swim",
+        "prescribed": { "metric": "distance", "value": 2000, "unit": "m" },
+        "effort": "Steady - repeatable. Same pace on the last rep as the first.",
+        "setRef": "wedMain",
+        "detail": ["Count strokes per length on the main set.",
+                   "If the count climbs more than 3-4 from first rep to last, the stroke is falling apart - note when."] },
+      { "discipline": "run", "title": "Brick run off the swim",
+        "prescribed": { "metric": "duration", "value": 30, "unit": "min" },
+        "effort": "Zone 2 - easy",
+        "detail": ["Short on purpose. Do not extend it."] }
+    ],
+    "thu": [
+      { "discipline": "run", "title": "Easy run + strides",
+        "prescribed": { "metric": "duration", "value": 45, "unit": "min" },
+        "effort": "Zone 2 - 65-75% max HR",
+        "detail": ["Finish with 6 x 20s strides.",
+                   "Strides are relaxed accelerations, not sprints. Smooth, controlled, no straining."] }
+    ],
+    "fri": [
+      { "discipline": "swim", "title": "Mixed swim",
+        "prescribed": { "metric": "distance", "value": 2000, "unit": "m" },
+        "effort": "Alternating steady and easy",
+        "setRef": "friMixed", "detail": [] },
+      { "discipline": "strength", "title": "Strength", "optional": true,
+        "prescribed": { "metric": "duration", "value": 30, "unit": "min" },
+        "effort": "Light. Durability work, not a lifting program.",
+        "setRef": "strength",
+        "detail": ["Two rounds, minimal rest between exercises, 90s between rounds.",
+                   "If it is making Saturday worse, cut it."] }
+    ],
+    "sat": [
+      { "discipline": "bike", "title": "Long ride",
+        "prescribed": { "metric": "duration", "value": null, "unit": "min", "fromProgression": "rideMin" },
+        "effort": "Zone 2 - 65-75% max HR. Yes, even the long one.",
+        "detail": ["The anchor session of the week."] }
+    ],
+    "sun": [
+      { "discipline": "run", "title": "Long run",
+        "prescribed": { "metric": "duration", "value": null, "unit": "min", "fromProgression": "runMin" },
+        "effort": "Zone 2. Slower than you think.",
+        "detail": [] }
+    ]
+  },
+
+  "progression": {
+    "prep": [
+      { "week": 1, "type": "build",    "rideMin": 90,  "runMin": 50, "wedDistance": 2000, "wedMainSet": "8 x 100 steady, 20s rest" },
+      { "week": 2, "type": "build",    "rideMin": 100, "runMin": 55, "wedDistance": 2000, "wedMainSet": "8 x 100 steady, 20s rest" },
+      { "week": 3, "type": "build",    "rideMin": 110, "runMin": 60, "wedDistance": 2100, "wedMainSet": "6 x 150 steady, 20s rest" },
+      { "week": 4, "type": "recovery", "rideMin": 70,  "runMin": 40, "wedDistance": 1700, "wedMainSet": "5 x 100 easy, 30s rest" },
+      { "week": 5, "type": "build",    "rideMin": 120, "runMin": 65, "wedDistance": 2200, "wedMainSet": "5 x 200 steady, 20s rest" },
+      { "week": 6, "type": "build",    "rideMin": 130, "runMin": 70, "wedDistance": 2200, "wedMainSet": "5 x 200 steady, 20s rest" },
+      { "week": 7, "type": "build",    "rideMin": 135, "runMin": 75, "wedDistance": 2400, "wedMainSet": "4 x 300 steady, 15s rest" },
+      { "week": 8, "type": "recovery", "rideMin": 90,  "runMin": 45, "wedDistance": 2000, "wedMainSet": "1 x 1500 continuous, steady - pacing test",
+        "wedStructureOverride": ["300 easy free", "1500 continuous steady - this is the pacing test", "200 easy cooldown"] }
+    ]
+  },
+
+  "recovery": {
+    "note": "Applied when a week's type is 'recovery'. You should finish feeling slightly restless. That is the target.",
+    "tue": { "durationMin": 40 },
+    "thu": { "durationMin": 30, "dropStrides": true },
+    "swimDeltaMetres": -500,
+    "swimDeltaAppliesTo": ["mon", "fri"],
+    "skipStrength": true
+  },
+
+  "sets": {
+    "monTechnique": [
+      "300 easy free",
+      "8 x 50 drill - 20s rest (rotate: fingertip drag, catch-up, single-arm, 6-3-6)",
+      "6 x 100 on ONE cue only - 20s rest",
+      "200 easy cooldown"
+    ],
+    "wedMain": {
+      "warmup": ["300 easy free", "4 x 50 build easy to moderate - 15s rest", "6 x 50 drill - 15s rest"],
+      "cooldown": ["4 x 50 pull buoy, high elbow - 15s rest", "200 easy cooldown"]
+    },
+    "friMixed": [
+      "400 easy free",
+      "6 x 50 drill - 15s rest",
+      "10 x 100 alternating: odd steady, even easy - 15s rest",
+      "200 kick with board (easy)",
+      "200 cooldown"
+    ],
+    "strength": [
+      "Goblet squat x 10",
+      "Single-leg Romanian deadlift x 8 each side",
+      "Push-up x 10-15",
+      "Split squat x 8 each side",
+      "Plank 45s",
+      "Side plank 30s each side",
+      "Glute bridge x 15"
+    ]
+  },
+
+  "cues": [
+    { "name": "Exhale, don't hold", "detail": "Steady bubbles the whole time your face is in the water. Breath-holding is what causes the panic-breathing spiral." },
+    { "name": "Look down", "detail": "Eyes at the bottom of the pool, slight pressure through the chest. Head lifts as you tire, hips sink, drag." },
+    { "name": "Long in front", "detail": "Reach, brief glide, finish past the hip. Tired means shortening and spinning the arms." },
+    { "name": "Quiet legs", "detail": "Small kick from the hip. The kick's job is body position, not propulsion." }
+  ],
+
+  "nutrition": {
+    "dayTypes": { "mon": "low", "tue": "moderate", "wed": "moderate", "thu": "moderate", "fri": "moderate", "sat": "big", "sun": "big" },
+    "types": {
+      "big":      { "label": "Big day", "approach": "Maintenance or slightly above. Fuel during the session." },
+      "moderate": { "label": "Moderate day", "approach": "~300-400 kcal deficit. Carbs concentrated around training." },
+      "low":      { "label": "Low day", "approach": "~500 kcal deficit. Protein high, carbs lower." }
+    },
+    "nonNegotiables": [
+      "Protein 1.6-2.0 g/kg bodyweight, in 3-4 feedings of 25-40g.",
+      "Vegetables at two meals.",
+      "Water throughout, plus replacing session losses.",
+      "Cap alcohol, especially Friday and Saturday."
+    ],
+    "fuel": {
+      "under75min": "Water only.",
+      "longRide": "60g carb/hr, starting at 30 min.",
+      "longRun": "Water for the first hour, then 20-30g carb/hr.",
+      "post": "After the long ride, long run, or the Wednesday brick: ~1g carb/kg + 25-30g protein within an hour. After anything else, just the next normal meal - no extra recovery snack."
+    }
+  }
+}
