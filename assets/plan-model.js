@@ -6,10 +6,28 @@ function phaseFor(block, week) {
   return p ? p.label : null;
 }
 
+// Blocks in chronological order, regardless of the order they appear in
+// plan.json. ISO date strings compare correctly as strings, so this needs
+// no date arithmetic.
+export function blocksInOrder(plan) {
+  return [...plan.blocks].sort((a, b) => a.start.localeCompare(b.start));
+}
+
 // The plan's first day. Derived from the earliest block rather than blocks[0],
 // so nothing depends on the order blocks appear in plan.json.
 export function planStart(plan) {
-  return plan.blocks.reduce((a, b) => (daysBetween(b.start, a.start) <= 0 ? a : b)).start;
+  return blocksInOrder(plan)[0].start;
+}
+
+// Previous and next plan week across block boundaries. Returns null at each
+// end of the plan.
+export function weekNav(plan, blockId, week) {
+  const flat = [];
+  for (const b of blocksInOrder(plan)) {
+    for (let n = 1; n <= b.weeks; n++) flat.push({ blockId: b.id, week: n });
+  }
+  const i = flat.findIndex(x => x.blockId === blockId && x.week === week);
+  return { prev: flat[i - 1] || null, next: flat[i + 1] || null };
 }
 
 export function dayForDate(plan, iso) {

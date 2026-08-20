@@ -1,4 +1,4 @@
-import { dayForDate, resolveWeek } from './plan-model.js';
+import { dayForDate, resolveWeek, weekNav, blocksInOrder } from './plan-model.js';
 import { weekCompletion } from './log-model.js';
 import { renderToday, renderWeek, renderSeason } from './render.js';
 import { daysBetween, todayISO, hoursSince } from './date-utils.js';
@@ -21,9 +21,14 @@ function banner(messages) {
   bannerEl.textContent = messages.join('  ·  ');
 }
 
-function syncMessages(status, logFailed) {
+function syncMessages(status, logFailed, statusFailed) {
   const msgs = [];
   if (logFailed) msgs.push('Training log unavailable — showing the plan only.');
+  if (statusFailed) {
+    // Without this file we cannot tell whether the log is fresh. Say so:
+    // a silent page here would be indistinguishable from a healthy sync.
+    msgs.push('Sync status unavailable — cannot tell when training data was last updated. Blanks below mean unknown, not rest.');
+  }
   if (!status) return msgs;
 
   if (status.reason === 'never-run') {
@@ -44,15 +49,6 @@ function indexEntries(entries, date) {
     byKey.set(e.planKey, e);
   }
   return { byKey, extras };
-}
-
-function weekNav(plan, blockId, week) {
-  const flat = [];
-  for (const b of plan.blocks) {
-    for (let n = 1; n <= b.weeks; n++) flat.push({ blockId: b.id, week: n });
-  }
-  const i = flat.findIndex(x => x.blockId === blockId && x.week === week);
-  return { prev: flat[i - 1] || null, next: flat[i + 1] || null };
 }
 
 function route() {
@@ -81,9 +77,10 @@ async function start() {
   try { log = await loadJSON('data/log.json'); } catch { logFailed = true; }
 
   let status = null;
-  try { status = await loadJSON('data/sync-status.json'); } catch { /* banner covers it */ }
+  let statusFailed = false;
+  try { status = await loadJSON('data/sync-status.json'); } catch { statusFailed = true; }
 
-  banner(syncMessages(status, logFailed));
+  banner(syncMessages(status, logFailed, statusFailed));
 
   const today = todayISO();
   const daysToRace = daysBetween(today, plan.race.date);
@@ -105,7 +102,7 @@ async function start() {
     }
 
     if (r.view === 'week') {
-      const blockId = r.blockId || (day.inPlan ? day.blockId : plan.blocks[0].id);
+      const blockId = r.blockId || (day.inPlan ? day.blockId : blocksInOrder(plan)[0].id);
       const week = r.week || (day.inPlan ? day.week : 1);
       main.append(renderWeek({
         plan,

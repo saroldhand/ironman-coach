@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { dayForDate, planStart } from '../assets/plan-model.js';
+import { dayForDate, planStart, blocksInOrder, weekNav } from '../assets/plan-model.js';
 
 const plan = JSON.parse(readFileSync(new URL('../data/plan.json', import.meta.url)));
 
@@ -164,4 +164,29 @@ test('each day carries its nutrition day type', () => {
   const w = resolveWeek(plan, 'prep', 1);
   assert.equal(w.days.find(d => d.dayKey === 'mon').nutrition.label, 'Low day');
   assert.equal(w.days.find(d => d.dayKey === 'sat').nutrition.label, 'Big day');
+});
+
+test('blocksInOrder sorts chronologically regardless of array order', () => {
+  assert.deepEqual(blocksInOrder(plan).map(b => b.id), ['prep', 'bridge', 'arc']);
+  const shuffled = { ...plan, blocks: [...plan.blocks].reverse() };
+  assert.deepEqual(blocksInOrder(shuffled).map(b => b.id), ['prep', 'bridge', 'arc']);
+});
+
+test('weekNav walks across block boundaries', () => {
+  // Last week of prep -> first week of bridge, and back.
+  assert.deepEqual(weekNav(plan, 'prep', 8).next, { blockId: 'bridge', week: 1 });
+  assert.deepEqual(weekNav(plan, 'bridge', 1).prev, { blockId: 'prep', week: 8 });
+  assert.deepEqual(weekNav(plan, 'bridge', 7).next, { blockId: 'arc', week: 1 });
+});
+
+test('weekNav returns null at both ends of the plan', () => {
+  assert.equal(weekNav(plan, 'prep', 1).prev, null);
+  assert.equal(weekNav(plan, 'arc', 26).next, null);
+});
+
+test('weekNav does not depend on the order blocks appear in plan.json', () => {
+  const shuffled = { ...plan, blocks: [...plan.blocks].reverse() };
+  assert.deepEqual(weekNav(shuffled, 'prep', 8).next, { blockId: 'bridge', week: 1 });
+  assert.equal(weekNav(shuffled, 'prep', 1).prev, null);
+  assert.equal(weekNav(shuffled, 'arc', 26).next, null);
 });
