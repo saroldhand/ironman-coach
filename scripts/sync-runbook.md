@@ -7,6 +7,8 @@ Working directory: the repo root.
 
 - Default target: **yesterday**, local date.
 - On request, an explicit date or inclusive date range.
+- A date that has not finished yet (today, or the tail of a range) is synced
+  without marking anything missed — sessions you have not done yet stay blank.
 
 ## Steps
 
@@ -24,6 +26,7 @@ Working directory: the repo root.
    ```bash
    node --input-type=module -e '
      import { readFileSync, writeFileSync } from "node:fs";
+     import { todayISO } from "./assets/date-utils.js";
      import { resolveWeek, dayForDate } from "./assets/plan-model.js";
      import { matchDay, mergeEntries } from "./assets/log-model.js";
 
@@ -40,7 +43,11 @@ Working directory: the repo root.
 
      const week = resolveWeek(plan, day.blockId, day.week);
      const resolvedDay = week.days.find(d => d.dayKey === day.dayKey);
-     const entries = matchDay(resolvedDay, activities, { elapsed: true });
+     // Only a day that is fully over can be judged "missed". Syncing today, or
+     // the in-progress end of a backfill range, must leave unperformed sessions
+     // blank — unknown is not the same as skipped. ISO dates compare as strings.
+     const elapsed = date < todayISO();
+     const entries = matchDay(resolvedDay, activities, { elapsed });
 
      log.entries = mergeEntries(log.entries, entries);
      writeFileSync("data/log.json", JSON.stringify(log, null, 2) + "\n");
@@ -56,7 +63,7 @@ Working directory: the repo root.
 
    ```json
    { "lastRun": "<ISO timestamp>", "lastSuccess": "<ISO timestamp or previous value>",
-     "ok": true, "reason": null, "activitiesFound": 2 }
+     "ok": true, "reason": null, "activitiesFound": <count> }
    ```
 
 5. **Commit and push:**
@@ -66,6 +73,17 @@ Working directory: the repo root.
    git commit -m "chore: sync Strava activities for <date>"
    git push
    ```
+
+## If the date is not in the plan
+
+`dayForDate` returns `inPlan: false` for any date before the plan starts or after
+it ends, and the script prints a `skipped` line and writes no entries. This is the
+normal, permanent state every night after the race.
+
+Still write and commit `data/sync-status.json` with `"ok": true` and the skip
+reason, and set `lastSuccess` to now. The sync did its job — there was simply
+nothing to record. Leaving `lastSuccess` stale here would make the site raise a
+"data may be stale" banner every night for a plan that has legitimately finished.
 
 ## If Strava is unreachable
 
@@ -81,3 +99,5 @@ If the Strava MCP tools are not available, or a call fails:
 ## If git push fails
 
 Nothing is lost. Report it and stop — the next successful run recommits.
+If a push fails repeatedly across several nights, it is not a transient network
+problem — check for a diverged remote before unpushed commits pile up.
