@@ -27,16 +27,23 @@ test('addDays crosses month and year boundaries', () => {
   assert.equal(addDays('2026-12-31', 1), '2027-01-01');
 });
 
-test('date arithmetic is identical in UTC and in a DST-observing timezone', () => {
+test('date arithmetic is anchored to UTC noon, not to local midnight', () => {
+  // Asia/Tokyo is UTC+9, so local midnight falls on the PREVIOUS UTC date.
+  // A local-midnight parseISO shifts every result back a day here; UTC-noon
+  // anchoring does not. A negative-offset zone (e.g. America/Los_Angeles)
+  // cannot detect this, and daysBetween cannot either — Math.round absorbs
+  // any sub-half-day error. addDays and weekdayKey share parseISO, so these
+  // assertions guard the anchor for the whole module.
   const exprs = [
-    "daysBetween('2026-10-31', '2026-11-02')",   // US DST ends 2026-11-01
-    "daysBetween('2027-03-13', '2027-03-15')",   // US DST starts 2027-03-14
-    "addDays('2026-10-31', 2)",
-    "addDays('2027-03-13', 2)",
+    "addDays('2026-08-24', 0)",
+    "addDays('2026-10-31', 2)",     // spans the 2026-11-01 US DST end
+    "addDays('2027-03-13', 2)",     // spans the 2027-03-14 US DST start
+    "weekdayKey('2026-08-24')",
     "weekdayKey('2026-11-01')"
   ];
   for (const expr of exprs) {
-    assert.equal(inTZ('America/Los_Angeles', expr), inTZ('UTC', expr), expr);
+    assert.equal(inTZ('Asia/Tokyo', expr), inTZ('UTC', expr), expr);
+    assert.equal(inTZ('Pacific/Kiritimati', expr), inTZ('UTC', expr), expr);
   }
 });
 
