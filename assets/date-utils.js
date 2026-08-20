@@ -35,7 +35,6 @@ export function hoursSince(isoTimestamp, now = Date.now()) {
 // The local calendar date. Deliberately NOT derived from toISO(), which is
 // UTC-based: "what date is it here, now" is a different question from
 // "what does this ISO string mean".
-export function todayISO() {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+export function todayISO(now = new Date()) {
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 }
