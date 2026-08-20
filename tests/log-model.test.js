@@ -109,3 +109,39 @@ test('a week with no entries at all reports null, not zero', () => {
 test('an unauthored week reports null completion', () => {
   assert.equal(weekCompletion(resolveWeek(plan, 'bridge', 1), []).pct, null);
 });
+
+test('matching picks the activity that fits the session, not the first one', () => {
+  const short = { id: 1, type: 'Ride', moving_time: 5 * 60, distance: 2000, start_date_local: '2026-08-25T06:00:00Z', name: 'Spin to work' };
+  const real  = { id: 2, type: 'Ride', moving_time: 60 * 60, distance: 28000, start_date_local: '2026-08-25T18:00:00Z', name: 'Evening ride' };
+
+  for (const order of [[short, real], [real, short]]) {
+    const entries = matchDay(dayOf(week1, 'tue'), order, { elapsed: true });
+    const planned = entries.find(e => e.planKey === 'prep:1:tue:bike');
+    assert.equal(planned.status, 'done');
+    assert.equal(planned.strava.id, 2, 'the 60-minute ride must claim the 60-minute session');
+    assert.equal(entries.find(e => e.status === 'extra').strava.id, 1);
+  }
+});
+
+test('merging never leaves two entries on one planKey', () => {
+  const existing = [
+    { date: '2026-08-25', planKey: 'prep:1:tue:bike', status: 'missed', strava: { id: 8 }, note: '' },
+    { date: '2026-08-25', planKey: null, status: 'extra', strava: { id: 9 }, note: '' }
+  ];
+  const incoming = [{ date: '2026-08-25', planKey: 'prep:1:tue:bike', status: 'done', strava: { id: 9 }, note: '' }];
+
+  const merged = mergeEntries(existing, incoming);
+  const onSlot = merged.filter(e => e.planKey === 'prep:1:tue:bike');
+  assert.equal(onSlot.length, 1);
+  assert.equal(onSlot[0].status, 'done');
+  assert.equal(onSlot[0].strava.id, 9);
+});
+
+test('merging the same batch repeatedly is stable', () => {
+  const incoming = matchDay(dayOf(week1, 'wed'), [swim(2000), run(30 * 60)], { elapsed: true });
+  const once = mergeEntries([], incoming);
+  const twice = mergeEntries(once, incoming);
+  const thrice = mergeEntries(twice, incoming);
+  assert.equal(twice.length, once.length);
+  assert.deepEqual(thrice, once);
+});

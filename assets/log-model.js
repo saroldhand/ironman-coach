@@ -13,6 +13,7 @@ export const DISCIPLINE_BY_STRAVA_TYPE = {
 
 const DONE_AT = 0.85;
 const PARTIAL_AT = 0.40;
+const STATUS_RANK = { done: 3, partial: 2, missed: 1 };
 
 function actualFor(session, activity) {
   return session.prescribed.metric === 'distance'
@@ -34,16 +35,32 @@ export function matchDay(resolvedDay, activities, opts = {}) {
   const entries = [];
 
   for (const session of resolvedDay.sessions) {
-    const slot = pool.find(p =>
-      !p.used && DISCIPLINE_BY_STRAVA_TYPE[p.activity.type] === session.discipline);
+    // Best fit, not first fit: among unused activities of the right discipline,
+    // take the one that best satisfies THIS session. First-fit lets a 5-minute
+    // ride consume the slot for a 60-minute session and pushes the real ride
+    // out to `extra`, reporting a completed session as missed.
+    let best = null;
+    for (const p of pool) {
+      if (p.used) continue;
+      if (DISCIPLINE_BY_STRAVA_TYPE[p.activity.type] !== session.discipline) continue;
 
-    if (slot) {
-      slot.used = true;
+      const ratio = actualFor(session, p.activity) / session.prescribed.value;
+      const rank = STATUS_RANK[statusFor(session, p.activity)];
+
+      if (!best
+        || rank > best.rank
+        || (rank === best.rank && Math.abs(ratio - 1) < Math.abs(best.ratio - 1))) {
+        best = { slot: p, rank, ratio };
+      }
+    }
+
+    if (best) {
+      best.slot.used = true;
       entries.push({
         date: resolvedDay.date,
         planKey: session.key,
-        status: statusFor(session, slot.activity),
-        strava: summarise(slot.activity),
+        status: statusFor(session, best.slot.activity),
+        strava: summarise(best.slot.activity),
         note: ''
       });
     } else if (elapsed && !session.optional) {
@@ -90,23 +107,22 @@ function identity(entry) {
 }
 
 export function mergeEntries(existing, incoming) {
-  const out = [...existing];
+  let out = [...existing];
 
   for (const entry of incoming) {
-    const byId = entry.strava
-      ? out.findIndex(e => e.strava && e.strava.id === entry.strava.id)
-      : -1;
-    const bySlot = entry.planKey
-      ? out.findIndex(e => e.date === entry.date && e.planKey === entry.planKey)
-      : -1;
-    const at = byId !== -1 ? byId : bySlot;
+    // Every record this entry supersedes: the one carrying the same Strava id,
+    // and the one occupying the same plan slot. Usually the same record. When
+    // they differ, keeping both would put two entries on one planKey, and
+    // weekCompletion would count that session twice.
+    const superseded = out.filter(e =>
+      (entry.strava && e.strava && e.strava.id === entry.strava.id) ||
+      (entry.planKey && e.date === entry.date && e.planKey === entry.planKey));
 
-    if (at === -1) {
-      out.push(entry);
-    } else {
-      // Hand-written notes survive a resync.
-      out[at] = { ...entry, note: out[at].note || entry.note };
-    }
+    // A hand-written note survives a resync, whichever record carried it.
+    const note = superseded.map(e => e.note).find(n => n) || entry.note;
+
+    out = out.filter(e => !superseded.includes(e));
+    out.push({ ...entry, note });
   }
 
   return out.sort((a, b) =>
