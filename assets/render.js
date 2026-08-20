@@ -1,4 +1,4 @@
-import { planStart } from './plan-model.js';
+import { planStart, blocksInOrder } from './plan-model.js';
 import { addDays } from './date-utils.js';
 
 const DOW = { mon: 'Monday', tue: 'Tuesday', wed: 'Wednesday', thu: 'Thursday',
@@ -29,6 +29,39 @@ function actualText(strava, metric) {
     : [`${mins} min`, `${(strava.distance / 1000).toFixed(1)} km`];
   if (strava.avgHr) parts.push(`${Math.round(strava.avgHr)} bpm avg`);
   return parts.join(' · ');
+}
+
+// Which fuelling rules apply today, chosen by the day's actual sessions rather
+// than hardcoded into them — a 70-minute recovery ride and a 135-minute long
+// ride must not get the same advice.
+export function fuelLines(plan, resolved) {
+  const f = plan.nutrition.fuel;
+  const lines = [];
+  const long = resolved.sessions.filter(s =>
+    s.prescribed.metric === 'duration' && s.prescribed.value >= 75);
+
+  for (const s of long) {
+    if (s.discipline === 'bike') lines.push(f.longRide);
+    if (s.discipline === 'run') lines.push(f.longRun);
+  }
+  if (!lines.length) lines.push(f.under75min);
+
+  const brick = resolved.dayKey === 'wed' && resolved.sessions.length > 1;
+  if (long.length || brick) lines.push(f.post);
+
+  return lines;
+}
+
+// Activities Strava recorded with no matching planned slot. Shared between the
+// unauthored-block early return and the normal path so an unauthored day's
+// extras are never dropped from the view — see log-model's `extra` status.
+function extrasSection(extras) {
+  if (!extras.length) return null;
+  return el('section', { class: 'card' }, [
+    el('h2', {}, 'Not on the plan'),
+    el('ul', { class: 'detail' }, extras.map(e =>
+      el('li', {}, `${e.strava.name} — ${Math.round(e.strava.movingTime / 60)} min`)))
+  ]);
 }
 
 function sessionCard(session, entry) {
@@ -86,6 +119,8 @@ export function renderToday(ctx) {
   if (!day.authored) {
     out.append(el('p', { class: 'placeholder' },
       'This block has not been written yet. Nothing prescribed for today.'));
+    const extrasEl = extrasSection(extras);
+    if (extrasEl) out.append(extrasEl);
     return out;
   }
 
@@ -98,16 +133,13 @@ export function renderToday(ctx) {
   out.append(el('section', { class: 'card' }, [
     el('h2', {}, ['Nutrition', el('span', { class: 'prescribed' }, resolved.nutrition.label)]),
     el('p', { class: 'effort' }, resolved.nutrition.approach),
+    el('p', { class: 'daymeta' }, 'Fuelling'),
+    el('ul', { class: 'detail' }, fuelLines(plan, resolved).map(l => el('li', {}, l))),
     el('ul', { class: 'detail' }, plan.nutrition.nonNegotiables.map(n => el('li', {}, n)))
   ]));
 
-  if (extras.length) {
-    out.append(el('section', { class: 'card' }, [
-      el('h2', {}, 'Not on the plan'),
-      el('ul', { class: 'detail' }, extras.map(e =>
-        el('li', {}, `${e.strava.name} — ${Math.round(e.strava.movingTime / 60)} min`)))
-    ]));
-  }
+  const extrasEl = extrasSection(extras);
+  if (extrasEl) out.append(extrasEl);
 
   return out;
 }
@@ -166,7 +198,7 @@ export function renderSeason(ctx) {
 
   const todayWeekStart = w => w.startDate <= today && today < addDays(w.startDate, 7);
 
-  for (const block of plan.blocks) {
+  for (const block of blocksInOrder(plan)) {
     out.append(el('div', { class: 'blockhead' },
       `${block.label} — ${block.weeks} weeks from ${block.start}`));
 

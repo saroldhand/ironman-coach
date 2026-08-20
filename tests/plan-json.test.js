@@ -1,6 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
+import { blocksInOrder } from '../assets/plan-model.js';
+import { addDays } from '../assets/date-utils.js';
 
 const plan = JSON.parse(readFileSync(new URL('../data/plan.json', import.meta.url)));
 
@@ -15,10 +17,10 @@ test('race date and blocks are anchored correctly', () => {
 });
 
 test('blocks are contiguous with no gap or overlap', () => {
-  for (let i = 1; i < plan.blocks.length; i++) {
-    const prev = plan.blocks[i - 1];
-    const prevEnd = new Date(`${prev.start}T12:00:00Z`).getTime() + prev.weeks * 7 * 86400000;
-    assert.equal(new Date(prevEnd).toISOString().slice(0, 10), plan.blocks[i].start);
+  const ordered = blocksInOrder(plan);
+  for (let i = 1; i < ordered.length; i++) {
+    const prev = ordered[i - 1];
+    assert.equal(addDays(prev.start, prev.weeks * 7), ordered[i].start);
   }
 });
 

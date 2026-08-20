@@ -1,9 +1,8 @@
 import { dayForDate, resolveWeek, weekNav, blocksInOrder } from './plan-model.js';
 import { weekCompletion } from './log-model.js';
 import { renderToday, renderWeek, renderSeason } from './render.js';
-import { daysBetween, todayISO, hoursSince } from './date-utils.js';
-
-const STALE_HOURS = 36;
+import { daysBetween, todayISO } from './date-utils.js';
+import { syncMessages, indexEntries, route } from './app-state.js';
 
 const main = document.getElementById('main');
 const bannerEl = document.getElementById('banner');
@@ -19,42 +18,6 @@ function banner(messages) {
   if (!messages.length) { bannerEl.hidden = true; return; }
   bannerEl.hidden = false;
   bannerEl.textContent = messages.join('  ·  ');
-}
-
-function syncMessages(status, logFailed, statusFailed) {
-  const msgs = [];
-  if (logFailed) msgs.push('Training log unavailable — showing the plan only.');
-  if (statusFailed) {
-    // Without this file we cannot tell whether the log is fresh. Say so:
-    // a silent page here would be indistinguishable from a healthy sync.
-    msgs.push('Sync status unavailable — cannot tell when training data was last updated. Blanks below mean unknown, not rest.');
-  }
-  if (!status) return msgs;
-
-  if (status.reason === 'never-run') {
-    msgs.push('Nightly Strava sync has never run. Completed sessions will stay blank.');
-  } else if (!status.ok) {
-    msgs.push(`Last sync failed (${status.reason}). Data may be incomplete — this is not a rest day.`);
-  } else if (status.lastSuccess && hoursSince(status.lastSuccess) > STALE_HOURS) {
-    msgs.push(`Last successful sync ${Math.round(hoursSince(status.lastSuccess) / 24)} days ago. Data may be stale.`);
-  }
-  return msgs;
-}
-
-function indexEntries(entries, date) {
-  const byKey = new Map();
-  const extras = [];
-  for (const e of entries) {
-    if (e.status === 'extra') { if (e.date === date) extras.push(e); continue; }
-    byKey.set(e.planKey, e);
-  }
-  return { byKey, extras };
-}
-
-function route() {
-  const hash = location.hash || '#/today';
-  const parts = hash.replace(/^#\//, '').split('/');
-  return { view: parts[0] || 'today', blockId: parts[1], week: Number(parts[2]) };
 }
 
 function setActiveNav(view) {
@@ -82,14 +45,16 @@ async function start() {
 
   banner(syncMessages(status, logFailed, statusFailed));
 
-  const today = todayISO();
-  const daysToRace = daysBetween(today, plan.race.date);
-  countdownEl.textContent = daysToRace >= 0
-    ? `${daysToRace} days to ${plan.race.date}`
-    : 'race day passed';
-
   function draw() {
-    const r = route();
+    // Recomputed on every draw, not once at load — a tab left open overnight
+    // must not keep rendering yesterday as "today".
+    const today = todayISO();
+    const daysToRace = daysBetween(today, plan.race.date);
+    countdownEl.textContent = daysToRace >= 0
+      ? `${daysToRace} days to ${plan.race.date}`
+      : 'race day passed';
+
+    const r = route(location.hash);
     setActiveNav(r.view);
     const day = dayForDate(plan, today);
     const { byKey, extras } = indexEntries(log.entries, today);

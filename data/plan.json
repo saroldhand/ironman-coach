@@ -68,14 +68,13 @@
       { "discipline": "bike", "title": "Long ride",
         "prescribed": { "metric": "duration", "value": null, "unit": "min", "fromProgression": "rideMin" },
         "effort": "Zone 2 - 65-75% max HR. Yes, even the long one.",
-        "detail": ["The anchor session of the week.",
-                   "Fuel: 60g carb/hr, starting at 30 min."] }
+        "detail": ["The anchor session of the week."] }
     ],
     "sun": [
       { "discipline": "run", "title": "Long run",
         "prescribed": { "metric": "duration", "value": null, "unit": "min", "fromProgression": "runMin" },
         "effort": "Zone 2. Slower than you think.",
-        "detail": ["Water for the first hour, then 20-30g carb/hr."] }
+        "detail": [] }
     ]
   },
 

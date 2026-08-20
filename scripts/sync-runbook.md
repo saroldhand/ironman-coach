@@ -36,17 +36,23 @@ Working directory: the repo root.
      const activities = JSON.parse(readFileSync(actPath));
 
      const day = dayForDate(plan, date);
-     if (!day.inPlan || !day.authored) {
-       console.log(JSON.stringify({ skipped: true, reason: day.reason ?? "unauthored" }));
+     if (!day.inPlan) {
+       console.log(JSON.stringify({ skipped: true, reason: day.reason }));
        process.exit(0);
      }
 
-     const week = resolveWeek(plan, day.blockId, day.week);
-     const resolvedDay = week.days.find(d => d.dayKey === day.dayKey);
      // Only a day that is fully over can be judged "missed". Syncing today, or
      // the in-progress end of a backfill range, must leave unperformed sessions
      // blank — unknown is not the same as skipped. ISO dates compare as strings.
      const elapsed = date < todayISO();
+
+     // An unauthored block has no prescribed sessions, but the athlete may still
+     // have trained. Match against an empty session list so every activity is
+     // recorded as `extra` — nothing invented, nothing discarded.
+     const resolvedDay = day.authored
+       ? resolveWeek(plan, day.blockId, day.week).days.find(d => d.dayKey === day.dayKey)
+       : { date, dayKey: day.dayKey, sessions: [] };
+
      const entries = matchDay(resolvedDay, activities, { elapsed });
 
      log.entries = mergeEntries(log.entries, entries);
@@ -56,7 +62,10 @@ Working directory: the repo root.
    ```
 
    Optional sessions with no activity produce no entry. Unmatched activities become
-   `status: "extra"` entries — the code never discards one. Re-running a date is
+   `status: "extra"` entries — the code never discards one. On a date that is
+   in-plan but not yet authored (e.g. Bridge before it is written), there are no
+   prescribed sessions to match against, so every activity that date recorded is
+   written as `extra` rather than silently dropped. Re-running a date is
    idempotent and preserves any hand-written `note`.
 
 4. **Write `data/sync-status.json`:**
@@ -70,9 +79,14 @@ Working directory: the repo root.
 
    ```bash
    git add data/log.json data/sync-status.json
-   git commit -m "chore: sync Strava activities for <date>"
+   git commit -m "chore: sync Strava activities for <date>" -- data/log.json data/sync-status.json
    git push
    ```
+
+   The commit is path-scoped deliberately, not just the `git add`: this job runs
+   unattended at 05:00, and `git commit` with no pathspec commits the entire index.
+   If anything else was left staged on this machine, it must never be swept into
+   a sync commit and pushed under a misleading message.
 
 ## If the date is not in the plan
 
