@@ -153,6 +153,22 @@ test('every template names a progression that exists, and vice versa', () => {
         `week ${w.week} names missing template ${w.template}`);
     }
   }
+
+  // A block whose weekSource is 'weekTemplates' resolves through
+  // plan.weekTemplates[progression.template] in resolveWeek. If a row in
+  // such a block loses its template key, resolveWeek does not throw - it
+  // silently falls back to the tri-discipline skeleton for what should be
+  // a lifting week. The loop above only catches a *named* missing template;
+  // this catches a row that should have named one and didn't.
+  for (const [blockId, rows] of Object.entries(plan.progression)) {
+    const block = plan.blocks.find(b => b.id === blockId);
+    if (!block || block.weekSource !== 'weekTemplates') continue;
+    for (const w of rows) {
+      assert.ok(w.template, `${blockId} week ${w.week} is missing its template`);
+      assert.ok(plan.weekTemplates[w.template],
+        `${blockId} week ${w.week} names missing template ${w.template}`);
+    }
+  }
 });
 
 test('no day prescribes two sessions of the same discipline', () => {
@@ -179,7 +195,7 @@ test('every prescribed session carries a usable metric', () => {
       for (const s of sessions) {
         assert.ok(['distance', 'duration'].includes(s.prescribed.metric),
           `${s.title} has metric ${s.prescribed.metric}`);
-        const resolvable = s.prescribed.value !== null || s.prescribed.fromProgression;
+        const resolvable = s.prescribed.value != null || s.prescribed.fromProgression;
         assert.ok(resolvable, `${s.title} has neither a value nor a progression key`);
       }
     }
