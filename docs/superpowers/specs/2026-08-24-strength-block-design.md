@@ -104,7 +104,7 @@ Three additions, no removals.
 
 `weekSource` defaults to `"skeleton"` when absent, so Prep and Arc need no change.
 
-**`plan.weekTemplates` holds three named weeks** — `gvtA`, `gvtB`, `ppl` — each shaped exactly like `plan.skeleton`: day keys mapping to arrays of session templates. Weeks 1–8 alternate `gvtA` (odd) and `gvtB` (even); weeks 9–12 all use `ppl`.
+**`plan.weekTemplates` holds three named weeks** — `gvtA`, `gvtB`, `ppl`. Each is `{ dayTypes, days }`, where `days` is shaped exactly like `plan.skeleton` (day keys mapping to arrays of session templates) and `dayTypes` overrides the global nutrition day types for that template. Weeks 1–8 alternate `gvtA` (odd) and `gvtB` (even); weeks 9–12 all use `ppl`.
 
 Three templates rather than sixty explicit sessions, because the material genuinely is two alternating weeks plus a progression. Weeks 1, 3, 5 and 7 are identical except for the GVT rep scheme; weeks 2, 4, 6 and 8 are identical except for the Wednesday deadlift and Friday bench schemes.
 
@@ -116,7 +116,7 @@ Three templates rather than sixty explicit sessions, because the material genuin
   "deadlift": "5×5 (80% 1RM)", "bench": "5×5 (75% 1RM)" },
 { "week": 9,  "type": "build", "template": "ppl",
   "main": "4×6", "power": "5×3 @ 85% 1RM",
-  "longRideMin": 75, "longRunMin": 40 }
+  "rideMin": 75, "runMin": 40 }
 ```
 
 Set lines interpolate these by name: `"Bench Press {gvt} — 90 sec rest, same weight all 10 sets"`.
@@ -135,16 +135,18 @@ Weekend durations reuse the **existing** `prescribed.fromProgression` mechanism,
 | 6 | gvtB | `deadlift` 6×2 (80% 1RM), `bench` 6×2 (75% 1RM) |
 | 7 | gvtA | `gvt` 10×3 |
 | 8 | gvtB | `deadlift` 4×8 (80% 1RM), `bench` 4×8 (75% 1RM) |
-| 9–12 | ppl | `main` / `power` / `longRideMin` / `longRunMin` per §3 table |
+| 9–12 | ppl | `main` / `power` / `rideMin` / `runMin` per §3 table |
 
 ### 4.4 `resolveWeek` changes
 
 One branch to pick the template source:
 
 ```js
-const source = block.weekSource === 'weekTemplates'
+const template = block.weekSource === 'weekTemplates'
   ? plan.weekTemplates[progression.template]
-  : plan.skeleton;
+  : null;
+const source = template ? template.days : plan.skeleton;
+const dayTypes = (template && template.dayTypes) || plan.nutrition.dayTypes;
 ```
 
 Plus placeholder interpolation in `setLines`, reading named values off the progression row.
