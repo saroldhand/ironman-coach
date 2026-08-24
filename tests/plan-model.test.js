@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { dayForDate, planStart, blocksInOrder, weekNav } from '../assets/plan-model.js';
+import { dayForDate, planStart, blocksInOrder, weekNav, monthRows } from '../assets/plan-model.js';
 
 const plan = JSON.parse(readFileSync(new URL('../data/plan.json', import.meta.url)));
 
@@ -189,4 +189,67 @@ test('weekNav does not depend on the order blocks appear in plan.json', () => {
   assert.deepEqual(weekNav(shuffled, 'prep', 8).next, { blockId: 'bridge', week: 1 });
   assert.equal(weekNav(shuffled, 'prep', 1).prev, null);
   assert.equal(weekNav(shuffled, 'arc', 26).next, null);
+});
+
+test('monthRows returns Monday-first rows of seven cells', () => {
+  const rows = monthRows(plan, '2026-10');
+  assert.ok(rows.every(r => r.cells.length === 7));
+  assert.deepEqual(rows[0].cells.slice(0, 3), [null, null, null]);
+  assert.equal(rows[0].cells[3].date, '2026-10-01');
+});
+
+test('monthRows labels each row with the plan week it covers', () => {
+  const rows = monthRows(plan, '2026-10');
+  // Prep starts Mon 2026-08-24, so the week containing 2026-10-01 is Prep W6.
+  assert.equal(rows[0].week.blockId, 'prep');
+  assert.equal(rows[0].week.week, 6);
+  assert.equal(rows[0].week.blockLabel, 'Prep');
+});
+
+test('monthRows crosses a block boundary inside one month', () => {
+  const rows = monthRows(plan, '2026-10');
+  const cells = rows.flatMap(r => r.cells).filter(Boolean);
+  const byDate = Object.fromEntries(cells.map(c => [c.date, c]));
+
+  // Prep runs through Sun 2026-10-18; Bridge starts Mon 2026-10-19.
+  assert.equal(byDate['2026-10-18'].blockId, 'prep');
+  assert.equal(byDate['2026-10-18'].authored, true);
+  assert.equal(byDate['2026-10-19'].blockId, 'bridge');
+  assert.equal(byDate['2026-10-19'].week, 1);
+  assert.equal(byDate['2026-10-19'].authored, false);
+});
+
+test('monthRows gives an unauthored block no sessions rather than guessing', () => {
+  const cell = monthRows(plan, '2026-10')
+    .flatMap(r => r.cells).find(c => c && c.date === '2026-10-20');
+  assert.equal(cell.blockLabel, 'Bridge');
+  assert.deepEqual(cell.sessions, []);
+});
+
+test('monthRows resolves sessions for an authored day with the same keys as the week view', () => {
+  const cell = monthRows(plan, '2026-10')
+    .flatMap(r => r.cells).find(c => c && c.date === '2026-10-06');  // a Tuesday inside the authored Prep block
+  const bike = cell.sessions.find(s => s.discipline === 'bike');
+  assert.ok(bike, 'Tuesday prescribes a bike session');
+  assert.equal(bike.key, `${cell.blockId}:${cell.week}:tue:bike`);
+});
+
+test('monthRows marks dates outside every block as not in the plan', () => {
+  const rows = monthRows(plan, '2026-08');
+  const cells = rows.flatMap(r => r.cells).filter(Boolean);
+  const before = cells.find(c => c.date === '2026-08-23');
+  assert.equal(before.inPlan, false);
+  assert.deepEqual(before.sessions, []);
+  assert.equal(cells.find(c => c.date === '2026-08-24').inPlan, true);
+});
+
+test('monthRows leaves a row with no plan days unlabelled', () => {
+  // The first week of August 2026 is entirely before the plan starts.
+  assert.equal(monthRows(plan, '2026-08')[0].week, null);
+});
+
+test('monthRows flags recovery weeks so the calendar can mark them', () => {
+  const rows = monthRows(plan, '2026-09').filter(r => r.week);
+  assert.ok(rows.some(r => r.week.type === 'recovery'),
+    'the prep block has at least one recovery week in September');
 });

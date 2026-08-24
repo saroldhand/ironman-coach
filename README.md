@@ -21,6 +21,21 @@ Static training site for an Ironman 70.3 on 2027-06-05. No build step, no depend
 
 Prep and Arc both number weeks 1–8, so week labels always name their block.
 
+## Views
+
+Four zoom levels, each linked to the ones either side of it:
+
+| View | Hash | Shows |
+|---|---|---|
+| Day | `#/day/2026-10-06`, `#/today` | Every session prescribed that day, plus what Strava recorded |
+| Week | `#/week/prep/6` | The seven days side by side |
+| Month | `#/month/2026-10` | A calendar grid; one dot per session, coloured by discipline |
+| Season | `#/season` | Every week of every block, with completion bars |
+
+In the month grid the left gutter names each row's plan week and links to it;
+each day cell links to its day. A malformed date in the hash falls back to today
+rather than erroring.
+
 ## Local development
 
 ```bash

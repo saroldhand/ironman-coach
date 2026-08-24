@@ -52,8 +52,36 @@ test('indexEntries keys planned entries and filters extras to the given date', (
 
 test('route parses each view and defaults to today', () => {
   assert.deepEqual(route('#/season').view, 'season');
-  assert.deepEqual(route('').view, 'today');
+  assert.equal(route('').view, 'day');
+  assert.equal(route('').date, null, 'no date means the caller substitutes today');
+  assert.equal(route('#/today').view, 'day');
+  assert.equal(route('#/today').date, null);
   assert.equal(route('#/week/prep/4').blockId, 'prep');
   assert.equal(route('#/week/prep/4').week, 4);
   assert.ok(Number.isNaN(route('#/week/prep/abc').week), 'a malformed week must be NaN so the caller falls back');
+});
+
+test('route reads a specific day', () => {
+  assert.equal(route('#/day/2026-10-06').view, 'day');
+  assert.equal(route('#/day/2026-10-06').date, '2026-10-06');
+});
+
+test('route falls back to today rather than rendering a malformed day', () => {
+  for (const bad of ['#/day/tomorrow', '#/day/2026-10', '#/day/2026-1-6', '#/day/']) {
+    const r = route(bad);
+    assert.equal(r.view, 'day', bad);
+    assert.equal(r.date, null, bad);
+  }
+});
+
+test('route reads a specific month', () => {
+  assert.equal(route('#/month/2026-10').view, 'month');
+  assert.equal(route('#/month/2026-10').ym, '2026-10');
+  assert.equal(route('#/month').ym, null, 'a bare month view starts at the current month');
+});
+
+test('route rejects an out-of-range or malformed month', () => {
+  for (const bad of ['#/month/2026-13', '#/month/2026-00', '#/month/october', '#/month/2026']) {
+    assert.equal(route(bad).ym, null, bad);
+  }
 });

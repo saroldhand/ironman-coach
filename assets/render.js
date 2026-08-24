@@ -1,5 +1,5 @@
 import { planStart, blocksInOrder } from './plan-model.js';
-import { addDays } from './date-utils.js';
+import { addDays, monthLabel, addMonths } from './date-utils.js';
 
 const DOW = { mon: 'Monday', tue: 'Tuesday', wed: 'Wednesday', thu: 'Thursday',
               fri: 'Friday', sat: 'Saturday', sun: 'Sunday' };
@@ -94,15 +94,33 @@ function sessionCard(session, entry) {
   return el('section', { class: `card ${session.discipline}` }, body);
 }
 
-export function renderToday(ctx) {
-  const { plan, day, week, entriesByKey, extras } = ctx;
+// Links out of the day to the levels either side of it: the days before and
+// after, and the week that contains it. Rendered even when the date falls
+// outside the plan, so a wrong turn is always one click from being undone.
+function dayNav(day, date, today) {
+  return el('nav', { class: 'levelnav' }, [
+    el('a', { href: `#/day/${addDays(date, -1)}` }, '‹ prev day'),
+    day.inPlan
+      ? el('a', { href: `#/week/${day.blockId}/${day.week}` }, 'week')
+      : null,
+    el('a', { href: `#/month/${date.slice(0, 7)}` }, 'month'),
+    date === today ? null : el('a', { href: '#/today' }, 'today'),
+    el('a', { href: `#/day/${addDays(date, 1)}` }, 'next day ›')
+  ]);
+}
+
+export function renderDay(ctx) {
+  const { plan, day, week, entriesByKey, extras, date, today } = ctx;
   const out = el('div');
+
+  out.append(dayNav(day, date, today));
 
   if (!day.inPlan) {
     const msg = day.reason === 'before-start'
       ? `Plan starts ${planStart(plan)}.`
       : 'Past the end of the plan.';
-    out.append(el('h1', {}, 'Not in the plan'), el('p', { class: 'placeholder' }, msg));
+    out.append(el('h1', {}, 'Not in the plan'),
+               el('p', { class: 'placeholder' }, `${date} — ${msg}`));
     return out;
   }
 
@@ -114,7 +132,10 @@ export function renderToday(ctx) {
   ].filter(Boolean).join(' · ');
 
   out.append(el('p', { class: 'daymeta' }, label));
-  out.append(el('h1', {}, DOW[day.dayKey]));
+  out.append(el('h1', {}, [
+    DOW[day.dayKey],
+    date === today ? el('span', { class: 'tag today' }, 'today') : null
+  ]));
 
   if (!day.authored) {
     out.append(el('p', { class: 'placeholder' },
@@ -156,10 +177,11 @@ export function renderWeek(ctx) {
     week.type === 'recovery' ? 'recovery week' : null
   ].filter(Boolean).join(' · ');
 
-  out.append(el('div', { class: 'daymeta' }, [
-    nav.prev ? el('a', { href: `#/week/${nav.prev.blockId}/${nav.prev.week}` }, '← prev') : null,
-    ' ',
-    nav.next ? el('a', { href: `#/week/${nav.next.blockId}/${nav.next.week}` }, 'next →') : null
+  out.append(el('nav', { class: 'levelnav' }, [
+    nav.prev ? el('a', { href: `#/week/${nav.prev.blockId}/${nav.prev.week}` }, '‹ prev week') : null,
+    el('a', { href: `#/month/${week.startDate.slice(0, 7)}` }, 'month'),
+    el('a', { href: '#/season' }, 'season'),
+    nav.next ? el('a', { href: `#/week/${nav.next.blockId}/${nav.next.week}` }, 'next week ›') : null
   ]));
   out.append(el('h1', {}, title));
 
@@ -173,7 +195,8 @@ export function renderWeek(ctx) {
 
   for (const day of week.days) {
     const cell = el('div', { class: `cell${day.date === today ? ' today' : ''}` }, [
-      el('div', { class: 'dow' }, `${DOW_SHORT[day.dayKey]} ${day.date.slice(8)}`)
+      el('a', { class: 'dow', href: `#/day/${day.date}` },
+        `${DOW_SHORT[day.dayKey]} ${day.date.slice(8)}`)
     ]);
 
     for (const s of day.sessions) {
@@ -194,6 +217,10 @@ export function renderWeek(ctx) {
 export function renderSeason(ctx) {
   const { plan, entries, today, resolveWeek, weekCompletion } = ctx;
   const out = el('div');
+  out.append(el('nav', { class: 'levelnav' }, [
+    el('a', { href: '#/today' }, 'today'),
+    el('a', { href: `#/month/${today.slice(0, 7)}` }, 'month')
+  ]));
   out.append(el('h1', {}, 'Season'));
 
   const todayWeekStart = w => w.startDate <= today && today < addDays(w.startDate, 7);
@@ -215,7 +242,7 @@ export function renderSeason(ctx) {
       if (week.type === 'recovery') classes.push('recovery');
       if (todayWeekStart(week)) classes.push('current');
 
-      list.append(el('div', { class: classes.join(' ') }, [
+      list.append(el('a', { class: classes.join(' '), href: `#/week/${block.id}/${n}` }, [
         el('span', { class: 'label' },
           `${block.label} W${n}${week.type === 'recovery' ? ' ↓' : ''}`),
         el('span', { class: 'daymeta' }, week.startDate),
@@ -227,6 +254,86 @@ export function renderSeason(ctx) {
 
     out.append(list);
   }
+
+  return out;
+}
+
+const DOW_HEAD = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+const DISCIPLINES = ['swim', 'bike', 'run', 'strength'];
+
+// One dot per prescribed session, coloured by discipline and filled in by what
+// the log says happened. A hollow dot is "prescribed, nothing recorded" — which
+// is not the same claim as "missed", and must not look like one.
+function monthDot(session, entry) {
+  const classes = ['mdot', session.discipline];
+  if (entry) classes.push(entry.status);
+  if (session.optional) classes.push('optional');
+  const title = `${session.discipline}${entry ? ` — ${entry.status}` : ''}`;
+  return el('span', { class: classes.join(' '), title });
+}
+
+function monthCell(cell, entriesByKey, today) {
+  if (!cell) return el('div', { class: 'mcell blank' });
+
+  const classes = ['mcell'];
+  if (!cell.inPlan) classes.push('out');
+  else if (!cell.authored) classes.push('unauthored');
+  if (cell.date === today) classes.push('today');
+  if (cell.weekType === 'recovery') classes.push('recovery');
+
+  // The visible cell is a number and some dots; the label is what a screen
+  // reader gets instead, since neither conveys a date or a discipline aloud.
+  const label = [
+    cell.date,
+    cell.inPlan ? `${cell.blockLabel} W${cell.week}` : 'not in the plan',
+    cell.sessions.length
+      ? cell.sessions.map(s => s.discipline).join(', ')
+      : (cell.inPlan && !cell.authored ? 'not written yet' : 'nothing prescribed'),
+    cell.date === today ? 'today' : null
+  ].filter(Boolean).join(' — ');
+
+  return el('a', { class: classes.join(' '), href: `#/day/${cell.date}`, 'aria-label': label }, [
+    el('span', { class: 'dnum' }, String(Number(cell.date.slice(8)))),
+    el('span', { class: 'mdots', 'aria-hidden': 'true' },
+      cell.sessions.map(s => monthDot(s, entriesByKey.get(s.key))))
+  ]);
+}
+
+// The gutter cell that opens each calendar row. It is the handle for zooming
+// out one level: click the week, get the week.
+function weekGutter(week) {
+  if (!week) return el('div', { class: 'wk empty' });
+  return el('a', { class: `wk${week.type === 'recovery' ? ' recovery' : ''}`,
+                   href: `#/week/${week.blockId}/${week.week}` }, [
+    el('span', { class: 'wkblock' }, week.blockLabel),
+    el('span', { class: 'wknum' }, `W${week.week}${week.type === 'recovery' ? ' ↓' : ''}`)
+  ]);
+}
+
+export function renderMonth(ctx) {
+  const { rows, ym, entriesByKey, today } = ctx;
+  const out = el('div');
+
+  out.append(el('nav', { class: 'levelnav' }, [
+    el('a', { href: `#/month/${addMonths(ym, -1)}` }, '‹ prev month'),
+    el('a', { href: '#/today' }, 'today'),
+    el('a', { href: '#/season' }, 'season'),
+    el('a', { href: `#/month/${addMonths(ym, 1)}` }, 'next month ›')
+  ]));
+  out.append(el('h1', {}, monthLabel(ym)));
+
+  const grid = el('div', { class: 'monthgrid' });
+  grid.append(el('div', { class: 'mhead' }));
+  for (const d of DOW_HEAD) grid.append(el('div', { class: 'mhead' }, d));
+
+  for (const row of rows) {
+    grid.append(weekGutter(row.week));
+    for (const cell of row.cells) grid.append(monthCell(cell, entriesByKey, today));
+  }
+
+  out.append(grid);
+  out.append(el('div', { class: 'legend' }, DISCIPLINES.map(d =>
+    el('span', { class: 'legenditem' }, [el('span', { class: `mdot ${d}` }), d]))));
 
   return out;
 }
