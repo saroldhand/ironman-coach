@@ -115,3 +115,73 @@ test('week 11 is the barbell deload', () => {
   assert.equal(w11.type, 'recovery');
   assert.match(w11.power, /70%/);
 });
+
+test('every placeholder in a template is supplied by every week that uses it', () => {
+  // A set line reading "Bench Press {gvt}" renders that literally on the page.
+  // Nothing throws, so only this test catches it.
+  const PLACEHOLDER = /\{(\w+)\}/g;
+
+  for (const [name, tpl] of Object.entries(plan.weekTemplates)) {
+    const needed = new Set();
+    for (const sessions of Object.values(tpl.days)) {
+      for (const s of sessions) {
+        for (const line of s.setLines || []) {
+          for (const [, key] of line.matchAll(PLACEHOLDER)) needed.add(key);
+        }
+      }
+    }
+
+    const users = Object.values(plan.progression)
+      .flat()
+      .filter(w => w.template === name);
+    assert.ok(users.length > 0, `template ${name} is never used`);
+
+    for (const week of users) {
+      for (const key of needed) {
+        assert.ok(week[key] !== undefined,
+          `${name} week ${week.week} does not supply {${key}}`);
+      }
+    }
+  }
+});
+
+test('every template names a progression that exists, and vice versa', () => {
+  for (const rows of Object.values(plan.progression)) {
+    for (const w of rows) {
+      if (!w.template) continue;
+      assert.ok(plan.weekTemplates[w.template],
+        `week ${w.week} names missing template ${w.template}`);
+    }
+  }
+});
+
+test('no day prescribes two sessions of the same discipline', () => {
+  // Session keys are blockId:week:day:discipline. A duplicate discipline on
+  // one day collides, and the second session vanishes from the log silently.
+  const sources = [
+    ['skeleton', plan.skeleton],
+    ...Object.entries(plan.weekTemplates).map(([n, t]) => [n, t.days])
+  ];
+
+  for (const [name, days] of sources) {
+    for (const [dayKey, sessions] of Object.entries(days)) {
+      const seen = sessions.map(s => s.discipline);
+      assert.equal(new Set(seen).size, seen.length,
+        `${name}.${dayKey} has two sessions of one discipline: ${seen.join(', ')}`);
+    }
+  }
+});
+
+test('every prescribed session carries a usable metric', () => {
+  const sources = [plan.skeleton, ...Object.values(plan.weekTemplates).map(t => t.days)];
+  for (const days of sources) {
+    for (const sessions of Object.values(days)) {
+      for (const s of sessions) {
+        assert.ok(['distance', 'duration'].includes(s.prescribed.metric),
+          `${s.title} has metric ${s.prescribed.metric}`);
+        const resolvable = s.prescribed.value !== null || s.prescribed.fromProgression;
+        assert.ok(resolvable, `${s.title} has neither a value nor a progression key`);
+      }
+    }
+  }
+});
