@@ -33,7 +33,7 @@ Four zoom levels, each linked to the ones either side of it:
 | View | Hash | Shows |
 |---|---|---|
 | Day | `#/day/2026-10-06`, `#/today` | Every session prescribed that day, plus what Strava recorded |
-| Week | `#/week/prep/6` | The seven days side by side |
+| Week | `#/week/strength/6` | The seven days side by side |
 | Month | `#/month/2026-10` | A calendar grid; one dot per session, coloured by discipline |
 | Season | `#/season` | Every week of every block, with completion bars |
 
