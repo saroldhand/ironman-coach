@@ -36,8 +36,23 @@ export function indexEntries(entries, date) {
   return { byKey, extras };
 }
 
+const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
+const ISO_MONTH = /^\d{4}-(0[1-9]|1[0-2])$/;
+
+// Every level of the plan is addressable, so a link can move between them:
+//   #/day/2026-10-06  #/week/prep/6  #/month/2026-10  #/season
+// A malformed date or month is not an error page — it degrades to "now",
+// because a mistyped URL should still show the athlete something useful.
 export function route(hash) {
   const h = hash || '#/today';
   const parts = h.replace(/^#\//, '').split('/');
-  return { view: parts[0] || 'today', blockId: parts[1], week: Number(parts[2]) };
+  const view = parts[0] || 'today';
+
+  if (view === 'month') {
+    return { view: 'month', ym: ISO_MONTH.test(parts[1]) ? parts[1] : null };
+  }
+  if (view === 'day' || view === 'today') {
+    return { view: 'day', date: ISO_DATE.test(parts[1]) ? parts[1] : null };
+  }
+  return { view, blockId: parts[1], week: Number(parts[2]) };
 }

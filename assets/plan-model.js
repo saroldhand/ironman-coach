@@ -1,4 +1,4 @@
-import { daysBetween, weekdayKey, addDays } from './date-utils.js';
+import { daysBetween, weekdayKey, addDays, monthGrid } from './date-utils.js';
 
 function phaseFor(block, week) {
   if (!block.phases) return null;
@@ -147,4 +147,55 @@ export function resolveWeek(plan, blockId, week) {
     blockId, blockLabel: block.label, week,
     type: progression.type, authored: true, startDate, days
   };
+}
+
+// A month laid out for the calendar view: Monday-first rows of seven, each
+// row carrying the plan week it covers so the grid can label its gutter.
+// Pure — it knows nothing about what was logged, which is the render layer's
+// job to overlay.
+export function monthRows(plan, ym) {
+  // Resolving a week rebuilds every session in it, and seven cells in a row
+  // ask for the same week. Resolve each one once per month.
+  const weeks = new Map();
+  const resolved = (blockId, week) => {
+    const k = `${blockId}:${week}`;
+    if (!weeks.has(k)) weeks.set(k, resolveWeek(plan, blockId, week));
+    return weeks.get(k);
+  };
+
+  const cellFor = iso => {
+    const day = dayForDate(plan, iso);
+    if (!day.inPlan) return { date: iso, inPlan: false, sessions: [] };
+
+    const week = resolved(day.blockId, day.week);
+    const resolvedDay = week.days.find(d => d.dayKey === day.dayKey);
+
+    return {
+      date: iso,
+      inPlan: true,
+      blockId: day.blockId,
+      blockLabel: day.blockLabel,
+      week: day.week,
+      weekType: day.weekType,
+      authored: day.authored,
+      sessions: (resolvedDay ? resolvedDay.sessions : []).map(s => ({
+        key: s.key, discipline: s.discipline, optional: s.optional
+      }))
+    };
+  };
+
+  return monthGrid(ym).map(row => {
+    const cells = row.map(iso => (iso ? cellFor(iso) : null));
+    // The week label comes from the row's first planned day. Blocks start on
+    // Mondays, so a calendar row holds at most one plan week — but a row that
+    // straddles a block edge still gets the label of the week it opens with.
+    const first = cells.find(c => c && c.inPlan);
+    return {
+      week: first
+        ? { blockId: first.blockId, blockLabel: first.blockLabel, week: first.week,
+            type: first.weekType }
+        : null,
+      cells
+    };
+  });
 }

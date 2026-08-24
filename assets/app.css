@@ -1,17 +1,31 @@
 :root {
-  --bg: #12141a;
-  --card: #1a1d25;
-  --line: #2a2f3a;
-  --text: #e6e8ee;
-  --dim: #9aa1b1;
-  --swim: #4aa3df;
-  --bike: #e2a03f;
-  --run: #6bbf59;
-  --strength: #a97bd6;
-  --done: #6bbf59;
-  --partial: #e2a03f;
-  --missed: #d1495b;
-  --warn: #e2a03f;
+  --bg: #fdf7f9;
+  --bg-alt: #f7eef4;
+  --card: #ffffff;
+  --line: #eee0e9;
+  --line-strong: #ddc8d9;
+  --text: #3d3446;
+  --dim: #786d87;
+
+  /* Each accent is a pair: the pastel is for fills, borders and dots, the ink
+     is the only one allowed to carry text. A pastel on white reads at about
+     1.5:1 - legible as a shape, unreadable as a word. */
+  --swim: #8ecdf0;      --swim-ink: #26728f;
+  --bike: #f9c07a;      --bike-ink: #9c5c0d;
+  --run: #97dcae;       --run-ink: #237a4a;
+  --strength: #c9adf0;  --strength-ink: #6b3fa0;
+
+  --done: #97dcae;      --done-ink: #237a4a;
+  --partial: #f9c07a;   --partial-ink: #9c5c0d;
+  --missed: #f5a3b0;    --missed-ink: #b03b52;
+  --warn: #f7d9a6;      --warn-ink: #8a5a10;
+
+  --accent: #eaa8c9;    --accent-ink: #a8467e;
+  --accent-soft: #fceaf3;
+  --recovery-soft: #edf6fc;
+
+  --shadow: 0 1px 2px rgba(93, 74, 102, .05), 0 4px 14px rgba(93, 74, 102, .06);
+  --radius: 12px;
 }
 
 * { box-sizing: border-box; }
@@ -27,39 +41,53 @@ body {
   display: flex; align-items: center; gap: 1rem;
   padding: .75rem 1rem;
   border-bottom: 1px solid var(--line);
-  position: sticky; top: 0; background: var(--bg); z-index: 2;
+  position: sticky; top: 0; z-index: 2;
+  background: rgba(253, 247, 249, .92);
+  backdrop-filter: blur(6px);
 }
-.brand { font-weight: 700; letter-spacing: .05em; }
+.brand { font-weight: 700; letter-spacing: .05em; color: var(--accent-ink); }
 .views { display: flex; gap: .25rem; margin-left: auto; }
 .views a {
   color: var(--dim); text-decoration: none;
   padding: .35rem .7rem; border-radius: 999px; font-size: .9rem;
 }
-.views a.active { color: var(--text); background: var(--card); }
+.views a:hover { background: var(--bg-alt); color: var(--text); }
+.views a.active { color: var(--accent-ink); background: var(--accent-soft); font-weight: 600; }
 .countdown { color: var(--dim); font-size: .85rem; white-space: nowrap; }
 
 .banner {
   margin: .75rem 1rem 0; padding: .6rem .8rem;
+  background: #fef7ea;
   border: 1px solid var(--warn); border-left-width: 4px;
-  border-radius: 6px; color: var(--warn); font-size: .9rem;
+  border-radius: 8px; color: var(--warn-ink); font-size: .9rem;
 }
 
-main { padding: 1rem; max-width: 780px; margin: 0 auto; }
+main { padding: 1rem; max-width: 880px; margin: 0 auto; }
 
 .daymeta { color: var(--dim); font-size: .9rem; }
-h1 { font-size: 1.4rem; margin: .2rem 0 1rem; }
+h1 { font-size: 1.4rem; margin: .2rem 0 1rem; display: flex; align-items: center; gap: .5rem; }
+
+/* The rail of links between plan levels - day, week, month, season. Present on
+   every view, so no level is ever a dead end. */
+.levelnav { display: flex; flex-wrap: wrap; gap: .4rem; margin-bottom: .8rem; }
+.levelnav a {
+  font-size: .8rem; text-decoration: none; color: var(--accent-ink);
+  background: var(--card); border: 1px solid var(--line);
+  border-radius: 999px; padding: .28rem .75rem;
+}
+.levelnav a:hover { background: var(--accent-soft); border-color: var(--accent); }
 
 .card {
   background: var(--card); border: 1px solid var(--line);
-  border-radius: 10px; padding: 1rem; margin-bottom: 1rem;
-  border-left: 4px solid var(--line);
+  border-radius: var(--radius); padding: 1rem; margin-bottom: 1rem;
+  border-left: 5px solid var(--line); box-shadow: var(--shadow);
 }
 .card.swim { border-left-color: var(--swim); }
 .card.bike { border-left-color: var(--bike); }
 .card.run { border-left-color: var(--run); }
 .card.strength { border-left-color: var(--strength); }
 
-.card h2 { margin: 0; font-size: 1.05rem; display: flex; align-items: center; gap: .5rem; }
+.card h2 { margin: 0; font-size: 1.05rem; display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; }
 .prescribed { margin-left: auto; color: var(--dim); font-weight: 400; font-size: .9rem; }
 .effort { color: var(--dim); font-size: .9rem; margin: .4rem 0 .6rem; }
 .setlines { margin: .5rem 0; padding-left: 1.1rem; }
@@ -68,40 +96,133 @@ h1 { font-size: 1.4rem; margin: .2rem 0 1rem; }
 
 .tag {
   font-size: .72rem; text-transform: uppercase; letter-spacing: .06em;
-  padding: .15rem .45rem; border-radius: 4px; border: 1px solid currentColor;
+  padding: .18rem .5rem; border-radius: 999px; font-weight: 600;
+  border: 1px solid transparent;
 }
-.tag.done { color: var(--done); }
-.tag.partial { color: var(--partial); }
-.tag.missed { color: var(--missed); }
-.tag.optional { color: var(--dim); }
-.tag.recovery { color: var(--swim); }
+.tag.done { color: var(--done-ink); background: #e7f7ed; border-color: var(--done); }
+.tag.partial { color: var(--partial-ink); background: #fdf1de; border-color: var(--partial); }
+.tag.missed { color: var(--missed-ink); background: #fdeaee; border-color: var(--missed); }
+.tag.optional { color: var(--dim); background: var(--bg-alt); border-color: var(--line-strong); }
+.tag.recovery { color: var(--swim-ink); background: var(--recovery-soft); border-color: var(--swim); }
+.tag.today { color: var(--accent-ink); background: var(--accent-soft); border-color: var(--accent); }
 
-.actual { margin-top: .6rem; padding-top: .6rem; border-top: 1px dashed var(--line); font-size: .9rem; }
-.actual a { color: var(--swim); }
+.actual { margin-top: .6rem; padding-top: .6rem; border-top: 1px dashed var(--line-strong); font-size: .9rem; }
+.actual a { color: var(--swim-ink); }
 
 .placeholder { color: var(--dim); font-style: italic; }
 
+/* ---- week view ---- */
+
 .weekgrid { display: grid; grid-template-columns: repeat(7, 1fr); gap: .5rem; }
 .weekgrid .cell {
-  background: var(--card); border: 1px solid var(--line); border-radius: 8px;
-  padding: .5rem; min-height: 88px; font-size: .8rem;
+  background: var(--card); border: 1px solid var(--line); border-radius: 10px;
+  padding: .5rem; min-height: 88px; font-size: .8rem; box-shadow: var(--shadow);
 }
-.weekgrid .cell.today { border-color: var(--text); }
-.weekgrid .cell .dow { color: var(--dim); text-transform: uppercase; font-size: .7rem; }
-.dot { display: inline-block; width: .5rem; height: .5rem; border-radius: 50%; box-shadow: inset 0 0 0 1px var(--dim); }
-.dot.done { background: var(--done); box-shadow: none; }
-.dot.partial { background: var(--partial); box-shadow: none; }
-.dot.missed { background: var(--missed); box-shadow: none; }
+.weekgrid .cell.today { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
+.weekgrid .cell .dow {
+  display: block; color: var(--dim); text-transform: uppercase; font-size: .7rem;
+  text-decoration: none; margin-bottom: .25rem;
+}
+.weekgrid .cell .dow:hover { color: var(--accent-ink); }
+.dot {
+  display: inline-block; width: .5rem; height: .5rem; border-radius: 50%;
+  box-shadow: inset 0 0 0 1.5px var(--line-strong);
+}
+.dot.done { background: var(--done); box-shadow: inset 0 0 0 1px var(--done-ink); }
+.dot.partial { background: var(--partial); box-shadow: inset 0 0 0 1px var(--partial-ink); }
+.dot.missed { background: var(--missed); box-shadow: inset 0 0 0 1px var(--missed-ink); }
+
+/* ---- month view ---- */
+
+.monthgrid {
+  display: grid;
+  grid-template-columns: 3.6rem repeat(7, minmax(0, 1fr));
+  gap: .35rem;
+}
+.mhead {
+  color: var(--dim); font-size: .7rem; text-transform: uppercase;
+  letter-spacing: .06em; text-align: center; padding-bottom: .15rem;
+}
+
+/* The gutter cell: the handle for zooming out from a row of days to its week. */
+.wk {
+  display: flex; flex-direction: column; justify-content: center;
+  text-decoration: none; color: var(--dim); font-size: .68rem;
+  border-radius: 10px; padding: .2rem .1rem; text-align: center;
+  background: var(--bg-alt); border: 1px solid transparent;
+}
+.wk:hover { color: var(--accent-ink); border-color: var(--accent); background: var(--accent-soft); }
+.wk.recovery { background: var(--recovery-soft); color: var(--swim-ink); }
+.wk .wkblock { text-transform: uppercase; letter-spacing: .04em; opacity: .75; }
+.wk .wknum { font-weight: 700; font-size: .8rem; }
+.wk.empty { background: transparent; }
+
+.mcell {
+  display: flex; flex-direction: column; gap: .3rem;
+  min-height: 66px; padding: .35rem .4rem;
+  background: var(--card); border: 1px solid var(--line); border-radius: 10px;
+  text-decoration: none; color: var(--text); box-shadow: var(--shadow);
+}
+.mcell:hover { border-color: var(--accent); }
+.mcell .dnum { font-size: .8rem; font-weight: 600; }
+.mcell.blank { background: transparent; border: none; box-shadow: none; min-height: 0; }
+.mcell.out { background: transparent; border-style: dashed; box-shadow: none; }
+.mcell.out .dnum { color: var(--dim); font-weight: 400; }
+.mcell.unauthored { background: var(--bg-alt); box-shadow: none; }
+.mcell.recovery { background: var(--recovery-soft); }
+.mcell.today { border-color: var(--accent); border-width: 2px; box-shadow: 0 0 0 3px var(--accent-soft); }
+
+.mdots { display: flex; flex-wrap: wrap; gap: .22rem; }
+
+/* One dot per session. Hue is the discipline; fill is what the log says.
+   Hollow means nothing was recorded, which is a different claim from missed. */
+.mdot {
+  --dot: var(--line-strong); --dot-ink: var(--dim);
+  display: inline-block; width: .55rem; height: .55rem; border-radius: 50%;
+  border: 1.5px solid var(--dot); background: transparent;
+}
+.mdot.swim { --dot: var(--swim); --dot-ink: var(--swim-ink); }
+.mdot.bike { --dot: var(--bike); --dot-ink: var(--bike-ink); }
+.mdot.run { --dot: var(--run); --dot-ink: var(--run-ink); }
+.mdot.strength { --dot: var(--strength); --dot-ink: var(--strength-ink); }
+.mdot.done { background: var(--dot); border-color: var(--dot-ink); }
+.mdot.partial { background: linear-gradient(90deg, var(--dot) 50%, transparent 50%); }
+.mdot.missed { background: var(--missed); border-color: var(--missed-ink); }
+.mdot.optional { opacity: .5; }
+
+.legend { display: flex; flex-wrap: wrap; gap: .9rem; margin-top: 1rem; }
+.legenditem {
+  display: flex; align-items: center; gap: .35rem;
+  font-size: .78rem; color: var(--dim); text-transform: capitalize;
+}
+
+/* ---- season view ---- */
 
 .season { display: flex; flex-direction: column; gap: .35rem; }
-.seasonrow { display: flex; align-items: center; gap: .5rem; font-size: .85rem; }
-.seasonrow .bar { height: .55rem; border-radius: 3px; background: var(--line); flex: 1; }
-.seasonrow .bar > span { display: block; height: 100%; border-radius: 3px; background: var(--done); }
-.seasonrow.recovery .label { color: var(--swim); }
-.seasonrow.current { outline: 1px solid var(--text); outline-offset: 3px; border-radius: 4px; }
-.blockhead { margin: 1rem 0 .35rem; color: var(--dim); font-size: .8rem; text-transform: uppercase; letter-spacing: .08em; }
+.seasonrow {
+  display: flex; align-items: center; gap: .5rem; font-size: .85rem;
+  text-decoration: none; color: var(--text);
+  padding: .3rem .5rem; border-radius: 8px; border: 1px solid transparent;
+}
+.seasonrow:hover { background: var(--card); border-color: var(--accent); }
+.seasonrow .bar { height: .55rem; border-radius: 999px; background: var(--bg-alt); flex: 1; }
+.seasonrow .bar > span { display: block; height: 100%; border-radius: 999px; background: var(--done); }
+.seasonrow.recovery .label { color: var(--swim-ink); }
+.seasonrow.current { background: var(--accent-soft); border-color: var(--accent); }
+.blockhead {
+  margin: 1rem 0 .35rem; color: var(--dim); font-size: .8rem;
+  text-transform: uppercase; letter-spacing: .08em;
+}
 
 @media (max-width: 620px) {
   .weekgrid { grid-template-columns: repeat(2, 1fr); }
   .countdown { display: none; }
+  .monthgrid { grid-template-columns: 2rem repeat(7, minmax(0, 1fr)); gap: .2rem; }
+  .mcell { min-height: 52px; padding: .25rem; }
+  .mcell .dnum { font-size: .7rem; }
+  .mdot { width: .42rem; height: .42rem; }
+  .wk .wkblock { display: none; }
+  .wk .wknum { font-size: .7rem; }
+  .mhead { font-size: .6rem; }
+  main { padding: .75rem .5rem; }
 }

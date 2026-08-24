@@ -1,7 +1,7 @@
-import { dayForDate, resolveWeek, weekNav, blocksInOrder } from './plan-model.js';
+import { dayForDate, resolveWeek, weekNav, blocksInOrder, monthRows, planStart } from './plan-model.js';
 import { weekCompletion } from './log-model.js';
-import { renderToday, renderWeek, renderSeason } from './render.js';
-import { daysBetween, todayISO } from './date-utils.js';
+import { renderDay, renderWeek, renderMonth, renderSeason } from './render.js';
+import { daysBetween, todayISO, ymOf } from './date-utils.js';
 import { syncMessages, indexEntries, route } from './app-state.js';
 
 const main = document.getElementById('main');
@@ -56,8 +56,7 @@ async function start() {
 
     const r = route(location.hash);
     setActiveNav(r.view);
-    const day = dayForDate(plan, today);
-    const { byKey, extras } = indexEntries(log.entries, today);
+    const todayInPlan = dayForDate(plan, today);
 
     main.replaceChildren();
 
@@ -66,23 +65,43 @@ async function start() {
       return;
     }
 
+    if (r.view === 'month') {
+      // A bare #/month opens on the month being trained. Before the plan
+      // starts that is not this month, so fall back to the month it begins.
+      const ym = r.ym || (todayInPlan.inPlan ? ymOf(today) : ymOf(planStart(plan)));
+      main.append(renderMonth({
+        rows: monthRows(plan, ym),
+        ym,
+        entriesByKey: indexEntries(log.entries, today).byKey,
+        today
+      }));
+      return;
+    }
+
     if (r.view === 'week') {
-      const blockId = r.blockId || (day.inPlan ? day.blockId : blocksInOrder(plan)[0].id);
-      const week = r.week || (day.inPlan ? day.week : 1);
+      const blockId = r.blockId || (todayInPlan.inPlan ? todayInPlan.blockId : blocksInOrder(plan)[0].id);
+      const week = r.week || (todayInPlan.inPlan ? todayInPlan.week : 1);
       main.append(renderWeek({
         plan,
         week: resolveWeek(plan, blockId, week),
-        entriesByKey: byKey,
+        entriesByKey: indexEntries(log.entries, today).byKey,
         today,
         nav: weekNav(plan, blockId, week)
       }));
       return;
     }
 
+    // The day view. `r.date` is null for #/today, and for a hash that named a
+    // date the plan could not parse — both mean "the day being trained now".
+    const date = r.date || today;
+    const day = dayForDate(plan, date);
+    // Extras are the activities with no planned slot ON THIS DATE, so they are
+    // indexed against the day being viewed, not against today.
+    const { byKey, extras } = indexEntries(log.entries, date);
     const week = day.inPlan && day.authored
       ? resolveWeek(plan, day.blockId, day.week)
       : { days: [] };
-    main.append(renderToday({ plan, day, week, entriesByKey: byKey, extras, today }));
+    main.append(renderDay({ plan, day, week, entriesByKey: byKey, extras, date, today }));
   }
 
   window.addEventListener('hashchange', draw);
