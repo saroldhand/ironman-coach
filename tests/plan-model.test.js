@@ -146,6 +146,34 @@ test('a build week has seven dated days starting Monday', () => {
   assert.equal(w.days[6].date, '2026-08-30');
 });
 
+test('weekend durations come from the progression table', () => {
+  // Two consumers of fromProgression: the skeleton path (prep, a plain
+  // block) and the template path (strength, a weekTemplates block). Both
+  // must resolve their sat/sun duration from that week's progression row,
+  // and the fromProgression marker must not leak into the resolved object.
+  const prepRow = plan.progression.prep.find(w => w.week === 1);
+  const prepWeek = resolveWeek(plan, 'prep', 1);
+  const prepSat = prepWeek.days.find(d => d.dayKey === 'sat').sessions.find(s => s.discipline === 'bike');
+  const prepSun = prepWeek.days.find(d => d.dayKey === 'sun').sessions.find(s => s.discipline === 'run');
+  assert.equal(prepSat.prescribed.value, prepRow.rideMin);
+  assert.equal(typeof prepSat.prescribed.value, 'number');
+  assert.ok(!('fromProgression' in prepSat.prescribed));
+  assert.equal(prepSun.prescribed.value, prepRow.runMin);
+  assert.equal(typeof prepSun.prescribed.value, 'number');
+  assert.ok(!('fromProgression' in prepSun.prescribed));
+
+  const strengthRow = plan.progression.strength.find(w => w.week === 12);
+  const strengthWeek = resolveWeek(plan, 'strength', 12);
+  const liftSat = strengthWeek.days.find(d => d.dayKey === 'sat').sessions.find(s => s.discipline === 'bike');
+  const liftSun = strengthWeek.days.find(d => d.dayKey === 'sun').sessions.find(s => s.discipline === 'run');
+  assert.equal(liftSat.prescribed.value, strengthRow.rideMin);
+  assert.equal(typeof liftSat.prescribed.value, 'number');
+  assert.ok(!('fromProgression' in liftSat.prescribed));
+  assert.equal(liftSun.prescribed.value, strengthRow.runMin);
+  assert.equal(typeof liftSun.prescribed.value, 'number');
+  assert.ok(!('fromProgression' in liftSun.prescribed));
+});
+
 test('session keys are stable and block-qualified', () => {
   const w = resolveWeek(plan, 'prep', 3);
   const keys = w.days.find(d => d.dayKey === 'wed').sessions.map(s => s.key);
@@ -183,12 +211,26 @@ test('skeleton blocks still honour recovery rules', () => {
       wedDistance: 1700, wedMainSet: '6 x 100 easy, 20s rest' }
   ];
 
-  const fri = resolveWeek(p, 'prep', 4).days.find(d => d.dayKey === 'fri');
+  const week4 = resolveWeek(p, 'prep', 4);
+  const dayOf = k => week4.days.find(d => d.dayKey === k);
+
+  const fri = dayOf('fri');
   assert.equal(fri.sessions.filter(s => s.discipline === 'strength').length, 0,
     'recovery drops the optional strength circuit');
-  assert.equal(resolveWeek(p, 'prep', 4).days
-    .find(d => d.dayKey === 'tue').sessions[0].prescribed.value, 40,
+  assert.equal(dayOf('tue').sessions[0].prescribed.value, 40,
     'recovery shortens the tuesday bike');
+
+  const thu = dayOf('thu').sessions[0];
+  assert.equal(thu.prescribed.value, 30, 'recovery shortens the thursday run');
+  assert.ok(!thu.detail.some(line => line.toLowerCase().includes('stride')),
+    'strides are dropped from the thursday detail');
+
+  assert.equal(dayOf('mon').sessions.find(s => s.discipline === 'swim').prescribed.value, 1300,
+    'recovery cuts the monday swim by 500m');
+  assert.equal(fri.sessions.find(s => s.discipline === 'swim').prescribed.value, 1500,
+    'recovery cuts the friday swim by 500m');
+  assert.equal(dayOf('wed').sessions.find(s => s.discipline === 'swim').prescribed.value, 1700,
+    "wednesday's swim is immune to the recovery delta - its cut is already in wedDistance");
 });
 
 test('each day carries its nutrition day type', () => {
