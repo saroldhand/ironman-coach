@@ -71,8 +71,19 @@ function swimSetLines(plan, template, dayKey, progression) {
   return [];
 }
 
+const PLACEHOLDER = /\{(\w+)\}/g;
+
+// Set lines in a week template carry {name} tokens filled from that week's
+// progression row, which is what lets four GVT weeks share one template.
+// An unknown token is left as written: a visible "{gvt}" on the page is a
+// bug that reports itself, where "undefined" reads like prescribed text.
+function fillPlaceholders(line, progression) {
+  return line.replace(PLACEHOLDER, (token, name) =>
+    progression[name] === undefined ? token : String(progression[name]));
+}
+
 function buildSession(plan, template, ctx) {
-  const { blockId, week, dayKey, progression, isRecovery } = ctx;
+  const { blockId, week, dayKey, progression, isRecovery, fromWeekTemplate } = ctx;
   const s = {
     key: `${blockId}:${week}:${dayKey}:${template.discipline}`,
     discipline: template.discipline,
@@ -90,15 +101,28 @@ function buildSession(plan, template, ctx) {
     delete s.prescribed.fromProgression;
   }
 
-  if (template.discipline === 'swim') {
+  // Deriving a swim from the weekday is a skeleton-only rule: wedDistance and
+  // plan.sets.monTechnique/friMixed/wedMain all describe the tri week. A week
+  // template's swim carries its own numbers and its own set lines, so - like
+  // the recovery deltas - these rules must not reach one.
+  const skeletonSwim = !fromWeekTemplate && template.discipline === 'swim';
+
+  if (skeletonSwim) {
     if (dayKey === 'wed') s.prescribed.value = progression.wedDistance;
     else if (isRecovery && plan.recovery.swimDeltaAppliesTo.includes(dayKey)) {
       s.prescribed.value += plan.recovery.swimDeltaMetres;
     }
-    s.setLines = swimSetLines(plan, template, dayKey, progression);
   }
 
-  if (template.setRef === 'strength') s.setLines = [...plan.sets.strength];
+  // Set lines, first match wins: a session's own literal lines beat the shared
+  // strength circuit, which beats the weekday-derived swim set.
+  if (template.setLines) {
+    s.setLines = template.setLines.map(l => fillPlaceholders(l, progression));
+  } else if (template.setRef === 'strength') {
+    s.setLines = [...plan.sets.strength];
+  } else if (skeletonSwim) {
+    s.setLines = swimSetLines(plan, template, dayKey, progression);
+  }
 
   if (isRecovery) {
     if (dayKey === 'tue') s.prescribed.value = plan.recovery.tue.durationMin;
@@ -126,20 +150,34 @@ export function resolveWeek(plan, blockId, week) {
     };
   }
 
-  const isRecovery = progression.type === 'recovery';
+  // A block either draws its week from the one global skeleton (the tri
+  // blocks, whose shape never changes) or from a named template chosen by
+  // the progression row (the strength block, whose shape alternates).
+  const weekTemplate = block.weekSource === 'weekTemplates'
+    ? plan.weekTemplates[progression.template]
+    : null;
+  const source = weekTemplate ? weekTemplate.days : plan.skeleton;
+  const dayTypes = (weekTemplate && weekTemplate.dayTypes) || plan.nutrition.dayTypes;
+
+  // The recovery deltas describe the tri week specifically — skipStrength
+  // would delete a whole lifting week. A template block carries its own
+  // deload, so it opts out of the rules while keeping the label.
+  const isRecovery = !weekTemplate && progression.type === 'recovery';
 
   const days = DAY_KEYS.map((dayKey, i) => {
-    let templates = plan.skeleton[dayKey];
+    // A template need not fill all seven days; the calendar still shows them.
+    let templates = source[dayKey] || [];
     if (isRecovery && plan.recovery.skipStrength) {
       templates = templates.filter(t => t.discipline !== 'strength');
     }
-    const typeKey = plan.nutrition.dayTypes[dayKey];
+    const typeKey = dayTypes[dayKey];
     return {
       dayKey,
       date: addDays(startDate, i),
       nutrition: plan.nutrition.types[typeKey],
       sessions: templates.map(t =>
-        buildSession(plan, t, { blockId, week, dayKey, progression, isRecovery }))
+        buildSession(plan, t, { blockId, week, dayKey, progression, isRecovery,
+                                fromWeekTemplate: Boolean(weekTemplate) }))
     };
   });
 
