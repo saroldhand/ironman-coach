@@ -88,3 +88,30 @@ test('every nutrition day type named by a template is defined', () => {
     }
   }
 });
+
+test('the strength block runs twelve weeks, PPL for the last four', () => {
+  assert.equal(plan.progression.strength.length, 12);
+  assert.deepEqual(plan.progression.strength.slice(8).map(w => w.template),
+    ['ppl', 'ppl', 'ppl', 'ppl']);
+});
+
+test('the weekend ramps monotonically through the PPL weeks', () => {
+  const ppl = plan.progression.strength.slice(8);
+  assert.deepEqual(ppl.map(w => w.rideMin), [75, 90, 105, 120]);
+  assert.deepEqual(ppl.map(w => w.runMin), [40, 45, 50, 55]);
+});
+
+test('the PPL split is legs, pull, push - in that order', () => {
+  // Squats need five clear days before the Saturday long ride, and Friday's
+  // pressing barely touches the legs. Reversing this breaks the cardio ramp.
+  const days = plan.weekTemplates.ppl.days;
+  assert.equal(days.mon[0].title, 'Legs');
+  assert.equal(days.wed[0].title, 'Pull');
+  assert.equal(days.fri[0].title, 'Push');
+});
+
+test('week 11 is the barbell deload', () => {
+  const w11 = plan.progression.strength.find(w => w.week === 11);
+  assert.equal(w11.type, 'recovery');
+  assert.match(w11.power, /70%/);
+});

@@ -312,6 +312,103 @@
             "detail": ["Optional. Full rest is the right call if the week beat you up."] }
         ]
       }
+    },
+    "ppl": {
+      "dayTypes": { "mon": "lift", "tue": "moderate", "wed": "lift", "thu": "moderate",
+                    "fri": "lift", "sat": "big", "sun": "big" },
+      "days": {
+        "mon": [
+          { "discipline": "strength", "title": "Legs",
+            "prescribed": { "metric": "duration", "value": 70, "unit": "min" },
+            "effort": "Main sets first, then the power sets. Bar speed is the intent, not grinding.",
+            "setLines": [
+              "Barbell Squat {main}",
+              "Barbell Squat {power} - bar speed on every rep",
+              "SUPERSET 4×: Leg Curls 12-15 + Stiff Legged Deadlifts 10-12",
+              "Overhead Walking Lunges 3×15 (25 or 45 lb plate)",
+              "Leg Extension Tri-Set - 4 rounds of 12 / 8 / AMRAP",
+              "Calf Raises 4×15-20",
+              "Goblet Squat 3×10-12"
+            ],
+            "detail": [
+              "Before work.",
+              "Legs go on Monday so they have five days to clear before Saturday's long ride."
+            ] }
+        ],
+        "tue": [
+          { "discipline": "swim", "title": "Aerobic swim",
+            "prescribed": { "metric": "distance", "value": 2000, "unit": "m" },
+            "effort": "Steady and repeatable. Same pace on the last rep as the first.",
+            "setLines": [
+              "300 easy free",
+              "6 × 50 drill - 15s rest",
+              "10 × 100 alternating: odd steady, even easy - 15s rest",
+              "200 easy cooldown"
+            ],
+            "detail": ["Evening."] }
+        ],
+        "wed": [
+          { "discipline": "strength", "title": "Pull",
+            "prescribed": { "metric": "duration", "value": 70, "unit": "min" },
+            "effort": "Main sets first, then the power sets. Bar speed is the intent.",
+            "setLines": [
+              "Deadlift {main}",
+              "Deadlift {power} - bar speed on every rep",
+              "SUPERSET 4×: Weighted Pull Ups AMRAP + Lat Pulldown 10-12",
+              "Pendlay Row 4×8-10",
+              "SUPERSET 4×: Cable Pullover 10-12 + Cable Row 10-12",
+              "DB Shrugs 4×15-20",
+              "Preacher Curl 3×12-15",
+              "Cable Concentration Curl 4×10-12",
+              "Hanging Leg Raises 4×15-20"
+            ],
+            "detail": ["Before work."] }
+        ],
+        "thu": [
+          { "discipline": "run", "title": "Easy run",
+            "prescribed": { "metric": "duration", "value": 40, "unit": "min" },
+            "effort": "Zone 2 - conversational. No strides, no pickups.",
+            "detail": [
+              "Evening.",
+              "The first running in eight weeks - expect it to feel worse than your fitness suggests. That is normal and it passes in a fortnight."
+            ] }
+        ],
+        "fri": [
+          { "discipline": "strength", "title": "Push",
+            "prescribed": { "metric": "duration", "value": 70, "unit": "min" },
+            "effort": "Main sets first, then the power sets. Bar speed is the intent.",
+            "setLines": [
+              "Bench Press {main}",
+              "Bench Press {power} - bar speed on every rep",
+              "Barbell Overhead Press 5×5, then 2×10",
+              "DB Chest Press 4×8-10",
+              "SUPERSET 3×: Skull Crushers 12-15 + Overhead Tricep Ext 10-12",
+              "Cable Flys 4×12-15",
+              "Landmine Press 4×12-15",
+              "Weighted Dips 4×15-20",
+              "Push Ups - 100 total as fast as possible",
+              "Hanging Leg Raises 4×15-20"
+            ],
+            "detail": [
+              "Before work.",
+              "Push goes on Friday because it barely touches the legs before Saturday."
+            ] }
+        ],
+        "sat": [
+          { "discipline": "bike", "title": "Long ride",
+            "prescribed": { "metric": "duration", "value": null, "unit": "min",
+                            "fromProgression": "rideMin" },
+            "effort": "Zone 2 - 65-75% max HR. Yes, even the long one.",
+            "detail": ["The anchor session of the week. This is where the aerobic base comes back."] }
+        ],
+        "sun": [
+          { "discipline": "run", "title": "Long run",
+            "prescribed": { "metric": "duration", "value": null, "unit": "min",
+                            "fromProgression": "runMin" },
+            "effort": "Zone 2. Slower than you think.",
+            "detail": ["Off the back of the ride. Run it by effort, not pace."] }
+        ]
+      }
     }
   },
 
@@ -339,7 +436,15 @@
         "deadlift": "6×2 (80% 1RM)", "bench": "6×2 (75% 1RM)" },
       { "week": 7, "type": "build", "template": "gvtA", "gvt": "10×3" },
       { "week": 8, "type": "build", "template": "gvtB",
-        "deadlift": "4×8 (80% 1RM)", "bench": "4×8 (75% 1RM)" }
+        "deadlift": "4×8 (80% 1RM)", "bench": "4×8 (75% 1RM)" },
+      { "week": 9, "type": "build", "template": "ppl",
+        "main": "4×6", "power": "5×3 @ 85% 1RM", "rideMin": 75, "runMin": 40 },
+      { "week": 10, "type": "build", "template": "ppl",
+        "main": "5×5", "power": "6×2 @ 90% 1RM", "rideMin": 90, "runMin": 45 },
+      { "week": 11, "type": "recovery", "template": "ppl",
+        "main": "6×3", "power": "4×6 @ 70% 1RM", "rideMin": 105, "runMin": 50 },
+      { "week": 12, "type": "build", "template": "ppl",
+        "main": "4×10", "power": "5×5 @ 75% 1RM", "rideMin": 120, "runMin": 55 }
     ]
   },
 
