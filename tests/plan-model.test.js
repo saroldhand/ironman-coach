@@ -198,6 +198,40 @@ test('recovery week drops strength entirely', () => {
   assert.deepEqual(friBuild.sessions.map(s => s.discipline), ['swim', 'strength']);
 });
 
+test('a recovery week in a template block keeps its lifting sessions', () => {
+  // recovery.skipStrength drops every strength session. On a lifting block
+  // that would silently empty the week, so the tri recovery rules must not
+  // reach a template block at all.
+  const p = templatePlan();
+  p.progression.lift[0].type = 'recovery';
+
+  const w = resolveWeek(p, 'lift', 1);
+  const mon = w.days.find(d => d.dayKey === 'mon');
+  assert.equal(mon.sessions.length, 1, 'the lift survives the recovery week');
+  assert.equal(w.type, 'recovery', 'but the week is still labelled recovery');
+});
+
+test('skeleton blocks still honour recovery rules', () => {
+  // Regression guard, on a clone rather than the real plan: after the
+  // calendar re-cut no live block has a recovery week, and this machinery
+  // still has to work when Arc is authored.
+  const p = JSON.parse(JSON.stringify(plan));
+  const prep = p.blocks.find(b => b.id === 'prep');
+  prep.weeks = 4;
+  p.progression.prep = [
+    ...p.progression.prep.slice(0, 3),
+    { week: 4, type: 'recovery', rideMin: 70, runMin: 40,
+      wedDistance: 1700, wedMainSet: '6 x 100 easy, 20s rest' }
+  ];
+
+  const fri = resolveWeek(p, 'prep', 4).days.find(d => d.dayKey === 'fri');
+  assert.equal(fri.sessions.filter(s => s.discipline === 'strength').length, 0,
+    'recovery drops the optional strength circuit');
+  assert.equal(resolveWeek(p, 'prep', 4).days
+    .find(d => d.dayKey === 'tue').sessions[0].prescribed.value, 40,
+    'recovery shortens the tuesday bike');
+});
+
 test('the wednesday main set advances with the week', () => {
   const setOf = n => resolveWeek(plan, 'prep', n).days.find(d => d.dayKey === 'wed')
     .sessions[0].setLines.join(' | ');

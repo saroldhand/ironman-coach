@@ -143,8 +143,6 @@ export function resolveWeek(plan, blockId, week) {
     };
   }
 
-  const isRecovery = progression.type === 'recovery';
-
   // A block either draws its week from the one global skeleton (the tri
   // blocks, whose shape never changes) or from a named template chosen by
   // the progression row (the strength block, whose shape alternates).
@@ -153,6 +151,11 @@ export function resolveWeek(plan, blockId, week) {
     : null;
   const source = template ? template.days : plan.skeleton;
   const dayTypes = (template && template.dayTypes) || plan.nutrition.dayTypes;
+
+  // The recovery deltas describe the tri week specifically — skipStrength
+  // would delete a whole lifting week. A template block carries its own
+  // deload, so it opts out of the rules while keeping the label.
+  const isRecovery = !template && progression.type === 'recovery';
 
   const days = DAY_KEYS.map((dayKey, i) => {
     // A template need not fill all seven days; the calendar still shows them.
