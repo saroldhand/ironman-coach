@@ -19,7 +19,7 @@ Static training site for an Ironman 70.3 on 2027-06-05. No build step, no depend
 | Strength | 12 | 2026-09-14 | 2026-12-06 |
 | Arc | 26 | 2026-12-07 | 2027-06-06 |
 
-Prep and Arc both number weeks from 1, so week labels always name their block.
+Prep, Strength and Arc each number weeks from 1, so week labels always name their block.
 
 The Strength block is a lifting cycle: five mornings a week for weeks 1–8 (GVT),
 then three for weeks 9–12 (powerbuilding) as cardio ramps back up. Its weeks come

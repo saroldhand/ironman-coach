@@ -83,7 +83,7 @@ function fillPlaceholders(line, progression) {
 }
 
 function buildSession(plan, template, ctx) {
-  const { blockId, week, dayKey, progression, isRecovery } = ctx;
+  const { blockId, week, dayKey, progression, isRecovery, fromWeekTemplate } = ctx;
   const s = {
     key: `${blockId}:${week}:${dayKey}:${template.discipline}`,
     discipline: template.discipline,
@@ -101,20 +101,27 @@ function buildSession(plan, template, ctx) {
     delete s.prescribed.fromProgression;
   }
 
-  if (template.discipline === 'swim') {
+  // Deriving a swim from the weekday is a skeleton-only rule: wedDistance and
+  // plan.sets.monTechnique/friMixed/wedMain all describe the tri week. A week
+  // template's swim carries its own numbers and its own set lines, so - like
+  // the recovery deltas - these rules must not reach one.
+  const skeletonSwim = !fromWeekTemplate && template.discipline === 'swim';
+
+  if (skeletonSwim) {
     if (dayKey === 'wed') s.prescribed.value = progression.wedDistance;
     else if (isRecovery && plan.recovery.swimDeltaAppliesTo.includes(dayKey)) {
       s.prescribed.value += plan.recovery.swimDeltaMetres;
     }
-    s.setLines = swimSetLines(plan, template, dayKey, progression);
   }
 
-  if (template.setRef === 'strength') s.setLines = [...plan.sets.strength];
-
-  // Templates carry their set lines literally; the skeleton derives swim sets
-  // from the weekday instead, so this must not clobber that.
+  // Set lines, first match wins: a session's own literal lines beat the shared
+  // strength circuit, which beats the weekday-derived swim set.
   if (template.setLines) {
     s.setLines = template.setLines.map(l => fillPlaceholders(l, progression));
+  } else if (template.setRef === 'strength') {
+    s.setLines = [...plan.sets.strength];
+  } else if (skeletonSwim) {
+    s.setLines = swimSetLines(plan, template, dayKey, progression);
   }
 
   if (isRecovery) {
@@ -146,16 +153,16 @@ export function resolveWeek(plan, blockId, week) {
   // A block either draws its week from the one global skeleton (the tri
   // blocks, whose shape never changes) or from a named template chosen by
   // the progression row (the strength block, whose shape alternates).
-  const template = block.weekSource === 'weekTemplates'
+  const weekTemplate = block.weekSource === 'weekTemplates'
     ? plan.weekTemplates[progression.template]
     : null;
-  const source = template ? template.days : plan.skeleton;
-  const dayTypes = (template && template.dayTypes) || plan.nutrition.dayTypes;
+  const source = weekTemplate ? weekTemplate.days : plan.skeleton;
+  const dayTypes = (weekTemplate && weekTemplate.dayTypes) || plan.nutrition.dayTypes;
 
   // The recovery deltas describe the tri week specifically — skipStrength
   // would delete a whole lifting week. A template block carries its own
   // deload, so it opts out of the rules while keeping the label.
-  const isRecovery = !template && progression.type === 'recovery';
+  const isRecovery = !weekTemplate && progression.type === 'recovery';
 
   const days = DAY_KEYS.map((dayKey, i) => {
     // A template need not fill all seven days; the calendar still shows them.
@@ -169,7 +176,8 @@ export function resolveWeek(plan, blockId, week) {
       date: addDays(startDate, i),
       nutrition: plan.nutrition.types[typeKey],
       sessions: templates.map(t =>
-        buildSession(plan, t, { blockId, week, dayKey, progression, isRecovery }))
+        buildSession(plan, t, { blockId, week, dayKey, progression, isRecovery,
+                                fromWeekTemplate: Boolean(weekTemplate) }))
     };
   });
 

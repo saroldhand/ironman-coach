@@ -61,8 +61,11 @@ test('nutrition assigns a day type to all seven days', () => {
   }
 });
 
-test('the GVT templates cover all seven days', () => {
-  for (const name of ['gvtA', 'gvtB']) {
+test('every week template covers all seven days', () => {
+  // Iterating the templates rather than naming them keeps a template added
+  // later inside the guard. A day missing from dayTypes resolves to
+  // nutrition: undefined, which throws in render.js.
+  for (const name of Object.keys(plan.weekTemplates)) {
     assert.deepEqual(Object.keys(plan.weekTemplates[name].days),
       ['mon','tue','wed','thu','fri','sat','sun'], name);
     assert.deepEqual(Object.keys(plan.weekTemplates[name].dayTypes),
@@ -93,6 +96,27 @@ test('the strength block runs twelve weeks, PPL for the last four', () => {
   assert.equal(plan.progression.strength.length, 12);
   assert.deepEqual(plan.progression.strength.slice(8).map(w => w.template),
     ['ppl', 'ppl', 'ppl', 'ppl']);
+});
+
+test('the strength phase labels match the template each week runs', () => {
+  // The phase labels live on plan.blocks; the templates that make a week GVT
+  // or powerbuilding live in progression.strength. Nothing links the two, so
+  // moving one boundary without the other labels a ppl week "GVT" on the page
+  // and nothing throws.
+  const phases = plan.blocks.find(b => b.id === 'strength').phases;
+  const labelFor = week => {
+    const p = phases.find(p => week >= p.from && week <= p.to);
+    return p ? p.label : null;
+  };
+
+  const phaseOfTemplate = { gvtA: 'GVT', gvtB: 'GVT', ppl: 'Powerbuilding' };
+
+  for (const w of plan.progression.strength) {
+    const expected = phaseOfTemplate[w.template];
+    assert.ok(expected, `week ${w.week} runs unmapped template ${w.template}`);
+    assert.equal(labelFor(w.week), expected,
+      `week ${w.week} runs ${w.template} but is labelled ${labelFor(w.week)}`);
+  }
 });
 
 test('the weekend ramps monotonically through the PPL weeks', () => {

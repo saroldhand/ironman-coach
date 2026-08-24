@@ -233,10 +233,64 @@ test('skeleton blocks still honour recovery rules', () => {
     "wednesday's swim is immune to the recovery delta - its cut is already in wedDistance");
 });
 
+test('the skeleton swim rules do not reach a template block', () => {
+  // Deriving a swim from the weekday is a tri-skeleton rule: Wednesday's
+  // metres come from progression.wedDistance, Monday and Friday inherit
+  // plan.sets. A lifting week supplies neither, so ungated a template
+  // Wednesday swim resolves to prescribed.value === undefined - which throws
+  // in render.js at p.value.toLocaleString() - and a template Monday or
+  // Friday swim silently inherits a triathlon set.
+  const p = templatePlan();
+  p.sets = {
+    monTechnique: ['TRI monday technique set'],
+    friMixed: ['TRI friday mixed set'],
+    wedMain: { warmup: ['TRI wednesday warmup'], cooldown: ['TRI wednesday cooldown'] }
+  };
+  p.weekTemplates.alpha.days.wed = [{
+    discipline: 'swim', title: 'Alpha wednesday swim',
+    prescribed: { metric: 'distance', value: 1200, unit: 'm' },
+    effort: 'Easy.', setLines: ['Alpha wednesday set']
+  }];
+  p.weekTemplates.alpha.days.fri = [{
+    discipline: 'swim', title: 'Alpha friday swim',
+    prescribed: { metric: 'distance', value: 1100, unit: 'm' },
+    effort: 'Easy.'
+  }];
+  // A strength progression row carries no wedDistance, and never would.
+  assert.equal(p.progression.lift[0].wedDistance, undefined);
+
+  const w = resolveWeek(p, 'lift', 1);
+  const swimOn = k =>
+    w.days.find(d => d.dayKey === k).sessions.find(s => s.discipline === 'swim');
+
+  const wed = swimOn('wed');
+  assert.equal(wed.prescribed.value, 1200, 'the template swim keeps its own distance');
+  assert.deepEqual(wed.setLines, ['Alpha wednesday set']);
+
+  const fri = swimOn('fri');
+  assert.equal(fri.prescribed.value, 1100);
+  assert.deepEqual(fri.setLines, [],
+    'a template swim with no set lines gets none, not the triathlon set');
+});
+
 test('each day carries its nutrition day type', () => {
   const w = resolveWeek(plan, 'prep', 1);
   assert.equal(w.days.find(d => d.dayKey === 'mon').nutrition.label, 'Low day');
   assert.equal(w.days.find(d => d.dayKey === 'sat').nutrition.label, 'Big day');
+});
+
+test('a template block reads its nutrition from the template, not the global map', () => {
+  // Strength week 1 runs gvtA: five lifting mornings, so Monday is a lifting
+  // day and Sunday is the light one. The global map says the opposite on both
+  // - 'low' on Monday, 'big' on Sunday - so dropping the template's dayTypes
+  // override would show Monday as "Low day / ~500 kcal deficit" in a week
+  // that is meant to hold maintenance calories.
+  assert.equal(plan.nutrition.dayTypes.mon, 'low');
+  assert.equal(plan.nutrition.dayTypes.sun, 'big');
+
+  const w = resolveWeek(plan, 'strength', 1);
+  assert.equal(w.days.find(d => d.dayKey === 'mon').nutrition.label, 'Lifting day');
+  assert.equal(w.days.find(d => d.dayKey === 'sun').nutrition.label, 'Low day');
 });
 
 test('blocksInOrder sorts chronologically regardless of array order', () => {
@@ -347,6 +401,32 @@ test('an unmatched placeholder survives verbatim rather than becoming undefined'
   assert.deepEqual(mon.sessions[0].setLines, ['Bench Press {missing}']);
 });
 
+test('the wednesday main set advances with the week', () => {
+  // Every prep week carries wedMainSet, and swimSetLines() splices it between
+  // the shared wedMain warmup and cooldown. Two ways that breaks. The line
+  // stops tracking the row - which every prep week must be checked against,
+  // since they do not all prescribe the same set and one hardcoded line
+  // cannot satisfy all three. Or the row loses the key, and the page reads
+  // "MAIN SET: undefined" - reading the row straight into the expectation
+  // would happily agree, so its presence is asserted separately.
+  const { warmup, cooldown } = plan.sets.wedMain;
+  const distinct = new Set();
+
+  for (const row of plan.progression.prep) {
+    assert.equal(typeof row.wedMainSet, 'string', `week ${row.week} names a main set`);
+    assert.ok(row.wedMainSet.length > 0, `week ${row.week} names a main set`);
+    distinct.add(row.wedMainSet);
+
+    const wed = resolveWeek(plan, 'prep', row.week).days.find(d => d.dayKey === 'wed');
+    const swim = wed.sessions.find(s => s.discipline === 'swim');
+    assert.deepEqual(swim.setLines,
+      [...warmup, `MAIN SET: ${row.wedMainSet}`, ...cooldown], `week ${row.week}`);
+  }
+
+  assert.ok(distinct.size > 1,
+    'the prep weeks all prescribe the same main set - this test no longer discriminates');
+});
+
 test('interpolation does not disturb a skeleton block swim set', () => {
   const wed = resolveWeek(plan, 'prep', 1).days.find(d => d.dayKey === 'wed');
   const swim = wed.sessions.find(s => s.discipline === 'swim');
@@ -354,15 +434,15 @@ test('interpolation does not disturb a skeleton block swim set', () => {
   assert.ok(swim.setLines.every(l => !l.includes('{')));
 });
 
-test('branch ordering: template setLines interpolation runs after swim derivation', () => {
-  // Verify that if template.setLines were processed before swimSetLines(),
-  // the template's literal lines would be clobbered. This test uses a
-  // templatePlan() swim that has both discipline: 'swim' and template.setLines,
-  // which only occurs in weekTemplates, not skeleton blocks.
+test('literal template setLines win over the weekday-derived swim set', () => {
+  // A session carrying both discipline: 'swim' and its own setLines only
+  // occurs in weekTemplates, not in skeleton blocks. Its literal lines are
+  // what must reach the page: the swim branch must neither clobber them nor
+  // run at all here.
   const p = templatePlan();
-  // Add a Tuesday swim to alpha template with both swim discipline and literal setLines.
-  // Tuesday is chosen because swimSetLines() returns [] for tue (unlike wed/mon/fri),
-  // so we can see the template.setLines clearly if it wins, and [] if swim wins.
+  // Tuesday is chosen because swimSetLines() returns [] for tue (unlike
+  // wed/mon/fri), so the template's lines are visibly distinct from what the
+  // swim branch would produce.
   p.weekTemplates.alpha.days.tue = [{
     discipline: 'swim',
     title: 'Swim {main}',
@@ -374,6 +454,6 @@ test('branch ordering: template setLines interpolation runs after swim derivatio
 
   const tue = resolveWeek(p, 'lift', 1).days.find(d => d.dayKey === 'tue');
   const swim = tue.sessions.find(s => s.discipline === 'swim');
-  // The interpolated template.setLines should win, not the empty [] from swimSetLines().
+  // The interpolated template.setLines survive intact.
   assert.deepEqual(swim.setLines, ['technique × 100 steady']);
 });
