@@ -9,10 +9,10 @@ const plan = JSON.parse(readFileSync(new URL('../data/plan.json', import.meta.ur
 test('race date and blocks are anchored correctly', () => {
   assert.equal(plan.race.date, '2027-06-05');
   const ids = plan.blocks.map(b => b.id);
-  assert.deepEqual(ids, ['prep', 'bridge', 'arc']);
+  assert.deepEqual(ids, ['prep', 'strength', 'arc']);
   assert.deepEqual(
     plan.blocks.map(b => [b.start, b.weeks]),
-    [['2026-08-24', 8], ['2026-10-19', 7], ['2026-12-07', 26]]
+    [['2026-08-24', 3], ['2026-09-14', 12], ['2026-12-07', 26]]
   );
 });
 
@@ -24,9 +24,9 @@ test('blocks are contiguous with no gap or overlap', () => {
   }
 });
 
-test('only prep is authored', () => {
+test('prep and strength are authored, arc is not', () => {
   assert.equal(plan.blocks.find(b => b.id === 'prep').authored, true);
-  assert.equal(plan.blocks.find(b => b.id === 'bridge').authored, false);
+  assert.equal(plan.blocks.find(b => b.id === 'strength').authored, true);
   assert.equal(plan.blocks.find(b => b.id === 'arc').authored, false);
 });
 
@@ -34,15 +34,15 @@ test('skeleton covers all seven days', () => {
   assert.deepEqual(Object.keys(plan.skeleton), ['mon','tue','wed','thu','fri','sat','sun']);
 });
 
-test('prep progression has 8 weeks with weeks 4 and 8 as recovery', () => {
-  assert.equal(plan.progression.prep.length, 8);
-  const types = plan.progression.prep.map(w => w.type);
-  assert.deepEqual(types, ['build','build','build','recovery','build','build','build','recovery']);
+test('prep progression is three build weeks', () => {
+  assert.equal(plan.progression.prep.length, 3);
+  assert.deepEqual(plan.progression.prep.map(w => w.type),
+    ['build', 'build', 'build']);
 });
 
 test('weekend progression matches the written plan', () => {
-  assert.deepEqual(plan.progression.prep.map(w => w.rideMin), [90,100,110,70,120,130,135,90]);
-  assert.deepEqual(plan.progression.prep.map(w => w.runMin), [50,55,60,40,65,70,75,45]);
+  assert.deepEqual(plan.progression.prep.map(w => w.rideMin), [90, 100, 110]);
+  assert.deepEqual(plan.progression.prep.map(w => w.runMin), [50, 55, 60]);
 });
 
 test('every wednesday swim lands in the 1700-2400m band', () => {

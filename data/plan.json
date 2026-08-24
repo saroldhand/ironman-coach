@@ -2,10 +2,15 @@
   "race": { "name": "TBD 70.3", "date": "2027-06-05" },
 
   "blocks": [
-    { "id": "prep", "label": "Prep", "start": "2026-08-24", "weeks": 8, "authored": true,
-      "note": "The written base phase, weeks 1-8." },
-    { "id": "bridge", "label": "Bridge", "start": "2026-10-19", "weeks": 7, "authored": false,
-      "note": "Extended aerobic base. Not authored yet - written before 2026-10-19." },
+    { "id": "prep", "label": "Prep", "start": "2026-08-24", "weeks": 3, "authored": true,
+      "note": "The opening three weeks of the written base phase, before the strength block." },
+    { "id": "strength", "label": "Strength", "start": "2026-09-14", "weeks": 12,
+      "authored": true, "weekSource": "weekTemplates",
+      "note": "The ETS lifting cycle. Five mornings a week for eight weeks, then three.",
+      "phases": [
+        { "label": "GVT", "from": 1, "to": 8 },
+        { "label": "Powerbuilding", "from": 9, "to": 12 }
+      ] },
     { "id": "arc", "label": "Arc", "start": "2026-12-07", "weeks": 26, "authored": false,
       "note": "The documented 26-week plan. Authored block by block as it approaches.",
       "phases": [
@@ -416,13 +421,7 @@
     "prep": [
       { "week": 1, "type": "build",    "rideMin": 90,  "runMin": 50, "wedDistance": 2000, "wedMainSet": "8 x 100 steady, 20s rest" },
       { "week": 2, "type": "build",    "rideMin": 100, "runMin": 55, "wedDistance": 2000, "wedMainSet": "8 x 100 steady, 20s rest" },
-      { "week": 3, "type": "build",    "rideMin": 110, "runMin": 60, "wedDistance": 2100, "wedMainSet": "6 x 150 steady, 20s rest" },
-      { "week": 4, "type": "recovery", "rideMin": 70,  "runMin": 40, "wedDistance": 1700, "wedMainSet": "5 x 100 easy, 30s rest" },
-      { "week": 5, "type": "build",    "rideMin": 120, "runMin": 65, "wedDistance": 2200, "wedMainSet": "5 x 200 steady, 20s rest" },
-      { "week": 6, "type": "build",    "rideMin": 130, "runMin": 70, "wedDistance": 2200, "wedMainSet": "5 x 200 steady, 20s rest" },
-      { "week": 7, "type": "build",    "rideMin": 135, "runMin": 75, "wedDistance": 2400, "wedMainSet": "4 x 300 steady, 15s rest" },
-      { "week": 8, "type": "recovery", "rideMin": 90,  "runMin": 45, "wedDistance": 2000, "wedMainSet": "1 x 1500 continuous, steady - pacing test",
-        "wedStructureOverride": ["300 easy free", "1500 continuous steady - this is the pacing test", "200 easy cooldown"] }
+      { "week": 3, "type": "build",    "rideMin": 110, "runMin": 60, "wedDistance": 2100, "wedMainSet": "6 x 150 steady, 20s rest" }
     ],
     "strength": [
       { "week": 1, "type": "build", "template": "gvtA", "gvt": "10×10" },

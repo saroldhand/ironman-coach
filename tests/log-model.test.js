@@ -107,7 +107,7 @@ test('a week with no entries at all reports null, not zero', () => {
 });
 
 test('an unauthored week reports null completion', () => {
-  assert.equal(weekCompletion(resolveWeek(plan, 'bridge', 1), []).pct, null);
+  assert.equal(weekCompletion(resolveWeek(plan, 'arc', 1), []).pct, null);
 });
 
 test('matching picks the activity that fits the session, not the first one', () => {
