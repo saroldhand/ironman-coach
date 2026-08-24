@@ -336,3 +336,27 @@ test('interpolation does not disturb a skeleton block swim set', () => {
   assert.ok(swim.setLines.length > 0);
   assert.ok(swim.setLines.every(l => !l.includes('{')));
 });
+
+test('branch ordering: template setLines interpolation runs after swim derivation', () => {
+  // Verify that if template.setLines were processed before swimSetLines(),
+  // the template's literal lines would be clobbered. This test uses a
+  // templatePlan() swim that has both discipline: 'swim' and template.setLines,
+  // which only occurs in weekTemplates, not skeleton blocks.
+  const p = templatePlan();
+  // Add a Tuesday swim to alpha template with both swim discipline and literal setLines.
+  // Tuesday is chosen because swimSetLines() returns [] for tue (unlike wed/mon/fri),
+  // so we can see the template.setLines clearly if it wins, and [] if swim wins.
+  p.weekTemplates.alpha.days.tue = [{
+    discipline: 'swim',
+    title: 'Swim {main}',
+    prescribed: { metric: 'distance', value: 1500, unit: 'm' },
+    effort: 'Steady.',
+    setLines: ['{main} × 100 steady']
+  }];
+  p.progression.lift[0].main = 'technique';
+
+  const tue = resolveWeek(p, 'lift', 1).days.find(d => d.dayKey === 'tue');
+  const swim = tue.sessions.find(s => s.discipline === 'swim');
+  // The interpolated template.setLines should win, not the empty [] from swimSetLines().
+  assert.deepEqual(swim.setLines, ['technique × 100 steady']);
+});
