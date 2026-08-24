@@ -128,12 +128,22 @@ export function resolveWeek(plan, blockId, week) {
 
   const isRecovery = progression.type === 'recovery';
 
+  // A block either draws its week from the one global skeleton (the tri
+  // blocks, whose shape never changes) or from a named template chosen by
+  // the progression row (the strength block, whose shape alternates).
+  const template = block.weekSource === 'weekTemplates'
+    ? plan.weekTemplates[progression.template]
+    : null;
+  const source = template ? template.days : plan.skeleton;
+  const dayTypes = (template && template.dayTypes) || plan.nutrition.dayTypes;
+
   const days = DAY_KEYS.map((dayKey, i) => {
-    let templates = plan.skeleton[dayKey];
+    // A template need not fill all seven days; the calendar still shows them.
+    let templates = source[dayKey] || [];
     if (isRecovery && plan.recovery.skipStrength) {
       templates = templates.filter(t => t.discipline !== 'strength');
     }
-    const typeKey = plan.nutrition.dayTypes[dayKey];
+    const typeKey = dayTypes[dayKey];
     return {
       dayKey,
       date: addDays(startDate, i),

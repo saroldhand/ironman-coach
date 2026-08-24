@@ -84,6 +84,62 @@ test('planStart is the earliest block regardless of array order', () => {
 
 import { resolveWeek } from '../assets/plan-model.js';
 
+// A minimal plan exercising weekTemplates, independent of data/plan.json.
+function templatePlan() {
+  return {
+    race: { name: 'Test', date: '2027-06-05' },
+    blocks: [
+      { id: 'lift', label: 'Lift', start: '2026-09-14', weeks: 2,
+        authored: true, weekSource: 'weekTemplates' }
+    ],
+    skeleton: { mon: [], tue: [], wed: [], thu: [], fri: [], sat: [], sun: [] },
+    weekTemplates: {
+      alpha: {
+        dayTypes: { mon: 'low', tue: 'low', wed: 'low', thu: 'low',
+                    fri: 'low', sat: 'low', sun: 'low' },
+        days: {
+          mon: [{ discipline: 'strength', title: 'Alpha lift',
+                  prescribed: { metric: 'duration', value: 60, unit: 'min' },
+                  effort: 'Hard.', setLines: ['Squat 5×5'] }]
+        }
+      }
+    },
+    progression: { lift: [{ week: 1, type: 'build', template: 'alpha' }] },
+    recovery: { swimDeltaAppliesTo: [], swimDeltaMetres: 0, skipStrength: true,
+                tue: { durationMin: 40 }, thu: { durationMin: 30 } },
+    sets: {},
+    nutrition: {
+      dayTypes: { mon: 'big', tue: 'big', wed: 'big', thu: 'big',
+                  fri: 'big', sat: 'big', sun: 'big' },
+      types: { big: { label: 'Big day', approach: 'Eat.' },
+               low: { label: 'Low day', approach: 'Less.' } }
+    }
+  };
+}
+
+test('resolveWeek reads a weekTemplates block from its named template', () => {
+  const w = resolveWeek(templatePlan(), 'lift', 1);
+  assert.equal(w.authored, true);
+  assert.equal(w.startDate, '2026-09-14');
+  const mon = w.days.find(d => d.dayKey === 'mon');
+  assert.equal(mon.sessions.length, 1);
+  assert.equal(mon.sessions[0].title, 'Alpha lift');
+  assert.equal(mon.sessions[0].key, 'lift:1:mon:strength');
+});
+
+test('resolveWeek gives a template day with no entry an empty session list', () => {
+  const w = resolveWeek(templatePlan(), 'lift', 1);
+  assert.equal(w.days.length, 7, 'all seven days are still present');
+  assert.deepEqual(w.days.find(d => d.dayKey === 'sat').sessions, []);
+});
+
+test('resolveWeek still reads skeleton blocks from the global skeleton', () => {
+  // Regression: the real plan's prep block must be untouched by this change.
+  const w = resolveWeek(plan, 'prep', 1);
+  assert.equal(w.authored, true);
+  assert.ok(w.days.find(d => d.dayKey === 'tue').sessions.length > 0);
+});
+
 test('an unauthored block resolves to an explicit placeholder, not fake sessions', () => {
   const w = resolveWeek(plan, 'bridge', 1);
   assert.equal(w.authored, false);
