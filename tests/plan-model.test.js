@@ -309,3 +309,30 @@ test('monthRows flags recovery weeks so the calendar can mark them', () => {
   assert.ok(rows.some(r => r.week.type === 'recovery'),
     'the prep block has at least one recovery week in September');
 });
+
+test('set lines interpolate values from the progression row', () => {
+  const p = templatePlan();
+  p.weekTemplates.alpha.days.mon[0].setLines = ['Bench Press {gvt}', 'Fly 4×12'];
+  p.progression.lift[0].gvt = '10×10';
+
+  const mon = resolveWeek(p, 'lift', 1).days.find(d => d.dayKey === 'mon');
+  assert.deepEqual(mon.sessions[0].setLines, ['Bench Press 10×10', 'Fly 4×12']);
+});
+
+test('an unmatched placeholder survives verbatim rather than becoming undefined', () => {
+  // It must stay visible: "Bench Press {gvt}" on screen is a bug you can see,
+  // "Bench Press undefined" is one you might not, and a silently dropped
+  // token is one you certainly would not.
+  const p = templatePlan();
+  p.weekTemplates.alpha.days.mon[0].setLines = ['Bench Press {missing}'];
+
+  const mon = resolveWeek(p, 'lift', 1).days.find(d => d.dayKey === 'mon');
+  assert.deepEqual(mon.sessions[0].setLines, ['Bench Press {missing}']);
+});
+
+test('interpolation does not disturb a skeleton block swim set', () => {
+  const wed = resolveWeek(plan, 'prep', 1).days.find(d => d.dayKey === 'wed');
+  const swim = wed.sessions.find(s => s.discipline === 'swim');
+  assert.ok(swim.setLines.length > 0);
+  assert.ok(swim.setLines.every(l => !l.includes('{')));
+});

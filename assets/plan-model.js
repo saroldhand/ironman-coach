@@ -71,6 +71,17 @@ function swimSetLines(plan, template, dayKey, progression) {
   return [];
 }
 
+const PLACEHOLDER = /\{(\w+)\}/g;
+
+// Set lines in a week template carry {name} tokens filled from that week's
+// progression row, which is what lets four GVT weeks share one template.
+// An unknown token is left as written: a visible "{gvt}" on the page is a
+// bug that reports itself, where "undefined" reads like prescribed text.
+function fillPlaceholders(line, progression) {
+  return line.replace(PLACEHOLDER, (token, name) =>
+    progression[name] === undefined ? token : String(progression[name]));
+}
+
 function buildSession(plan, template, ctx) {
   const { blockId, week, dayKey, progression, isRecovery } = ctx;
   const s = {
@@ -99,6 +110,12 @@ function buildSession(plan, template, ctx) {
   }
 
   if (template.setRef === 'strength') s.setLines = [...plan.sets.strength];
+
+  // Templates carry their set lines literally; the skeleton derives swim sets
+  // from the weekday instead, so this must not clobber that.
+  if (template.setLines) {
+    s.setLines = template.setLines.map(l => fillPlaceholders(l, progression));
+  }
 
   if (isRecovery) {
     if (dayKey === 'tue') s.prescribed.value = plan.recovery.tue.durationMin;
