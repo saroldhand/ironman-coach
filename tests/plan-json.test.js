@@ -60,3 +60,31 @@ test('nutrition assigns a day type to all seven days', () => {
     assert.ok(plan.nutrition.types[t], `missing definition for day type ${t}`);
   }
 });
+
+test('the GVT templates cover all seven days', () => {
+  for (const name of ['gvtA', 'gvtB']) {
+    assert.deepEqual(Object.keys(plan.weekTemplates[name].days),
+      ['mon','tue','wed','thu','fri','sat','sun'], name);
+    assert.deepEqual(Object.keys(plan.weekTemplates[name].dayTypes),
+      ['mon','tue','wed','thu','fri','sat','sun'], name);
+  }
+});
+
+test('the GVT block alternates its two templates by week parity', () => {
+  const first8 = plan.progression.strength.slice(0, 8);
+  assert.deepEqual(first8.map(w => w.template),
+    ['gvtA','gvtB','gvtA','gvtB','gvtA','gvtB','gvtA','gvtB']);
+});
+
+test('the GVT rep scheme descends across the block', () => {
+  const gvt = plan.progression.strength.filter(w => w.gvt).map(w => w.gvt);
+  assert.deepEqual(gvt, ['10×10', '10×6', '10×4', '10×3']);
+});
+
+test('every nutrition day type named by a template is defined', () => {
+  for (const [name, tpl] of Object.entries(plan.weekTemplates)) {
+    for (const t of Object.values(tpl.dayTypes)) {
+      assert.ok(plan.nutrition.types[t], `${name} names missing day type ${t}`);
+    }
+  }
+});
