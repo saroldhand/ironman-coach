@@ -92,7 +92,7 @@ function templatePlan() {
       { id: 'lift', label: 'Lift', start: '2026-09-14', weeks: 2,
         authored: true, weekSource: 'weekTemplates' }
     ],
-    skeleton: { mon: [], tue: [], wed: [], thu: [], fri: [], sat: [], sun: [] },
+    skeleton: { mon: [], tue: [], wed: [], thu: [], fri: [], sat: [{ discipline: 'bike', title: 'Skeleton bike', prescribed: { metric: 'duration', value: 90, unit: 'min' }, effort: 'Easy.' }], sun: [] },
     weekTemplates: {
       alpha: {
         dayTypes: { mon: 'low', tue: 'low', wed: 'low', thu: 'low',
