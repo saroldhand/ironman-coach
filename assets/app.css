@@ -1,4 +1,5 @@
 :root {
+  /* ---- colour ---- */
   --bg: #fdf7f9;
   --bg-alt: #f7eef4;
   --card: #ffffff;
@@ -24,8 +25,33 @@
   --accent-soft: #fceaf3;
   --recovery-soft: #edf6fc;
 
+  /* ---- type scale ----
+     Five steps. Every font-size in this file is one of these; a sixth ad-hoc
+     value is how a stylesheet stops looking designed. */
+  --text-xs: .6875rem;    /* 11px - gutters, tags, column heads */
+  --text-sm: .8125rem;    /* 13px - meta and secondary lines    */
+  --text-base: .9375rem;  /* 15px - body                        */
+  --text-lg: 1.0625rem;   /* 17px - card and row titles         */
+  --text-xl: 1.375rem;    /* 22px - page heading                */
+
+  /* ---- spacing scale ---- */
+  --s-1: .25rem;
+  --s-2: .5rem;
+  --s-3: .75rem;
+  --s-4: 1rem;
+  --s-5: 1.5rem;
+  --s-6: 2rem;
+
+  /* ---- radii ---- */
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-full: 999px;
+
   --shadow: 0 1px 2px rgba(93, 74, 102, .05), 0 4px 14px rgba(93, 74, 102, .06);
-  --radius: 12px;
+
+  /* Prescriptions are numbers read down a column. Proportional digits make
+     those columns visibly ragged; lining tabular figures do not. */
+  --nums: tabular-nums lining-nums;
 }
 
 * { box-sizing: border-box; }
@@ -34,70 +60,112 @@ body {
   margin: 0;
   background: var(--bg);
   color: var(--text);
-  font: 16px/1.5 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  font: var(--text-base)/1.55 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
 
+:focus-visible {
+  outline: 2px solid var(--accent-ink);
+  outline-offset: 2px;
+  border-radius: var(--r-sm);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
+
+/* ---- chrome ---- */
+
 .topbar {
-  display: flex; align-items: center; gap: 1rem;
-  padding: .75rem 1rem;
+  display: flex; align-items: center; gap: var(--s-4);
+  padding: var(--s-3) var(--s-4);
   border-bottom: 1px solid var(--line);
   position: sticky; top: 0; z-index: 2;
   background: rgba(253, 247, 249, .92);
   backdrop-filter: blur(6px);
 }
-.brand { font-weight: 700; letter-spacing: .05em; color: var(--accent-ink); }
-.views { display: flex; gap: .25rem; margin-left: auto; }
+.brand {
+  font-weight: 700; letter-spacing: .06em; color: var(--accent-ink);
+  font-variant-numeric: var(--nums);
+}
+.views { display: flex; gap: var(--s-1); margin-left: auto; }
 .views a {
   color: var(--dim); text-decoration: none;
-  padding: .35rem .7rem; border-radius: 999px; font-size: .9rem;
+  padding: var(--s-1) var(--s-3); border-radius: var(--r-full);
+  font-size: var(--text-sm); transition: background-color .15s, color .15s;
 }
 .views a:hover { background: var(--bg-alt); color: var(--text); }
 .views a.active { color: var(--accent-ink); background: var(--accent-soft); font-weight: 600; }
-.countdown { color: var(--dim); font-size: .85rem; white-space: nowrap; }
-
-.banner {
-  margin: .75rem 1rem 0; padding: .6rem .8rem;
-  background: #fef7ea;
-  border: 1px solid var(--warn); border-left-width: 4px;
-  border-radius: 8px; color: var(--warn-ink); font-size: .9rem;
+.countdown {
+  color: var(--dim); font-size: var(--text-sm); white-space: nowrap;
+  font-variant-numeric: var(--nums);
 }
 
-main { padding: 1rem; max-width: 880px; margin: 0 auto; }
+.banner {
+  margin: var(--s-3) var(--s-4) 0; padding: var(--s-2) var(--s-3);
+  background: #fef7ea;
+  border: 1px solid var(--warn); border-left-width: 4px;
+  border-radius: var(--r-sm); color: var(--warn-ink); font-size: var(--text-sm);
+}
 
-.daymeta { color: var(--dim); font-size: .9rem; }
-h1 { font-size: 1.4rem; margin: .2rem 0 1rem; display: flex; align-items: center; gap: .5rem; }
+main { padding: var(--s-4); max-width: 880px; margin: 0 auto; }
 
-/* The rail of links between plan levels - day, week, month, season. Present on
-   every view, so no level is ever a dead end. */
-.levelnav { display: flex; flex-wrap: wrap; gap: .4rem; margin-bottom: .8rem; }
+/* The day view is prose - set lines, effort notes, fuelling rules. An 810px
+   measure is past comfortable reading; the grid views keep the full width. */
+.dayview { max-width: 660px; margin: 0 auto; }
+
+h1 {
+  font-size: var(--text-xl); font-weight: 650; letter-spacing: -.01em;
+  margin: var(--s-1) 0 var(--s-4);
+  display: flex; align-items: center; gap: var(--s-2);
+}
+.daymeta {
+  color: var(--dim); font-size: var(--text-sm);
+  font-variant-numeric: var(--nums);
+}
+
+.levelnav { display: flex; flex-wrap: wrap; gap: var(--s-1); margin-bottom: var(--s-3); }
 .levelnav a {
-  font-size: .8rem; text-decoration: none; color: var(--accent-ink);
+  font-size: var(--text-sm); text-decoration: none; color: var(--accent-ink);
   background: var(--card); border: 1px solid var(--line);
-  border-radius: 999px; padding: .28rem .75rem;
+  border-radius: var(--r-full); padding: var(--s-1) var(--s-3);
+  transition: background-color .15s, border-color .15s;
 }
 .levelnav a:hover { background: var(--accent-soft); border-color: var(--accent); }
 
+/* ---- day view cards ---- */
+
 .card {
   background: var(--card); border: 1px solid var(--line);
-  border-radius: var(--radius); padding: 1rem; margin-bottom: 1rem;
-  border-left: 5px solid var(--line); box-shadow: var(--shadow);
+  border-radius: var(--r-md); padding: var(--s-4); margin-bottom: var(--s-3);
+  border-left: 4px solid var(--line); box-shadow: var(--shadow);
 }
 .card.swim { border-left-color: var(--swim); }
 .card.bike { border-left-color: var(--bike); }
 .card.run { border-left-color: var(--run); }
 .card.strength { border-left-color: var(--strength); }
 
-.card h2 { margin: 0; font-size: 1.05rem; display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; }
-.prescribed { margin-left: auto; color: var(--dim); font-weight: 400; font-size: .9rem; }
-.effort { color: var(--dim); font-size: .9rem; margin: .4rem 0 .6rem; }
-.setlines { margin: .5rem 0; padding-left: 1.1rem; }
-.setlines li { margin: .15rem 0; }
-.detail { color: var(--dim); font-size: .9rem; margin: .5rem 0 0; padding-left: 1.1rem; }
+.card h2 {
+  margin: 0; font-size: var(--text-lg); font-weight: 650; letter-spacing: -.005em;
+  display: flex; align-items: center; gap: var(--s-2); flex-wrap: wrap;
+}
+.prescribed {
+  margin-left: auto; color: var(--dim); font-weight: 400;
+  font-size: var(--text-sm); font-variant-numeric: var(--nums);
+}
+.effort { color: var(--dim); font-size: var(--text-sm); margin: var(--s-2) 0; }
+.setlines { margin: var(--s-2) 0; padding-left: var(--s-5); }
+.setlines li { margin: .1rem 0; }
+.detail {
+  color: var(--dim); font-size: var(--text-sm);
+  margin: var(--s-2) 0 0; padding-left: var(--s-5);
+}
+.placeholder { color: var(--dim); font-style: italic; }
 
 .tag {
-  font-size: .72rem; text-transform: uppercase; letter-spacing: .06em;
-  padding: .18rem .5rem; border-radius: 999px; font-weight: 600;
-  border: 1px solid transparent;
+  font-size: var(--text-xs); text-transform: uppercase; letter-spacing: .06em;
+  padding: .15rem var(--s-2); border-radius: var(--r-full); font-weight: 600;
+  border: 1px solid transparent; white-space: nowrap;
 }
 .tag.done { color: var(--done-ink); background: #e7f7ed; border-color: var(--done); }
 .tag.partial { color: var(--partial-ink); background: #fdf1de; border-color: var(--partial); }
@@ -106,74 +174,103 @@ h1 { font-size: 1.4rem; margin: .2rem 0 1rem; display: flex; align-items: center
 .tag.recovery { color: var(--swim-ink); background: var(--recovery-soft); border-color: var(--swim); }
 .tag.today { color: var(--accent-ink); background: var(--accent-soft); border-color: var(--accent); }
 
-.actual { margin-top: .6rem; padding-top: .6rem; border-top: 1px dashed var(--line-strong); font-size: .9rem; }
+.actual {
+  margin-top: var(--s-2); padding-top: var(--s-2);
+  border-top: 1px dashed var(--line-strong); font-size: var(--text-sm);
+  font-variant-numeric: var(--nums);
+}
 .actual a { color: var(--swim-ink); }
 
-.placeholder { color: var(--dim); font-style: italic; }
-
-/* ---- week view ---- */
-
-.weekgrid { display: grid; grid-template-columns: repeat(7, 1fr); gap: .5rem; }
-.weekgrid .cell {
-  display: flex; flex-direction: column; gap: .45rem;
-  background: var(--card); border: 1px solid var(--line); border-radius: 10px;
-  padding: .5rem; min-height: 88px; font-size: .8rem; box-shadow: var(--shadow);
-  text-decoration: none; color: var(--text);
-}
-.weekgrid .cell:hover { border-color: var(--accent); }
-.weekgrid .cell.today { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
-.weekgrid .cell .dow {
-  display: block; color: var(--dim); text-transform: uppercase; font-size: .7rem;
-}
-
-.wsession { display: flex; flex-direction: column; gap: .1rem; }
-.wsession.optional { opacity: .6; }
-.wtitle { display: flex; align-items: center; gap: .3rem; flex-wrap: wrap; }
-.wname { font-weight: 600; line-height: 1.25; }
-.wamount { color: var(--dim); font-size: .72rem; margin-left: auto; white-space: nowrap; }
-.wsummary { color: var(--dim); font-size: .72rem; line-height: 1.3; }
-.wrest { color: var(--dim); font-style: italic; }
+/* ---- status dot ----
+   Hollow means prescribed with nothing recorded, which is not the same claim
+   as missed and must not look like one. */
 .dot {
   display: inline-block; width: .5rem; height: .5rem; border-radius: 50%;
-  box-shadow: inset 0 0 0 1.5px var(--line-strong);
+  box-shadow: inset 0 0 0 1.5px var(--line-strong); flex: none;
 }
 .dot.done { background: var(--done); box-shadow: inset 0 0 0 1px var(--done-ink); }
 .dot.partial { background: var(--partial); box-shadow: inset 0 0 0 1px var(--partial-ink); }
 .dot.missed { background: var(--missed); box-shadow: inset 0 0 0 1px var(--missed-ink); }
 
+/* ---- week view: one row per day ----
+   Seven columns gave each day 114px, which is not enough for a session title,
+   an amount and a set line. A row gives it the full measure instead. */
+
+.weeklist { display: flex; flex-direction: column; gap: var(--s-2); }
+
+.dayrow {
+  display: grid; grid-template-columns: 5.5rem 1fr; gap: var(--s-4);
+  padding: var(--s-3) var(--s-4);
+  background: var(--card); border: 1px solid var(--line);
+  border-radius: var(--r-md); box-shadow: var(--shadow);
+  text-decoration: none; color: var(--text);
+  transition: border-color .15s;
+}
+.dayrow:hover { border-color: var(--accent); }
+.dayrow.today { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
+
+.dayrow .dow {
+  font-size: var(--text-xs); text-transform: uppercase; letter-spacing: .07em;
+  color: var(--dim); font-variant-numeric: var(--nums); padding-top: .15rem;
+}
+.dayrow.today .dow { color: var(--accent-ink); font-weight: 700; }
+
+.daysessions { display: flex; flex-direction: column; gap: var(--s-2); }
+
+/* Dot in a fixed gutter, so the name, the amount and the summary beneath them
+   all share one left edge. */
+.wsession {
+  display: grid; grid-template-columns: .5rem 1fr auto;
+  gap: 0 var(--s-2); align-items: baseline;
+}
+.wsession.optional { opacity: .65; }
+.wsession .dot { grid-column: 1; align-self: center; }
+.wname { grid-column: 2; font-weight: 600; font-size: var(--text-base); }
+.wamount {
+  grid-column: 3; color: var(--dim); font-size: var(--text-sm);
+  font-variant-numeric: var(--nums); white-space: nowrap;
+}
+.wsummary {
+  grid-column: 2 / -1; color: var(--dim); font-size: var(--text-sm);
+  line-height: 1.4;
+}
+.wrest { color: var(--dim); font-style: italic; font-size: var(--text-sm); }
+
 /* ---- month view ---- */
 
 .monthgrid {
-  display: grid;
-  grid-template-columns: 3.6rem repeat(7, minmax(0, 1fr));
-  gap: .35rem;
+  display: grid; grid-template-columns: 3.5rem repeat(7, minmax(0, 1fr));
+  gap: var(--s-1);
 }
 .mhead {
-  color: var(--dim); font-size: .7rem; text-transform: uppercase;
-  letter-spacing: .06em; text-align: center; padding-bottom: .15rem;
+  color: var(--dim); font-size: var(--text-xs); text-transform: uppercase;
+  letter-spacing: .07em; text-align: center; padding-bottom: var(--s-1);
 }
 
-/* The gutter cell: the handle for zooming out from a row of days to its week. */
 .wk {
   display: flex; flex-direction: column; justify-content: center;
-  text-decoration: none; color: var(--dim); font-size: .68rem;
-  border-radius: 10px; padding: .2rem .1rem; text-align: center;
+  text-decoration: none; color: var(--dim); font-size: var(--text-xs);
+  border-radius: var(--r-sm); padding: var(--s-1) 0; text-align: center;
   background: var(--bg-alt); border: 1px solid transparent;
+  transition: background-color .15s, border-color .15s;
 }
 .wk:hover { color: var(--accent-ink); border-color: var(--accent); background: var(--accent-soft); }
 .wk.recovery { background: var(--recovery-soft); color: var(--swim-ink); }
-.wk .wkblock { text-transform: uppercase; letter-spacing: .04em; opacity: .75; }
-.wk .wknum { font-weight: 700; font-size: .8rem; }
+.wk .wkblock { text-transform: uppercase; letter-spacing: .05em; opacity: .75; }
+.wk .wknum { font-weight: 700; font-size: var(--text-sm); font-variant-numeric: var(--nums); }
 .wk.empty { background: transparent; }
 
 .mcell {
-  display: flex; flex-direction: column; gap: .3rem;
-  min-height: 66px; padding: .35rem .4rem;
-  background: var(--card); border: 1px solid var(--line); border-radius: 10px;
+  display: flex; flex-direction: column; gap: var(--s-1);
+  min-height: 68px; padding: var(--s-1) var(--s-2);
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--r-sm);
   text-decoration: none; color: var(--text); box-shadow: var(--shadow);
+  transition: border-color .15s;
 }
 .mcell:hover { border-color: var(--accent); }
-.mcell .dnum { font-size: .8rem; font-weight: 600; }
+.mcell .dnum {
+  font-size: var(--text-sm); font-weight: 600; font-variant-numeric: var(--nums);
+}
 .mcell.blank { background: transparent; border: none; box-shadow: none; min-height: 0; }
 .mcell.out { background: transparent; border-style: dashed; box-shadow: none; }
 .mcell.out .dnum { color: var(--dim); font-weight: 400; }
@@ -181,13 +278,12 @@ h1 { font-size: 1.4rem; margin: .2rem 0 1rem; display: flex; align-items: center
 .mcell.recovery { background: var(--recovery-soft); }
 .mcell.today { border-color: var(--accent); border-width: 2px; box-shadow: 0 0 0 3px var(--accent-soft); }
 
-.mdots { display: flex; flex-wrap: wrap; gap: .22rem; }
+.mdots { display: flex; flex-wrap: wrap; gap: .2rem; }
 
-/* One dot per session. Hue is the discipline; fill is what the log says.
-   Hollow means nothing was recorded, which is a different claim from missed. */
+/* Hue is the discipline; fill is what the log says. */
 .mdot {
   --dot: var(--line-strong); --dot-ink: var(--dim);
-  display: inline-block; width: .55rem; height: .55rem; border-radius: 50%;
+  display: inline-block; width: .5rem; height: .5rem; border-radius: 50%;
   border: 1.5px solid var(--dot); background: transparent;
 }
 .mdot.swim { --dot: var(--swim); --dot-ink: var(--swim-ink); }
@@ -199,39 +295,54 @@ h1 { font-size: 1.4rem; margin: .2rem 0 1rem; display: flex; align-items: center
 .mdot.missed { background: var(--missed); border-color: var(--missed-ink); }
 .mdot.optional { opacity: .5; }
 
-.legend { display: flex; flex-wrap: wrap; gap: .9rem; margin-top: 1rem; }
+.legend { display: flex; flex-wrap: wrap; gap: var(--s-4); margin-top: var(--s-4); }
 .legenditem {
-  display: flex; align-items: center; gap: .35rem;
-  font-size: .78rem; color: var(--dim); text-transform: capitalize;
+  display: flex; align-items: center; gap: var(--s-1);
+  font-size: var(--text-xs); color: var(--dim); text-transform: capitalize;
 }
 
-/* ---- season view ---- */
+/* ---- season view ----
+   A fixed grid, not flex: the phase column is empty for blocks that have no
+   phases, and under flex an absent element shifted every following column. */
 
-.season { display: flex; flex-direction: column; gap: .35rem; }
+.season { display: flex; flex-direction: column; gap: .15rem; }
 .seasonrow {
-  display: flex; align-items: center; gap: .5rem; font-size: .85rem;
-  text-decoration: none; color: var(--text);
-  padding: .3rem .5rem; border-radius: 8px; border: 1px solid transparent;
+  display: grid;
+  grid-template-columns: 7.5rem 6rem 7rem 1fr 3rem;
+  align-items: center; gap: var(--s-2);
+  font-size: var(--text-sm); text-decoration: none; color: var(--text);
+  padding: var(--s-1) var(--s-2); border-radius: var(--r-sm);
+  border: 1px solid transparent; transition: background-color .15s, border-color .15s;
 }
 .seasonrow:hover { background: var(--card); border-color: var(--accent); }
-.seasonrow .bar { height: .55rem; border-radius: 999px; background: var(--bg-alt); flex: 1; }
-.seasonrow .bar > span { display: block; height: 100%; border-radius: 999px; background: var(--done); }
+.seasonrow .label { font-weight: 600; font-variant-numeric: var(--nums); }
+.seasonrow .bar { height: .5rem; border-radius: var(--r-full); background: var(--bg-alt); }
+.seasonrow .bar > span { display: block; height: 100%; border-radius: var(--r-full); background: var(--done); }
+.seasonrow .pct { text-align: right; color: var(--dim); font-variant-numeric: var(--nums); }
 .seasonrow.recovery .label { color: var(--swim-ink); }
 .seasonrow.current { background: var(--accent-soft); border-color: var(--accent); }
 .blockhead {
-  margin: 1rem 0 .35rem; color: var(--dim); font-size: .8rem;
-  text-transform: uppercase; letter-spacing: .08em;
+  margin: var(--s-5) 0 var(--s-2); color: var(--dim); font-size: var(--text-xs);
+  text-transform: uppercase; letter-spacing: .09em; font-weight: 600;
 }
 
+/* ---- narrow ---- */
+
 @media (max-width: 620px) {
-  .weekgrid { grid-template-columns: repeat(2, 1fr); }
   .countdown { display: none; }
-  .monthgrid { grid-template-columns: 2rem repeat(7, minmax(0, 1fr)); gap: .2rem; }
-  .mcell { min-height: 52px; padding: .25rem; }
-  .mcell .dnum { font-size: .7rem; }
+  main { padding: var(--s-3) var(--s-2); }
+
+  /* The day column becomes a header line rather than a squeezed gutter. */
+  .dayrow { grid-template-columns: 1fr; gap: var(--s-2); }
+  .dayrow .dow { padding-top: 0; }
+
+  .monthgrid { grid-template-columns: 1.75rem repeat(7, minmax(0, 1fr)); gap: .15rem; }
+  .mcell { min-height: 52px; padding: .2rem; }
   .mdot { width: .42rem; height: .42rem; }
   .wk .wkblock { display: none; }
-  .wk .wknum { font-size: .7rem; }
-  .mhead { font-size: .6rem; }
-  main { padding: .75rem .5rem; }
+  .mhead { letter-spacing: .04em; }
+
+  /* Drop the date and phase columns; the label and bar carry the row. */
+  .seasonrow { grid-template-columns: 7rem 1fr 2.75rem; }
+  .seasonrow .date, .seasonrow .phase { display: none; }
 }

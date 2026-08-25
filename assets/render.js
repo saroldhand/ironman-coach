@@ -134,7 +134,7 @@ function dayNav(day, date, today) {
 
 export function renderDay(ctx) {
   const { plan, day, week, entriesByKey, extras, date, today } = ctx;
-  const out = el('div');
+  const out = el('div', { class: 'dayview' });
 
   out.append(dayNav(day, date, today));
 
@@ -214,37 +214,38 @@ export function renderWeek(ctx) {
     return out;
   }
 
-  const grid = el('div', { class: 'weekgrid' });
+  const list = el('div', { class: 'weeklist' });
 
   for (const day of week.days) {
-    // The whole cell is the link, not just the date - a card-shaped target that
+    // The whole row is the link, not just the date - a card-shaped target that
     // does nothing when you click the middle of it reads as broken.
-    const cell = el('a', {
-      class: `cell${day.date === today ? ' today' : ''}`,
-      href: `#/day/${day.date}`
-    }, [
-      el('span', { class: 'dow' }, `${DOW_SHORT[day.dayKey]} ${day.date.slice(8)}`)
-    ]);
+    const sessions = el('div', { class: 'daysessions' });
 
     for (const s of day.sessions) {
       const entry = entriesByKey.get(s.key);
       const summary = summaryLine(s);
-      cell.append(el('div', { class: `wsession${s.optional ? ' optional' : ''}` }, [
-        el('div', { class: 'wtitle' }, [
-          entry ? el('span', { class: `dot ${entry.status}` }) : el('span', { class: 'dot' }),
-          el('span', { class: 'wname' }, s.title),
-          el('span', { class: 'wamount' }, prescribedText(s.prescribed))
-        ]),
-        summary ? el('div', { class: 'wsummary' }, summary) : null
+      // Dot, name and amount are siblings in one grid rather than a nested
+      // row, so the summary beneath them shares the name's left edge.
+      sessions.append(el('div', { class: `wsession${s.optional ? ' optional' : ''}` }, [
+        entry ? el('span', { class: `dot ${entry.status}` }) : el('span', { class: 'dot' }),
+        el('span', { class: 'wname' }, s.title),
+        el('span', { class: 'wamount' }, prescribedText(s.prescribed)),
+        summary ? el('span', { class: 'wsummary' }, summary) : null
       ]));
     }
 
-    if (!day.sessions.length) cell.append(el('div', { class: 'wrest' }, 'Rest'));
+    if (!day.sessions.length) sessions.append(el('div', { class: 'wrest' }, 'Rest'));
 
-    grid.append(cell);
+    list.append(el('a', {
+      class: `dayrow${day.date === today ? ' today' : ''}`,
+      href: `#/day/${day.date}`
+    }, [
+      el('span', { class: 'dow' }, `${DOW_SHORT[day.dayKey]} ${day.date.slice(8)}`),
+      sessions
+    ]));
   }
 
-  out.append(grid);
+  out.append(list);
   return out;
 }
 
@@ -276,13 +277,16 @@ export function renderSeason(ctx) {
       if (week.type === 'recovery') classes.push('recovery');
       if (todayWeekStart(week)) classes.push('current');
 
+      // The phase cell is always emitted, empty when the block has no phases:
+      // omitting it shifted every following column out of line with the rows
+      // above, which is what made this list look ragged.
       list.append(el('a', { class: classes.join(' '), href: `#/week/${block.id}/${n}` }, [
         el('span', { class: 'label' },
           `${block.label} W${n}${week.type === 'recovery' ? ' ↓' : ''}`),
-        el('span', { class: 'daymeta' }, week.startDate),
-        phase ? el('span', { class: 'daymeta' }, phase) : null,
+        el('span', { class: 'daymeta date' }, week.startDate),
+        el('span', { class: 'daymeta phase' }, phase || ''),
         el('span', { class: 'bar' }, el('span', { style: `width:${c.pct ?? 0}%` })),
-        el('span', { class: 'daymeta' }, c.pct === null ? '—' : `${c.pct}%`)
+        el('span', { class: 'pct' }, c.pct === null ? '—' : `${c.pct}%`)
       ]));
     }
 
