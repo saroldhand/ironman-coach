@@ -22,6 +22,29 @@ export function prescribedText(p) {
   return p.metric === 'distance' ? `${p.value.toLocaleString()} m` : `${p.value} min`;
 }
 
+const SUMMARY_MAX = 38;
+
+// The one line a day cell shows under a session's title. A lift is named by its
+// main set - always the first line - while everything else is named by its
+// effort, because a swim's first set line is the warmup and says nothing about
+// the session.
+export function summaryLine(session) {
+  const source = session.discipline === 'strength' && session.setLines.length
+    ? session.setLines[0]
+    : firstClause(session.effort);
+  return truncate(source, SUMMARY_MAX);
+}
+
+// Effort strings run "Zone 2 - 65-75% max HR. Conversational the whole way."
+// Either separator can come first, so split on whichever does.
+function firstClause(effort) {
+  return (effort || '').split(/\.\s|\s[-–]\s/)[0].replace(/\.$/, '');
+}
+
+function truncate(text, max) {
+  return text.length <= max ? text : `${text.slice(0, max - 1)}…`;
+}
+
 function actualText(strava, metric) {
   const mins = Math.round(strava.movingTime / 60);
   const parts = metric === 'distance'
@@ -194,18 +217,29 @@ export function renderWeek(ctx) {
   const grid = el('div', { class: 'weekgrid' });
 
   for (const day of week.days) {
-    const cell = el('div', { class: `cell${day.date === today ? ' today' : ''}` }, [
-      el('a', { class: 'dow', href: `#/day/${day.date}` },
-        `${DOW_SHORT[day.dayKey]} ${day.date.slice(8)}`)
+    // The whole cell is the link, not just the date - a card-shaped target that
+    // does nothing when you click the middle of it reads as broken.
+    const cell = el('a', {
+      class: `cell${day.date === today ? ' today' : ''}`,
+      href: `#/day/${day.date}`
+    }, [
+      el('span', { class: 'dow' }, `${DOW_SHORT[day.dayKey]} ${day.date.slice(8)}`)
     ]);
 
     for (const s of day.sessions) {
       const entry = entriesByKey.get(s.key);
-      cell.append(el('div', {}, [
-        entry ? el('span', { class: `dot ${entry.status}` }) : el('span', { class: 'dot' }),
-        ` ${s.discipline} ${prescribedText(s.prescribed)}`
+      const summary = summaryLine(s);
+      cell.append(el('div', { class: `wsession${s.optional ? ' optional' : ''}` }, [
+        el('div', { class: 'wtitle' }, [
+          entry ? el('span', { class: `dot ${entry.status}` }) : el('span', { class: 'dot' }),
+          el('span', { class: 'wname' }, s.title),
+          el('span', { class: 'wamount' }, prescribedText(s.prescribed))
+        ]),
+        summary ? el('div', { class: 'wsummary' }, summary) : null
       ]));
     }
+
+    if (!day.sessions.length) cell.append(el('div', { class: 'wrest' }, 'Rest'));
 
     grid.append(cell);
   }
