@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { prescribedText, summaryLine } from '../assets/render.js';
+import { prescribedText, summaryLine, fuelLines } from '../assets/render.js';
 
 test('prescribedText formats distances in metres with thousands separators', () => {
   assert.equal(prescribedText({ metric: 'distance', value: 2000, unit: 'm' }), '2,000 m');
@@ -61,4 +61,52 @@ test('summaryLine leaves a line that already fits untouched', () => {
 test('summaryLine returns empty string when there is nothing to summarise', () => {
   assert.equal(summaryLine({ discipline: 'strength', effort: '', setLines: [] }), '');
   assert.equal(summaryLine({ discipline: 'run', effort: '', setLines: [] }), '');
+});
+
+test('prescribedText switches to kilometres at race-length distances', () => {
+  // Race day prescribes the bike and run by distance; "90,000 m" reads as a
+  // typo. Pool distances stay in metres.
+  assert.equal(prescribedText({ metric: 'distance', value: 90000, unit: 'm' }), '90 km');
+  assert.equal(prescribedText({ metric: 'distance', value: 21100, unit: 'm' }), '21.1 km');
+  assert.equal(prescribedText({ metric: 'distance', value: 9999, unit: 'm' }), '9,999 m');
+  assert.equal(prescribedText({ metric: 'distance', value: 1900, unit: 'm' }), '1,900 m');
+});
+
+test('summaryLine names a swim by its main set when it has one', () => {
+  // The effort says how a swim should feel; the main set says what it is.
+  // The day cell has room for one, and the main set is the one that changes.
+  const swim = {
+    discipline: 'swim',
+    effort: 'Steady sets hold the same pace on the last rep as the first.',
+    setLines: ['300 easy free', 'MAIN SET: 8 × 100 @ CSS+8 - 20s rest', '200 easy cooldown']
+  };
+  assert.equal(summaryLine(swim), '8 × 100 @ CSS+8');
+});
+
+const FUEL = { under75min: 'G water', longRide: 'G ride', longRun: 'G run', post: 'G post' };
+const fuelPlan = { nutrition: { fuel: FUEL } };
+const session = (discipline, metric, value) => ({ discipline, prescribed: { metric, value } });
+
+test('fuelLines keeps short days on water and adds recovery after a long one', () => {
+  assert.deepEqual(fuelLines(fuelPlan, { dayKey: 'tue', sessions: [session('bike', 'duration', 60)] }),
+    ['G water']);
+  assert.deepEqual(fuelLines(fuelPlan, { dayKey: 'sat', sessions: [session('bike', 'duration', 180)] }),
+    ['G ride', 'G post']);
+});
+
+test("fuelLines prefers the day's own fuelling rules over the global ones", () => {
+  const day = { dayKey: 'sat', fuel: { ...FUEL, longRide: 'T ride' },
+                sessions: [session('bike', 'duration', 180)] };
+  assert.deepEqual(fuelLines(fuelPlan, day), ['T ride', 'G post']);
+});
+
+test('fuelLines treats a bike or run prescribed by distance as long', () => {
+  // Race day: the legs are prescribed by distance, and judging them by a
+  // duration threshold would tell the athlete to drink water only.
+  const raceDay = { dayKey: 'sat', sessions: [
+    session('swim', 'distance', 1900),
+    session('bike', 'distance', 90000),
+    session('run', 'distance', 21100)
+  ] };
+  assert.deepEqual(fuelLines(fuelPlan, raceDay), ['G ride', 'G run', 'G post']);
 });

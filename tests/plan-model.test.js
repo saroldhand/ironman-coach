@@ -457,3 +457,49 @@ test('literal template setLines win over the weekday-derived swim set', () => {
   // The interpolated template.setLines survive intact.
   assert.deepEqual(swim.setLines, ['technique × 100 steady']);
 });
+
+test('placeholders fill titles, efforts and detail lines, not only set lines', () => {
+  // One Arc template serves easy, test and interval weeks alike, so the words
+  // that name a session have to change with the row - not just its set lines.
+  const p = templatePlan();
+  Object.assign(p.weekTemplates.alpha.days.mon[0], {
+    title: '{liftTitle}',
+    effort: '{liftEffort} - then rest.',
+    detail: ['Note: {liftNote}']
+  });
+  Object.assign(p.progression.lift[0],
+    { liftTitle: 'Light lift', liftEffort: 'One fewer set', liftNote: 'easy week' });
+
+  const s = resolveWeek(p, 'lift', 1).days.find(d => d.dayKey === 'mon').sessions[0];
+  assert.equal(s.title, 'Light lift');
+  assert.equal(s.effort, 'One fewer set - then rest.');
+  assert.deepEqual(s.detail, ['Note: easy week']);
+});
+
+test('a session with no effort or detail still resolves', () => {
+  const p = templatePlan();
+  delete p.weekTemplates.alpha.days.mon[0].effort;
+
+  const s = resolveWeek(p, 'lift', 1).days.find(d => d.dayKey === 'mon').sessions[0];
+  assert.equal(s.effort, undefined);
+  assert.deepEqual(s.detail, []);
+});
+
+test('a week template overrides fuelling rules one by one, like day types', () => {
+  // Race-specific long rides train the gut at 75-90 g/hr; base ones fuel at
+  // 60. A template that changes only the long-ride rule must still inherit
+  // the global short-session and recovery rules, so the maps merge.
+  const p = templatePlan();
+  p.nutrition.fuel = { under75min: 'Water.', longRide: 'Global ride.',
+                       longRun: 'Global run.', post: 'Global post.' };
+  p.weekTemplates.alpha.fuel = { longRide: 'Template ride.' };
+
+  const mon = resolveWeek(p, 'lift', 1).days.find(d => d.dayKey === 'mon');
+  assert.deepEqual(mon.fuel, { under75min: 'Water.', longRide: 'Template ride.',
+                               longRun: 'Global run.', post: 'Global post.' });
+});
+
+test('a skeleton block day carries the global fuelling rules', () => {
+  const tue = resolveWeek(plan, 'prep', 1).days.find(d => d.dayKey === 'tue');
+  assert.deepEqual(tue.fuel, plan.nutrition.fuel);
+});

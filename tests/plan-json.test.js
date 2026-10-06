@@ -147,9 +147,11 @@ test('every placeholder in a template is supplied by every week that uses it', (
 
   for (const [name, tpl] of Object.entries(plan.weekTemplates)) {
     const needed = new Set();
+    // Titles, efforts and detail lines carry tokens too, not only set lines.
     for (const sessions of Object.values(tpl.days)) {
       for (const s of sessions) {
-        for (const line of s.setLines || []) {
+        for (const line of [s.title, s.effort, ...(s.setLines || []), ...(s.detail || [])]) {
+          if (typeof line !== 'string') continue;
           for (const [, key] of line.matchAll(PLACEHOLDER)) needed.add(key);
         }
       }
@@ -221,6 +223,27 @@ test('every prescribed session carries a usable metric', () => {
           `${s.title} has metric ${s.prescribed.metric}`);
         const resolvable = s.prescribed.value != null || s.prescribed.fromProgression;
         assert.ok(resolvable, `${s.title} has neither a value nor a progression key`);
+      }
+    }
+  }
+});
+
+test('every amount a template reads from the progression is supplied by every week that uses it', () => {
+  // resolveWeek copies progression[key] straight into prescribed.value. A row
+  // missing the key renders "undefined min" and scores the session missed
+  // however much was done.
+  for (const [name, tpl] of Object.entries(plan.weekTemplates)) {
+    const needed = new Set();
+    for (const sessions of Object.values(tpl.days)) {
+      for (const s of sessions) {
+        if (s.prescribed.fromProgression) needed.add(s.prescribed.fromProgression);
+      }
+    }
+
+    const users = Object.values(plan.progression).flat().filter(w => w.template === name);
+    for (const week of users) {
+      for (const key of needed) {
+        assert.equal(typeof week[key], 'number', `${name} week ${week.week} does not supply ${key}`);
       }
     }
   }
