@@ -34,18 +34,36 @@ distances and session text. The reasoning behind the numbers is in
 
 ## Views
 
-Four zoom levels, each linked to the ones either side of it:
+Four zoom levels: Season › Month › Week › Day.
 
 | View | Hash | Shows |
 |---|---|---|
 | Day | `#/day/2026-10-06`, `#/today` | Every session prescribed that day, plus what Strava recorded |
 | Week | `#/week/strength/6` | The seven days side by side |
 | Month | `#/month/2026-10` | A calendar grid; one dot per session, coloured by discipline |
-| Season | `#/season` | Every week of every block, with completion bars |
+| Season | `#/season`, `#/season/arc/21` | Every week of every block, with completion bars; opened on a week, it scrolls to it |
 
 In the month grid the left gutter names each row's plan week and links to it;
 each day cell links to its day. A malformed date in the hash falls back to today
-rather than erroring.
+rather than erroring, and a week that does not exist shows this week.
+
+### Getting around
+
+Every page has the same four ways to move:
+
+- **Back** returns to the previous page, at the scroll position you left it.
+  On a page opened cold, from a bookmark or a shared link, it goes up one level
+  instead, so it never leaves the site.
+- **The trail** beside it, `Season › May 2027 › Arc W21 › Sat 1 May`, names where
+  you are, and each step links back up. On a phone the Season step is left to the
+  Season tab, which goes to the same place.
+- **The pager** steps to the neighbours at the same level, and back to today,
+  this week or this month from anywhere else.
+- **The level tabs** keep the date you are looking at. From a day in May, Week
+  opens that day's week and Season opens scrolled to it. 70.3 goes to today.
+
+Back and the trail sit in the sticky header, so they stay on screen however far
+down a page you are. The logic lives in `assets/nav-model.js`.
 
 ## Local development
 
