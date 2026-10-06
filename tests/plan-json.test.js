@@ -24,10 +24,10 @@ test('blocks are contiguous with no gap or overlap', () => {
   }
 });
 
-test('prep and strength are authored, arc is not', () => {
-  assert.equal(plan.blocks.find(b => b.id === 'prep').authored, true);
-  assert.equal(plan.blocks.find(b => b.id === 'strength').authored, true);
-  assert.equal(plan.blocks.find(b => b.id === 'arc').authored, false);
+test('every block is authored, through race day', () => {
+  for (const id of ['prep', 'strength', 'arc']) {
+    assert.equal(plan.blocks.find(b => b.id === id).authored, true, id);
+  }
 });
 
 test('skeleton covers all seven days', () => {
@@ -246,5 +246,50 @@ test('every amount a template reads from the progression is supplied by every we
         assert.equal(typeof week[key], 'number', `${name} week ${week.week} does not supply ${key}`);
       }
     }
+  }
+});
+
+test('the arc phase labels match the template each week runs', () => {
+  // Same trap as the strength block: phase labels live on the block and
+  // templates on the rows, and nothing links them. A race-specific week
+  // labelled "Build" reads fine and is wrong.
+  const arc = plan.blocks.find(b => b.id === 'arc');
+  assert.deepEqual(arc.phases.map(p => [p.label, p.from, p.to]),
+    [['Base', 1, 8], ['Build', 9, 16], ['Race-specific', 17, 24], ['Taper', 25, 26]]);
+  assert.deepEqual(plan.progression.arc.map(w => w.week), Array.from({ length: 26 }, (_, i) => i + 1));
+
+  const labelFor = week => (arc.phases.find(p => week >= p.from && week <= p.to) || {}).label;
+  const phaseOfTemplate = { arcBase: 'Base', arcBuild: 'Build', arcRace: 'Race-specific',
+                            arcTaper: 'Taper', arcRaceWeek: 'Taper' };
+  for (const w of plan.progression.arc) {
+    assert.equal(labelFor(w.week), phaseOfTemplate[w.template],
+      `week ${w.week} runs ${w.template} but is labelled ${labelFor(w.week)}`);
+  }
+  assert.equal(plan.progression.arc[25].template, 'arcRaceWeek', 'the last week is race week');
+});
+
+test('arc recovery weeks land every fourth week and back the load off', () => {
+  const rows = plan.progression.arc;
+  const recovery = rows.filter(w => w.type === 'recovery');
+  assert.deepEqual(recovery.map(w => w.week), [4, 8, 12, 16, 20]);
+
+  for (const r of recovery) {
+    const prev = rows.find(w => w.week === r.week - 1);
+    for (const key of ['tueMin', 'thuMin', 'rideMin', 'runMin']) {
+      assert.ok(r[key] < prev[key],
+        `week ${r.week} ${key} is ${r[key]}, not below week ${prev.week}'s ${prev[key]}`);
+    }
+  }
+});
+
+test('arc running never ramps more than 15% from one loading week to the next', () => {
+  // Running is where a triathlon build gets injured. Recovery weeks dip on
+  // purpose; what matters is each loading week against the last one.
+  const runOf = w => (w.wedRunMin || 0) + (w.thuMin || 0) + (w.brickMin || 0) + (w.runMin || 0);
+  const loading = plan.progression.arc.filter(w => w.type === 'build');
+  for (let i = 1; i < loading.length; i++) {
+    const [a, b] = [loading[i - 1], loading[i]];
+    assert.ok(runOf(b) <= runOf(a) * 1.15,
+      `week ${b.week} runs ${runOf(b)} min after ${runOf(a)} in week ${a.week}`);
   }
 });

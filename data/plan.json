@@ -11,13 +11,14 @@
         { "label": "GVT", "from": 1, "to": 8 },
         { "label": "Powerbuilding", "from": 9, "to": 12 }
       ] },
-    { "id": "arc", "label": "Arc", "start": "2026-12-07", "weeks": 26, "authored": false,
-      "note": "The documented 26-week plan. Authored block by block as it approaches.",
+    { "id": "arc", "label": "Arc", "start": "2026-12-07", "weeks": 26,
+      "authored": true, "weekSource": "weekTemplates",
+      "note": "The 26-week build to the race: base, build, race-specific, taper.",
       "phases": [
         { "label": "Base", "from": 1, "to": 8 },
         { "label": "Build", "from": 9, "to": 16 },
-        { "label": "Race-specific", "from": 17, "to": 22 },
-        { "label": "Taper", "from": 23, "to": 26 }
+        { "label": "Race-specific", "from": 17, "to": 24 },
+        { "label": "Taper", "from": 25, "to": 26 }
       ]
     }
   ],
@@ -414,6 +415,499 @@
             "detail": ["Off the back of the ride. Run it by effort, not pace."] }
         ]
       }
+    },
+    "arcBase": {
+      "dayTypes": { "mon": "low", "tue": "moderate", "wed": "moderate", "thu": "moderate",
+                    "fri": "moderate", "sat": "big", "sun": "big" },
+      "days": {
+        "mon": [
+          { "discipline": "strength", "title": "Strength",
+            "prescribed": { "metric": "duration", "value": null, "unit": "min", "fromProgression": "strMin" },
+            "effort": "RPE 7 - two or three reps in the tank, nothing to failure. A 30-minute session is a light week: one fewer set on every lift.",
+            "setLines": [
+              "Back Squat 3×5 @ RPE 7",
+              "Romanian Deadlift 3×6",
+              "Bench Press 3×5 @ RPE 7",
+              "Weighted Pull Ups 3×5",
+              "Bulgarian Split Squat 2×8 each leg",
+              "Pallof Press 3×10 each side",
+              "Calf Raises 3×15"
+            ],
+            "detail": ["Before work.", "This keeps what the lifting block built. It is not a lifting program."] },
+          { "discipline": "swim", "title": "Technique swim", "optional": true,
+            "prescribed": { "metric": "distance", "value": 1800, "unit": "m" },
+            "effort": "Easy throughout. Technique is the point, not the distance.",
+            "setLines": [
+              "300 easy free",
+              "8 × 50 drill - 20s rest (rotate: fingertip drag, catch-up, single-arm, 6-3-6)",
+              "8 × 100 on ONE cue only - 20s rest",
+              "300 easy cooldown"
+            ],
+            "detail": [
+              "Evening. Optional - but do it unless you are genuinely wrecked. Swim frequency is the cheapest speed a newer swimmer can buy.",
+              "Pick ONE cue for the whole session."
+            ] }
+        ],
+        "tue": [
+          { "discipline": "bike", "title": "{tueTitle}",
+            "prescribed": { "metric": "duration", "value": null, "unit": "min", "fromProgression": "tueMin" },
+            "effort": "{tueEffort}",
+            "detail": [
+              "On the trainer, Zone 2 is 56-75% FTP. Without power, ride it by heart rate and breathing.",
+              "Warm up 10-15 min easy before any efforts; spin easy to the full time."
+            ] }
+        ],
+        "wed": [
+          { "discipline": "swim", "title": "Main swim",
+            "prescribed": { "metric": "distance", "value": null, "unit": "m", "fromProgression": "wedSwimM" },
+            "effort": "Steady sets hold the same pace on the last rep as the first. CSS is your pace per 100 m from the last test.",
+            "setLines": [
+              "300 easy free",
+              "4 × 50 build easy to moderate - 15s rest",
+              "6 × 50 drill - 15s rest",
+              "MAIN SET: {wedMain}",
+              "4 × 50 pull buoy, high elbow - 15s rest",
+              "200 easy cooldown"
+            ],
+            "detail": [
+              "Count strokes per length on the main set.",
+              "If the count climbs more than 3-4 from first rep to last, the stroke is falling apart - note when."
+            ] },
+          { "discipline": "run", "title": "Run off the swim",
+            "prescribed": { "metric": "duration", "value": null, "unit": "min", "fromProgression": "wedRunMin" },
+            "effort": "Zone 2 - easy. Short on purpose.",
+            "detail": ["Straight from the pool. Do not extend it."] }
+        ],
+        "thu": [
+          { "discipline": "run", "title": "{thuTitle}",
+            "prescribed": { "metric": "duration", "value": null, "unit": "min", "fromProgression": "thuMin" },
+            "effort": "{thuEffort}",
+            "detail": [
+              "Strides are relaxed accelerations to about 5K effort, not sprints. Walk back between.",
+              "The most common way to ruin base is letting easy running drift into moderately hard."
+            ] }
+        ],
+        "fri": [
+          { "discipline": "swim", "title": "Aerobic swim",
+            "prescribed": { "metric": "distance", "value": null, "unit": "m", "fromProgression": "friSwimM" },
+            "effort": "Steady and continuous. The easy day before the big weekend - keep it that way.",
+            "setLines": [
+              "400 easy free",
+              "6 × 50 drill - 15s rest",
+              "MAIN SET: {friMain}",
+              "200 kick with board (easy)",
+              "200 easy cooldown"
+            ],
+            "detail": [] }
+        ],
+        "sat": [
+          { "discipline": "bike", "title": "Long ride",
+            "prescribed": { "metric": "duration", "value": null, "unit": "min", "fromProgression": "rideMin" },
+            "effort": "{satEffort}",
+            "detail": [
+              "The anchor session of the week.",
+              "Indoors there is no coasting, so it is harder per minute than it looks. If it has to shrink, keep any Zone 3 work and cut the easy tail."
+            ] }
+        ],
+        "sun": [
+          { "discipline": "run", "title": "Long run",
+            "prescribed": { "metric": "duration", "value": null, "unit": "min", "fromProgression": "runMin" },
+            "effort": "{sunEffort}",
+            "detail": ["Run it by effort, not pace."] }
+        ]
+      }
+    },
+    "arcBuild": {
+      "dayTypes": { "mon": "low", "tue": "key", "wed": "moderate", "thu": "key",
+                    "fri": "moderate", "sat": "big", "sun": "big" },
+      "fuel": {
+        "longRide": "60-75g carb/hr, starting at 30 min. Start using the products you plan to race with.",
+        "longRun": "Water for the first hour, then 30-45g carb/hr."
+      },
+      "days": {
+        "mon": [
+          { "discipline": "strength", "title": "Strength",
+            "prescribed": { "metric": "duration", "value": null, "unit": "min", "fromProgression": "strMin" },
+            "effort": "RPE 7 - two or three reps in the tank, nothing to failure. A 30-minute session is a light week: one fewer set on every lift.",
+            "setLines": [
+              "Back Squat 3×4 @ RPE 7",
+              "Single-Leg RDL 3×8 each leg",
+              "Bench Press 3×5 @ RPE 7",
+              "Pull Ups 3×6",
+              "Step Ups 2×10 each leg",
+              "Copenhagen Plank 3×20s each side",
+              "Calf Raises 3×15"
+            ],
+            "detail": [
+              "Before work.",
+              "If Tuesday's intervals suffer, move the squats and RDLs to Tuesday, after the ride."
+            ] },
+          { "discipline": "swim", "title": "Technique swim", "optional": true,
+            "prescribed": { "metric": "distance", "value": 2000, "unit": "m" },
+            "effort": "Easy throughout. Technique is the point, not the distance.",
+            "setLines": [
+              "400 easy free",
+              "8 × 50 drill - 20s rest (rotate: fingertip drag, catch-up, single-arm, 6-3-6)",
+              "8 × 100 on ONE cue only - 20s rest",
+              "400 easy cooldown"
+            ],
+            "detail": [
+              "Evening. Optional - but do it unless you are genuinely wrecked. Swim frequency is the cheapest speed a newer swimmer can buy.",
+              "Pick ONE cue for the whole session."
+            ] }
+        ],
+        "tue": [
+          { "discipline": "bike", "title": "{tueTitle}",
+            "prescribed": { "metric": "duration", "value": null, "unit": "min", "fromProgression": "tueMin" },
+            "effort": "{tueEffort}",
+            "detail": [
+              "Zone 4 is 88-95% FTP - ERG mode on the trainer holds it for you. By heart rate it is 83-89% max, but bike HR runs 5-10 bpm low, so trust RPE 7.",
+              "Warm up 15 min easy, building, before the first interval; spin easy to the full time."
+            ] }
+        ],
+        "wed": [
+          { "discipline": "swim", "title": "Main swim",
+            "prescribed": { "metric": "distance", "value": null, "unit": "m", "fromProgression": "wedSwimM" },
+            "effort": "Steady sets hold the same pace on the last rep as the first. CSS is your pace per 100 m from the last test.",
+            "setLines": [
+              "300 easy free",
+              "4 × 50 build easy to moderate - 15s rest",
+              "6 × 50 drill - 15s rest",
+              "MAIN SET: {wedMain}",
+              "4 × 50 pull buoy, high elbow - 15s rest",
+              "200 easy cooldown"
+            ],
+            "detail": [
+              "Count strokes per length on the main set.",
+              "If the count climbs more than 3-4 from first rep to last, the stroke is falling apart - note when."
+            ] },
+          { "discipline": "run", "title": "Run off the swim",
+            "prescribed": { "metric": "duration", "value": null, "unit": "min", "fromProgression": "wedRunMin" },
+            "effort": "Zone 2 - easy. Short on purpose.",
+            "detail": ["Straight from the pool. Do not extend it."] }
+        ],
+        "thu": [
+          { "discipline": "run", "title": "{thuTitle}",
+            "prescribed": { "metric": "duration", "value": null, "unit": "min", "fromProgression": "thuMin" },
+            "effort": "{thuEffort}",
+            "detail": [
+              "Zone 4 is 83-89% max HR, or just under the HR from your last run test. Even effort: the last rep looks like the first.",
+              "Warm up 15 min easy before the first interval; jog easy to the full time."
+            ] }
+        ],
+        "fri": [
+          { "discipline": "swim", "title": "Aerobic swim",
+            "prescribed": { "metric": "distance", "value": null, "unit": "m", "fromProgression": "friSwimM" },
+            "effort": "Steady and continuous. The easy day before the big weekend - keep it that way.",
+            "setLines": [
+              "400 easy free",
+              "6 × 50 drill - 15s rest",
+              "MAIN SET: {friMain}",
+              "200 kick with board (easy)",
+              "200 easy cooldown"
+            ],
+            "detail": ["Non-stop means non-stop: slow down rather than stop."] }
+        ],
+        "sat": [
+          { "discipline": "bike", "title": "Long ride",
+            "prescribed": { "metric": "duration", "value": null, "unit": "min", "fromProgression": "rideMin" },
+            "effort": "{satEffort}",
+            "detail": [
+              "The anchor session of the week. Put the Zone 3 blocks in the middle hours, not the first.",
+              "Build time in the aero position: 10-minute blocks, working toward 30 and more.",
+              "Indoors: if it has to shrink, keep the Zone 3 work and cut the easy tail."
+            ] },
+          { "discipline": "run", "title": "Brick run",
+            "prescribed": { "metric": "duration", "value": null, "unit": "min", "fromProgression": "brickMin" },
+            "effort": "Easy - short, quick steps for the first 5 min. Wooden legs are normal and pass.",
+            "detail": ["Running within 5 minutes of getting off the bike. That transition is the whole point."] }
+        ],
+        "sun": [
+          { "discipline": "run", "title": "Long run",
+            "prescribed": { "metric": "duration", "value": null, "unit": "min", "fromProgression": "runMin" },
+            "effort": "{sunEffort}",
+            "detail": ["Run it by effort, not pace."] }
+        ]
+      }
+    },
+    "arcRace": {
+      "dayTypes": { "mon": "maintain", "tue": "key", "wed": "maintain", "thu": "key",
+                    "fri": "maintain", "sat": "big", "sun": "big" },
+      "fuel": {
+        "longRide": "75-90g carb/hr from 30 min - the exact products you'll race with. This is gut training; build up to it.",
+        "longRun": "30-45g carb/hr - a gel every 30-40 min, as on race day."
+      },
+      "days": {
+        "mon": [
+          { "discipline": "strength", "title": "Strength",
+            "prescribed": { "metric": "duration", "value": null, "unit": "min", "fromProgression": "strMin" },
+            "effort": "RPE 6 - crisp, fast reps. Nothing heavy, nothing to failure.",
+            "setLines": [
+              "Back Squat 2×5 @ RPE 6 - fast reps",
+              "Single-Leg RDL 2×8 each leg",
+              "Pull Ups 2×6",
+              "Push Ups 2×15",
+              "Step Ups 2×10 each leg",
+              "Side Plank 2×30s each side",
+              "Calf Raises 2×20"
+            ],
+            "detail": ["Before work.", "Recovery week: one set of each, and call it done."] },
+          { "discipline": "swim", "title": "Technique swim", "optional": true,
+            "prescribed": { "metric": "distance", "value": 2000, "unit": "m" },
+            "effort": "Easy throughout. Technique is the point, not the distance.",
+            "setLines": [
+              "400 easy free",
+              "8 × 50 drill - 20s rest (rotate: fingertip drag, catch-up, single-arm, 6-3-6)",
+              "8 × 100 on ONE cue only - 20s rest",
+              "400 easy cooldown"
+            ],
+            "detail": [
+              "Evening. Optional - but do it unless you are genuinely wrecked. Swim frequency is the cheapest speed a newer swimmer can buy.",
+              "Pick ONE cue for the whole session."
+            ] }
+        ],
+        "tue": [
+          { "discipline": "bike", "title": "{tueTitle}",
+            "prescribed": { "metric": "duration", "value": null, "unit": "min", "fromProgression": "tueMin" },
+            "effort": "{tueEffort}",
+            "detail": [
+              "Zone 4 is 88-95% FTP; race effort is 70-75% FTP, RPE 5. Bike HR runs 5-10 bpm low - trust power, then RPE.",
+              "Warm up 15 min easy, building, before the first interval; spin easy to the full time."
+            ] }
+        ],
+        "wed": [
+          { "discipline": "swim", "title": "Main swim",
+            "prescribed": { "metric": "distance", "value": null, "unit": "m", "fromProgression": "wedSwimM" },
+            "effort": "Race effort is CSS+5 to +8 per 100 m - steady enough to breathe every 2-3 strokes the whole way.",
+            "setLines": [
+              "300 easy free",
+              "4 × 50 build easy to moderate - 15s rest",
+              "6 × 50 drill - 15s rest",
+              "MAIN SET: {wedMain}",
+              "4 × 50 pull buoy, high elbow - 15s rest",
+              "200 easy cooldown"
+            ],
+            "detail": [
+              "Sight on the main set: lift your eyes forward every 6th stroke, crocodile-style, without lifting your head."
+            ] },
+          { "discipline": "run", "title": "Run off the swim",
+            "prescribed": { "metric": "duration", "value": null, "unit": "min", "fromProgression": "wedRunMin" },
+            "effort": "Zone 2 - easy. Short on purpose.",
+            "detail": ["Straight from the pool. Do not extend it."] }
+        ],
+        "thu": [
+          { "discipline": "run", "title": "{thuTitle}",
+            "prescribed": { "metric": "duration", "value": null, "unit": "min", "fromProgression": "thuMin" },
+            "effort": "{thuEffort}",
+            "detail": [
+              "Race effort is what you could hold for about two hours fresh - mid Zone 3, RPE 6. On race day you hold it after three hours on the bike.",
+              "Warm up 10-15 min easy first; jog easy to the full time."
+            ] }
+        ],
+        "fri": [
+          { "discipline": "swim", "title": "Aerobic swim",
+            "prescribed": { "metric": "distance", "value": null, "unit": "m", "fromProgression": "friSwimM" },
+            "effort": "Steady and continuous, sighting as you go. The easy day before the big weekend.",
+            "setLines": [
+              "400 easy free",
+              "6 × 50 drill - 15s rest",
+              "MAIN SET: {friMain}",
+              "200 kick with board (easy)",
+              "200 easy cooldown"
+            ],
+            "detail": ["Open water: never alone, and with a tow float."] }
+        ],
+        "sat": [
+          { "discipline": "bike", "title": "Long ride",
+            "prescribed": { "metric": "duration", "value": null, "unit": "min", "fromProgression": "rideMin" },
+            "effort": "{satEffort}",
+            "detail": [
+              "Race-effort blocks go exactly as you'll race: aero position, race nutrition, race kit when you can.",
+              "Indoors: if it has to shrink, keep the race-effort work and cut the easy tail."
+            ] },
+          { "discipline": "run", "title": "Brick run",
+            "prescribed": { "metric": "duration", "value": null, "unit": "min", "fromProgression": "brickMin" },
+            "effort": "{brickEffort}",
+            "detail": [
+              "Running within 5 minutes of getting off the bike.",
+              "Practise race-run fuelling on the longer ones: a gel at 20-30 min."
+            ] }
+        ],
+        "sun": [
+          { "discipline": "run", "title": "Long run",
+            "prescribed": { "metric": "duration", "value": null, "unit": "min", "fromProgression": "runMin" },
+            "effort": "{sunEffort}",
+            "detail": [
+              "Run it by effort, not pace. The day after a big Saturday the pace will be slow - that is the point."
+            ] }
+        ]
+      }
+    },
+    "arcTaper": {
+      "dayTypes": { "mon": "maintain", "tue": "maintain", "wed": "maintain", "thu": "maintain",
+                    "fri": "maintain", "sat": "big", "sun": "maintain" },
+      "fuel": {
+        "longRide": "75-90g carb/hr from 30 min - the exact products you'll race with. This is gut training; build up to it.",
+        "longRun": "30-45g carb/hr - a gel every 30-40 min, as on race day."
+      },
+      "days": {
+        "mon": [
+          { "discipline": "strength", "title": "Strength",
+            "prescribed": { "metric": "duration", "value": 20, "unit": "min" },
+            "effort": "Bodyweight only - two rounds, nothing hard. This is staying loose, not training.",
+            "setLines": [
+              "Bodyweight Squat 2×15",
+              "Single-Leg Glute Bridge 2×10 each leg",
+              "Push Ups 2×12",
+              "Side Plank 2×30s each side",
+              "Calf Raises 2×20"
+            ],
+            "detail": ["Before work."] },
+          { "discipline": "swim", "title": "Technique swim", "optional": true,
+            "prescribed": { "metric": "distance", "value": 1500, "unit": "m" },
+            "effort": "Easy throughout. Technique is the point, not the distance.",
+            "setLines": [
+              "300 easy free",
+              "8 × 50 drill - 20s rest (rotate: fingertip drag, catch-up, single-arm, 6-3-6)",
+              "5 × 100 on ONE cue only - 20s rest",
+              "300 easy cooldown"
+            ],
+            "detail": [
+              "Evening. Optional - but do it unless you are genuinely wrecked. Swim frequency is the cheapest speed a newer swimmer can buy.",
+              "Pick ONE cue for the whole session."
+            ] }
+        ],
+        "tue": [
+          { "discipline": "bike", "title": "Race-effort bike",
+            "prescribed": { "metric": "duration", "value": 60, "unit": "min" },
+            "effort": "3 × 8 min at race effort - 70-75% FTP, RPE 5. 4 min easy between.",
+            "detail": ["Taper: the volume drops, the intensity doesn't. Feeling flat or twitchy this week is normal."] }
+        ],
+        "wed": [
+          { "discipline": "swim", "title": "Main swim",
+            "prescribed": { "metric": "distance", "value": 2000, "unit": "m" },
+            "effort": "Race effort - CSS+5 to +8 per 100 m. Sharp, not tired.",
+            "setLines": [
+              "300 easy free",
+              "4 × 50 build easy to moderate - 15s rest",
+              "6 × 50 drill - 15s rest",
+              "MAIN SET: 8 × 100 @ race effort - 20s rest",
+              "4 × 50 pull buoy, high elbow - 15s rest",
+              "200 easy cooldown"
+            ],
+            "detail": [] },
+          { "discipline": "run", "title": "Run off the swim",
+            "prescribed": { "metric": "duration", "value": 20, "unit": "min" },
+            "effort": "Zone 2 - easy. Short on purpose.",
+            "detail": ["Straight from the pool. Do not extend it."] }
+        ],
+        "thu": [
+          { "discipline": "run", "title": "Race-effort run",
+            "prescribed": { "metric": "duration", "value": 45, "unit": "min" },
+            "effort": "3 × 6 min at race effort - mid Zone 3, RPE 6. 2 min jog between.",
+            "detail": ["Warm up 10-15 min easy first; jog easy to the full time."] }
+        ],
+        "fri": [
+          { "discipline": "swim", "title": "Aerobic swim",
+            "prescribed": { "metric": "distance", "value": 1800, "unit": "m" },
+            "effort": "Easy, with a little speed at the end.",
+            "setLines": [
+              "400 easy free",
+              "6 × 50 drill - 15s rest",
+              "MAIN SET: 5 × 100 easy-steady, then 4 × 50 fast - 20s rest",
+              "200 kick with board (easy)",
+              "200 easy cooldown"
+            ],
+            "detail": ["Open water if you can get it, never alone."] }
+        ],
+        "sat": [
+          { "discipline": "bike", "title": "Long ride",
+            "prescribed": { "metric": "duration", "value": 120, "unit": "min" },
+            "effort": "2 × 15 min race effort - inside a Zone 2 ride, 70-75% FTP, RPE 5.",
+            "detail": ["The last ride with any length to it. Race kit, race nutrition."] },
+          { "discipline": "run", "title": "Brick run",
+            "prescribed": { "metric": "duration", "value": 20, "unit": "min" },
+            "effort": "First 10 min at race effort, then easy.",
+            "detail": ["Running within 5 minutes of getting off the bike."] }
+        ],
+        "sun": [
+          { "discipline": "run", "title": "Long run",
+            "prescribed": { "metric": "duration", "value": 60, "unit": "min" },
+            "effort": "Zone 2 with 4 × 3 min at race effort - 2 min easy between.",
+            "detail": ["Run it by effort, not pace."] }
+        ]
+      }
+    },
+    "arcRaceWeek": {
+      "dayTypes": { "mon": "maintain", "tue": "maintain", "wed": "maintain", "thu": "carbLoad",
+                    "fri": "carbLoad", "sat": "race", "sun": "big" },
+      "fuel": {
+        "longRide": "Race: 60-90g carb/hr - whatever you trained - with 500-750ml fluid/hr and electrolytes, more in the heat. Eat every 20 min on a timer.",
+        "longRun": "Race: a gel or on-course carbs every ~30 min. Water at every aid station."
+      },
+      "days": {
+        "mon": [],
+        "tue": [
+          { "discipline": "bike", "title": "Openers",
+            "prescribed": { "metric": "duration", "value": 45, "unit": "min" },
+            "effort": "3 × 3 min at race effort - 3 min easy between, then spin easy.",
+            "detail": ["Short and sharp. You are reminding your legs, not training them."] }
+        ],
+        "wed": [
+          { "discipline": "swim", "title": "Main swim",
+            "prescribed": { "metric": "distance", "value": 1500, "unit": "m" },
+            "effort": "Race effort on the 100s, easy everything else.",
+            "setLines": [
+              "500 easy free",
+              "4 × 50 drill - 15s rest",
+              "MAIN SET: 4 × 100 @ race effort - 20s rest",
+              "400 easy cooldown"
+            ],
+            "detail": [] },
+          { "discipline": "run", "title": "Run off the swim",
+            "prescribed": { "metric": "duration", "value": 20, "unit": "min" },
+            "effort": "Zone 2 - easy, with 4 × 20s strides.",
+            "detail": [] }
+        ],
+        "thu": [
+          { "discipline": "run", "title": "Shakeout run",
+            "prescribed": { "metric": "duration", "value": 20, "unit": "min" },
+            "effort": "Easy - 20 min with 4 × 20s strides.",
+            "detail": ["Travel day if you need it.", "Carb load starts today."] }
+        ],
+        "fri": [
+          { "discipline": "bike", "title": "Shakeout ride",
+            "prescribed": { "metric": "duration", "value": 20, "unit": "min" },
+            "effort": "Easy - 20 min with 3 × 1 min at race effort.",
+            "detail": ["Bike check-in. Then feet up."] },
+          { "discipline": "swim", "title": "Venue swim", "optional": true,
+            "prescribed": { "metric": "duration", "value": 15, "unit": "min" },
+            "effort": "Easy - a few minutes to feel the water, if the venue allows it.",
+            "detail": [] }
+        ],
+        "sat": [
+          { "discipline": "swim", "title": "Race swim",
+            "prescribed": { "metric": "distance", "value": 1900, "unit": "m" },
+            "effort": "Steady, not hard - start at the side or back of your wave. Sight every 6-8 strokes.",
+            "detail": ["Sub-7 budget: about 45 min. The effort matters; the clock doesn't."] },
+          { "discipline": "bike", "title": "Race bike",
+            "prescribed": { "metric": "distance", "value": 90000, "unit": "m" },
+            "effort": "Race effort and no higher - 70-75% FTP, RPE 5. Ride the first 20 min easy.",
+            "detail": [
+              "If you're passing people on the climbs, you're riding too hard.",
+              "Eat every 20 minutes, on a timer.",
+              "Sub-7 budget: about 3:20."
+            ] },
+          { "discipline": "run", "title": "Race run",
+            "prescribed": { "metric": "distance", "value": 21100, "unit": "m" },
+            "effort": "Ease into it - the first 5 km at the bottom of race effort. It will feel too easy; then settle in.",
+            "detail": [
+              "Walk the aid stations if that's what it takes to eat and drink.",
+              "Sub-7 budget: about 2:25. Sub-7 is the sum of the legs, not a target for any one of them."
+            ] }
+        ],
+        "sun": []
+      }
     }
   },
 
@@ -444,6 +938,194 @@
         "main": "6×3", "power": "4×6 @ 70% 1RM", "rideMin": 105, "runMin": 50 },
       { "week": 12, "type": "build", "template": "ppl",
         "main": "4×10", "power": "5×5 @ 75% 1RM", "rideMin": 120, "runMin": 55 }
+    ],
+    "arc": [
+      { "week": 1, "type": "build", "template": "arcBase", "strMin": 45,
+        "tueTitle": "Bike test", "tueMin": 60, "tueEffort": "20-minute test - 15 min warm-up with 3 × 1 min hard, then 20 min at your best even effort, then easy to the full time. FTP is 95% of the 20-minute average power. No trainer yet? Ride 60 min Zone 2 and test next week.",
+        "wedSwimM": 2000, "wedMain": "CSS test - 400 all-out, 200 very easy, 200 all-out. Time both. CSS per 100 m = (400 time - 200 time) ÷ 2.", "wedRunMin": 20,
+        "thuTitle": "Easy run + strides", "thuMin": 40, "thuEffort": "Zone 2 - 65-75% max HR. Finish with 6 × 20s strides.",
+        "friSwimM": 2000, "friMain": "9 × 100 steady - 15s rest",
+        "rideMin": 120, "satEffort": "Zone 2 - 65-75% max HR, 56-75% FTP. Yes, even the long one.",
+        "runMin": 55, "sunEffort": "Zone 2. Slower than you think." },
+      { "week": 2, "type": "build", "template": "arcBase", "strMin": 45,
+        "tueTitle": "Easy bike", "tueMin": 60, "tueEffort": "Zone 2 with 6 × 30s spin-ups - 110+ rpm in an easy gear, 90s easy between.",
+        "wedSwimM": 2000, "wedMain": "8 × 100 @ CSS+8 - 20s rest", "wedRunMin": 25,
+        "thuTitle": "Easy run + strides", "thuMin": 40, "thuEffort": "Zone 2 - 65-75% max HR. Finish with 6 × 20s strides.",
+        "friSwimM": 2000, "friMain": "3 × 300 steady - 30s rest",
+        "rideMin": 135, "satEffort": "Zone 2 - 65-75% max HR, 56-75% FTP. Yes, even the long one.",
+        "runMin": 60, "sunEffort": "Zone 2. Slower than you think." },
+      { "week": 3, "type": "build", "template": "arcBase", "strMin": 45,
+        "tueTitle": "Easy bike", "tueMin": 75, "tueEffort": "Zone 2 with 6 × 30s spin-ups - 110+ rpm in an easy gear, 90s easy between.",
+        "wedSwimM": 2200, "wedMain": "5 × 200 @ CSS+8 - 20s rest", "wedRunMin": 25,
+        "thuTitle": "Easy run + strides", "thuMin": 45, "thuEffort": "Zone 2 - 65-75% max HR. Finish with 6 × 20s strides.",
+        "friSwimM": 2200, "friMain": "600 + 500 steady - 60s rest between",
+        "rideMin": 150, "satEffort": "Zone 2 - 65-75% max HR, 56-75% FTP. Yes, even the long one.",
+        "runMin": 65, "sunEffort": "Zone 2. Slower than you think." },
+      { "week": 4, "type": "recovery", "template": "arcBase", "strMin": 30,
+        "tueTitle": "Easy bike", "tueMin": 45, "tueEffort": "Zone 2 - 65-75% max HR, 56-75% FTP. Conversational the whole way.",
+        "wedSwimM": 1800, "wedMain": "6 × 100 steady - 20s rest. Easy week.", "wedRunMin": 20,
+        "thuTitle": "Easy run", "thuMin": 30, "thuEffort": "Zone 2 - 65-75% max HR. No strides this week.",
+        "friSwimM": 1800, "friMain": "7 × 100 easy-steady - 15s rest",
+        "rideMin": 90, "satEffort": "Zone 2 - 65-75% max HR, 56-75% FTP. Easy week: no efforts.",
+        "runMin": 45, "sunEffort": "Zone 2. Slower than you think." },
+      { "week": 5, "type": "build", "template": "arcBase", "strMin": 45,
+        "tueTitle": "Tempo bike", "tueMin": 75, "tueEffort": "3 × 8 min Zone 3 - 76-87% FTP, RPE 5-6. 4 min easy between.",
+        "wedSwimM": 2200, "wedMain": "10 × 100 @ CSS+5 - 15s rest", "wedRunMin": 25,
+        "thuTitle": "Easy run + hill strides", "thuMin": 45, "thuEffort": "Zone 2 - finish with 6 × 20s hill strides: a strong effort uphill, then walk back down.",
+        "friSwimM": 2200, "friMain": "700 + 400 steady - 60s rest between",
+        "rideMin": 150, "satEffort": "Zone 2 - 65-75% max HR, 56-75% FTP. Yes, even the long one.",
+        "runMin": 70, "sunEffort": "Zone 2. Slower than you think." },
+      { "week": 6, "type": "build", "template": "arcBase", "strMin": 45,
+        "tueTitle": "Tempo bike", "tueMin": 75, "tueEffort": "3 × 10 min Zone 3 - 76-87% FTP, RPE 5-6. 4 min easy between.",
+        "wedSwimM": 2400, "wedMain": "4 × 300 @ CSS+8 - 30s rest", "wedRunMin": 30,
+        "thuTitle": "Easy run + strides", "thuMin": 50, "thuEffort": "Zone 2 - 65-75% max HR. Finish with 6 × 20s strides.",
+        "friSwimM": 2400, "friMain": "800 non-stop, then 5 × 100 steady - 15s rest",
+        "rideMin": 165, "satEffort": "Last 20 min Zone 3 - the rest Zone 2. 76-87% FTP, RPE 5-6.",
+        "runMin": 75, "sunEffort": "Zone 2. Slower than you think." },
+      { "week": 7, "type": "build", "template": "arcBase", "strMin": 45,
+        "tueTitle": "Tempo bike", "tueMin": 90, "tueEffort": "3 × 12 min Zone 3 - 76-87% FTP, RPE 5-6. 4 min easy between.",
+        "wedSwimM": 2400, "wedMain": "3 × 400 @ CSS+8 - 30s rest", "wedRunMin": 30,
+        "thuTitle": "Steady run", "thuMin": 50, "thuEffort": "3 × 5 min Zone 3 - RPE 5-6, 2 min jog between. Zone 2 otherwise.",
+        "friSwimM": 2400, "friMain": "1,000 non-stop, then 3 × 100 steady - 15s rest. First milestone.",
+        "rideMin": 180, "satEffort": "2 × 15 min Zone 3 - in the second half of a Zone 2 ride, 76-87% FTP, RPE 5-6.",
+        "runMin": 80, "sunEffort": "Zone 2. Slower than you think." },
+      { "week": 8, "type": "recovery", "template": "arcBase", "strMin": 30,
+        "tueTitle": "Easy bike", "tueMin": 45, "tueEffort": "Zone 2 - 65-75% max HR, 56-75% FTP. Conversational the whole way.",
+        "wedSwimM": 1800, "wedMain": "6 × 100 steady - 20s rest. Easy week.", "wedRunMin": 20,
+        "thuTitle": "Easy run", "thuMin": 30, "thuEffort": "Zone 2 - 65-75% max HR. No strides this week.",
+        "friSwimM": 1800, "friMain": "7 × 100 easy-steady - 15s rest",
+        "rideMin": 105, "satEffort": "Zone 2 - 65-75% max HR, 56-75% FTP. Easy week: no efforts.",
+        "runMin": 50, "sunEffort": "Zone 2. Slower than you think." },
+      { "week": 9, "type": "build", "template": "arcBuild", "strMin": 30,
+        "tueTitle": "Bike test", "tueMin": 60, "tueEffort": "20-minute test - 15 min warm-up with 3 × 1 min hard, then 20 min at your best even effort, then easy to the full time. FTP is 95% of the 20-minute average power.",
+        "wedSwimM": 2000, "wedMain": "CSS test - 400 all-out, 200 very easy, 200 all-out. Time both. CSS per 100 m = (400 time - 200 time) ÷ 2.", "wedRunMin": 25,
+        "thuTitle": "Run test", "thuMin": 55, "thuEffort": "30-minute test - solo, best even effort, after a 15 min warm-up. Record the distance and the average HR of the last 20 minutes.",
+        "friSwimM": 2400, "friMain": "1,000 non-stop, then 3 × 100 steady - 15s rest",
+        "rideMin": 165, "satEffort": "2 × 20 min Zone 3 - inside a Zone 2 ride, 76-87% FTP, RPE 5-6.",
+        "brickMin": 10,
+        "runMin": 80, "sunEffort": "Zone 2. Slower than you think." },
+      { "week": 10, "type": "build", "template": "arcBuild", "strMin": 40,
+        "tueTitle": "Threshold bike", "tueMin": 75, "tueEffort": "3 × 10 min Zone 4 - 88-95% FTP, RPE 7. 5 min easy between.",
+        "wedSwimM": 2400, "wedMain": "12 × 100 @ CSS - 15s rest", "wedRunMin": 30,
+        "thuTitle": "Threshold run", "thuMin": 55, "thuEffort": "4 × 6 min Zone 4 - RPE 7-8. 2 min jog between.",
+        "friSwimM": 2300, "friMain": "2 × 600 steady - 60s rest",
+        "rideMin": 180, "satEffort": "2 × 25 min Zone 3 - inside a Zone 2 ride, 76-87% FTP, RPE 5-6.",
+        "brickMin": 15,
+        "runMin": 85, "sunEffort": "Zone 2. Slower than you think." },
+      { "week": 11, "type": "build", "template": "arcBuild", "strMin": 40,
+        "tueTitle": "Threshold bike", "tueMin": 75, "tueEffort": "3 × 12 min Zone 4 - 88-95% FTP, RPE 7. 5 min easy between.",
+        "wedSwimM": 2600, "wedMain": "6 × 200 @ CSS+3 - 20s rest, then 4 × 50 fast - 20s rest", "wedRunMin": 30,
+        "thuTitle": "Threshold run", "thuMin": 55, "thuEffort": "3 × 10 min Zone 4 - RPE 7-8. 3 min jog between.",
+        "friSwimM": 2300, "friMain": "1,200 non-stop",
+        "rideMin": 195, "satEffort": "3 × 20 min Zone 3 - inside a Zone 2 ride, 76-87% FTP, RPE 5-6.",
+        "brickMin": 20,
+        "runMin": 90, "sunEffort": "Zone 2. Slower than you think." },
+      { "week": 12, "type": "recovery", "template": "arcBuild", "strMin": 30,
+        "tueTitle": "Easy bike", "tueMin": 60, "tueEffort": "Zone 2 with 6 × 30s spin-ups - 110+ rpm in an easy gear, 90s easy between.",
+        "wedSwimM": 2000, "wedMain": "8 × 100 steady - 20s rest. Easy week.", "wedRunMin": 20,
+        "thuTitle": "Easy run + strides", "thuMin": 40, "thuEffort": "Zone 2 - 65-75% max HR. Finish with 6 × 20s strides.",
+        "friSwimM": 1800, "friMain": "7 × 100 easy-steady - 15s rest",
+        "rideMin": 120, "satEffort": "Zone 2 - 65-75% max HR, 56-75% FTP. Easy week: no efforts.",
+        "brickMin": 10,
+        "runMin": 60, "sunEffort": "Zone 2. Slower than you think." },
+      { "week": 13, "type": "build", "template": "arcBuild", "strMin": 40,
+        "tueTitle": "Threshold bike", "tueMin": 90, "tueEffort": "3 × 15 min Zone 4 - 88-95% FTP, RPE 7. 5 min easy between.",
+        "wedSwimM": 2600, "wedMain": "4 × 300 @ CSS+3 - 20s rest, then 4 × 50 fast - 20s rest", "wedRunMin": 30,
+        "thuTitle": "Threshold run", "thuMin": 60, "thuEffort": "4 × 8 min Zone 4 - RPE 7-8. 2 min jog between.",
+        "friSwimM": 2500, "friMain": "1,400 non-stop",
+        "rideMin": 195, "satEffort": "2 × 30 min Zone 3 - inside a Zone 2 ride, 76-87% FTP, RPE 5-6.",
+        "brickMin": 20,
+        "runMin": 90, "sunEffort": "Zone 2. Slower than you think." },
+      { "week": 14, "type": "build", "template": "arcBuild", "strMin": 40,
+        "tueTitle": "Threshold bike", "tueMin": 90, "tueEffort": "2 × 20 min Zone 4 - 88-95% FTP, RPE 7. 5 min easy between.",
+        "wedSwimM": 2800, "wedMain": "3 × 500 @ CSS+5 - 30s rest, then 2 × 50 fast", "wedRunMin": 30,
+        "thuTitle": "Threshold run", "thuMin": 60, "thuEffort": "3 × 12 min Zone 4 - RPE 7-8. 3 min jog between.",
+        "friSwimM": 2700, "friMain": "1,600 non-stop",
+        "rideMin": 210, "satEffort": "3 × 25 min Zone 3 - inside a Zone 2 ride, 76-87% FTP, RPE 5-6.",
+        "brickMin": 25,
+        "runMin": 95, "sunEffort": "Zone 2, last 15 min Zone 3 - RPE 5-6." },
+      { "week": 15, "type": "build", "template": "arcBuild", "strMin": 40,
+        "tueTitle": "Threshold bike", "tueMin": 90, "tueEffort": "2 × 25 min Zone 4 - 88-95% FTP, RPE 7. 5 min easy between.",
+        "wedSwimM": 2800, "wedMain": "16 × 100 @ CSS - 10s rest", "wedRunMin": 30,
+        "thuTitle": "Threshold run", "thuMin": 60, "thuEffort": "2 × 15 min Zone 4 - RPE 7-8. 4 min jog between.",
+        "friSwimM": 3000, "friMain": "1,900 non-stop - the race distance. Milestone.",
+        "rideMin": 210, "satEffort": "2 × 40 min Zone 3 - inside a Zone 2 ride, 76-87% FTP, RPE 5-6.",
+        "brickMin": 30,
+        "runMin": 100, "sunEffort": "Zone 2, last 20 min Zone 3 - RPE 5-6." },
+      { "week": 16, "type": "recovery", "template": "arcBuild", "strMin": 30,
+        "tueTitle": "Easy bike", "tueMin": 60, "tueEffort": "Zone 2 - 65-75% max HR, 56-75% FTP. Conversational the whole way.",
+        "wedSwimM": 2000, "wedMain": "8 × 100 steady - 20s rest. Easy week.", "wedRunMin": 20,
+        "thuTitle": "Easy run + strides", "thuMin": 40, "thuEffort": "Zone 2 - 65-75% max HR. Finish with 6 × 20s strides.",
+        "friSwimM": 1800, "friMain": "7 × 100 easy-steady - 15s rest",
+        "rideMin": 120, "satEffort": "Zone 2 - 65-75% max HR, 56-75% FTP. Easy week: no efforts.",
+        "brickMin": 10,
+        "runMin": 60, "sunEffort": "Zone 2. Slower than you think." },
+      { "week": 17, "type": "build", "template": "arcRace", "strMin": 30,
+        "tueTitle": "Bike test", "tueMin": 60, "tueEffort": "20-minute test - 15 min warm-up with 3 × 1 min hard, then 20 min at your best even effort, then easy to the full time. FTP is 95% of the 20-minute average power.",
+        "wedSwimM": 2000, "wedMain": "CSS test - 400 all-out, 200 very easy, 200 all-out. Time both. CSS per 100 m = (400 time - 200 time) ÷ 2.", "wedRunMin": 25,
+        "thuTitle": "Run test", "thuMin": 55, "thuEffort": "30-minute test - solo, best even effort, after a 15 min warm-up. Record the distance and the average HR of the last 20 minutes.",
+        "friSwimM": 2300, "friMain": "6 × 200 steady with sighting - 20s rest",
+        "rideMin": 210, "satEffort": "2 × 40 min race effort - inside a Zone 2 ride, 70-75% FTP, RPE 5.",
+        "brickMin": 30, "brickEffort": "First 10 min at race effort, then easy.",
+        "runMin": 95, "sunEffort": "Zone 2. Slower than you think." },
+      { "week": 18, "type": "build", "template": "arcRace", "strMin": 30,
+        "tueTitle": "Threshold bike", "tueMin": 90, "tueEffort": "2 × 20 min Zone 4 - 88-95% FTP, RPE 7. 5 min easy between.",
+        "wedSwimM": 2800, "wedMain": "2 × 800 @ race effort - 60s rest", "wedRunMin": 30,
+        "thuTitle": "Race-effort run", "thuMin": 60, "thuEffort": "3 × 12 min at race effort - mid Zone 3, RPE 6. 2 min jog between.",
+        "friSwimM": 2700, "friMain": "4 × 400 steady with sighting - 30s rest",
+        "rideMin": 210, "satEffort": "3 × 30 min race effort - inside a Zone 2 ride, 70-75% FTP, RPE 5.",
+        "brickMin": 30, "brickEffort": "First 15 min at race effort, then easy.",
+        "runMin": 100, "sunEffort": "Zone 2, last 20 min at race effort - mid Zone 3, RPE 6." },
+      { "week": 19, "type": "build", "template": "arcRace", "strMin": 30,
+        "tueTitle": "Threshold bike", "tueMin": 90, "tueEffort": "3 × 15 min Zone 4 - 88-95% FTP, RPE 7. 5 min easy between.",
+        "wedSwimM": 3000, "wedMain": "1,500 non-stop @ race effort - then 6 × 50 fast, 20s rest", "wedRunMin": 30,
+        "thuTitle": "Race-effort run", "thuMin": 60, "thuEffort": "2 × 20 min at race effort - mid Zone 3, RPE 6. 3 min jog between.",
+        "friSwimM": 2300, "friMain": "3 × 400 steady with sighting - 30s rest",
+        "rideMin": 225, "satEffort": "2 × 50 min race effort - inside a Zone 2 ride, 70-75% FTP, RPE 5.",
+        "brickMin": 40, "brickEffort": "First 20 min at race effort, then easy.",
+        "runMin": 105, "sunEffort": "Zone 2. Slower than you think." },
+      { "week": 20, "type": "recovery", "template": "arcRace", "strMin": 30,
+        "tueTitle": "Easy bike", "tueMin": 60, "tueEffort": "Zone 2 - 65-75% max HR, 56-75% FTP. Conversational the whole way.",
+        "wedSwimM": 2000, "wedMain": "8 × 100 steady - 20s rest. Easy week.", "wedRunMin": 20,
+        "thuTitle": "Easy run + strides", "thuMin": 40, "thuEffort": "Zone 2 - 65-75% max HR. Finish with 6 × 20s strides.",
+        "friSwimM": 1800, "friMain": "7 × 100 easy-steady - 15s rest",
+        "rideMin": 120, "satEffort": "Zone 2 - 65-75% max HR, 56-75% FTP. Easy week: no efforts.",
+        "brickMin": 15, "brickEffort": "Easy - short, quick steps.",
+        "runMin": 60, "sunEffort": "Zone 2. Slower than you think." },
+      { "week": 21, "type": "build", "template": "arcRace", "strMin": 30,
+        "tueTitle": "Threshold bike", "tueMin": 90, "tueEffort": "4 × 10 min Zone 4 - 88-95% FTP, RPE 7. 3 min easy between.",
+        "wedSwimM": 3000, "wedMain": "3 × 600 @ race effort - sighting every 6th stroke, 45s rest", "wedRunMin": 30,
+        "thuTitle": "Race-effort run", "thuMin": 60, "thuEffort": "3 × 15 min at race effort - mid Zone 3, RPE 6. 3 min jog between.",
+        "friSwimM": 2400, "friMain": "1,300 non-stop with sighting - or, if the water is 16°C/60°F or warmer, 40 min continuous in open water in your wetsuit. Never alone.",
+        "rideMin": 225, "satEffort": "2 × 60 min race effort - inside a Zone 2 ride, 70-75% FTP, RPE 5.",
+        "brickMin": 40, "brickEffort": "First 20 min at race effort, then easy.",
+        "runMin": 105, "sunEffort": "Zone 2. Slower than you think." },
+      { "week": 22, "type": "build", "template": "arcRace", "strMin": 30,
+        "tueTitle": "Threshold bike", "tueMin": 90, "tueEffort": "2 × 20 min Zone 4 - 88-95% FTP, RPE 7. 5 min easy between.",
+        "wedSwimM": 3100, "wedMain": "1,900 non-stop @ race effort - the race swim. Milestone.", "wedRunMin": 30,
+        "thuTitle": "Race-effort run", "thuMin": 60, "thuEffort": "40 min straight at race effort - mid Zone 3, RPE 6.",
+        "friSwimM": 2400, "friMain": "1,300 non-stop with sighting - or, if the water is 16°C/60°F or warmer, 40 min continuous in open water in your wetsuit. Never alone.",
+        "rideMin": 225, "satEffort": "90 min straight at race effort - inside a Zone 2 ride, 70-75% FTP, RPE 5.",
+        "brickMin": 45, "brickEffort": "First 20 min at race effort, then easy.",
+        "runMin": 90, "sunEffort": "Zone 2, last 20 min at race effort - mid Zone 3, RPE 6." },
+      { "week": 23, "type": "build", "template": "arcRace", "strMin": 30,
+        "tueTitle": "Threshold bike", "tueMin": 75, "tueEffort": "3 × 10 min Zone 4 - 88-95% FTP, RPE 7. 5 min easy between.",
+        "wedSwimM": 2600, "wedMain": "3 × 400 @ race effort - 30s rest, then 4 × 50 fast", "wedRunMin": 25,
+        "thuTitle": "Race-effort run", "thuMin": 50, "thuEffort": "3 × 8 min at race effort - mid Zone 3, RPE 6. 2 min jog between.",
+        "friSwimM": 2000, "friMain": "9 × 100 easy-steady - 15s rest. Saturday is the rehearsal.",
+        "rideMin": 180, "satEffort": "RACE REHEARSAL - 3 hours at race effort, about 90 km, then straight into the run. Race breakfast 3 h before, race kit, race nutrition - everything you'll use on June 5.",
+        "brickMin": 50, "brickEffort": "First 30 min at race effort, then easy.",
+        "runMin": 45, "sunEffort": "Easy - Zone 1-2, the day after the rehearsal. Walk breaks are fine." },
+      { "week": 24, "type": "build", "template": "arcRace", "strMin": 30,
+        "tueTitle": "Race-effort bike", "tueMin": 75, "tueEffort": "3 × 10 min at race effort - 70-75% FTP, RPE 5 - then 4 × 1 min fast. 3 min easy between.",
+        "wedSwimM": 2400, "wedMain": "6 × 200 @ race effort - 20s rest", "wedRunMin": 25,
+        "thuTitle": "Race-effort run", "thuMin": 55, "thuEffort": "2 × 15 min at race effort - mid Zone 3, RPE 6. 3 min jog between.",
+        "friSwimM": 2400, "friMain": "1,300 non-stop with sighting - or, if the water is 16°C/60°F or warmer, 40 min continuous in open water in your wetsuit. Never alone.",
+        "rideMin": 150, "satEffort": "2 × 30 min race effort - inside a Zone 2 ride, 70-75% FTP, RPE 5.",
+        "brickMin": 30, "brickEffort": "First 15 min at race effort, then easy.",
+        "runMin": 80, "sunEffort": "Zone 2. The last long run - nothing to prove." },
+      { "week": 25, "type": "taper", "template": "arcTaper" },
+      { "week": 26, "type": "race", "template": "arcRaceWeek" }
     ]
   },
 
@@ -501,7 +1183,11 @@
       "lift": {
         "label": "Lifting day",
         "approach": "Maintenance calories. Protein 1.8-2.2 g/kg. Do not run a deficit while ramping strength."
-      }
+      },
+      "key":      { "label": "Quality day", "approach": "Maintenance calories. Carbs before and after the session - intervals run on glycogen. No deficit today." },
+      "maintain": { "label": "Maintenance day", "approach": "Maintenance calories, no deficit. Weight should hold steady from here to race day." },
+      "carbLoad": { "label": "Carb load", "approach": "7-10g carb per kg bodyweight. Cut fibre and fat so it fits. Nothing new." },
+      "race":     { "label": "Race day", "approach": "Breakfast about 3 hours before the start: 1-2g carb per kg, food you've eaten before every long ride. Then the plan you rehearsed. Nothing new today." }
     },
     "nonNegotiables": [
       "Protein 1.6-2.0 g/kg bodyweight, in 3-4 feedings of 25-40g.",
