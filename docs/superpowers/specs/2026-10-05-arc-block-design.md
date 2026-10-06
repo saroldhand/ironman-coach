@@ -1,7 +1,7 @@
 # Arc Block — 26 Weeks to the 70.3 — Design
 
 **Date:** 2026-10-05
-**Status:** Approved 2026-10-06 — the athlete's answers are in §13. Encoded in `plan.json` (§14).
+**Status:** Approved 2026-10-06. The race is IRONMAN 70.3 Hawaii, and the athlete's answers are in §13. Encoded in `plan.json` (§14).
 **Supersedes:** the Arc phase table in `2026-08-20-ironman-training-site-design.md` §3 (taper shortened from four weeks to two)
 
 ---
@@ -10,9 +10,9 @@
 
 Write the triathlon block that runs from the end of the lifting cycle to race day, so the site stops showing "not written yet" from December 7.
 
-The Strength block ends on Sunday 2026-12-06. By then the athlete has a 2-hour Z2 ride, a 55-minute long run, a 40-minute easy run and one 2,000 m swim a week. Arc takes that to a 70.3 (1.9 km swim, 90 km bike, 21.1 km run) on Saturday 2027-06-05.
+The Strength block ends on Sunday 2026-12-06. By then the athlete has a 2-hour Z2 ride, a 55-minute long run, a 40-minute easy run and one 2,000 m swim a week. Arc takes that to IRONMAN 70.3 Hawaii (1.9 km swim, 90 km bike, 21.1 km run), on the Big Island's Kohala Coast, on Saturday 2027-06-05.
 
-**Goal:** first 70.3, finished without time stress. Under 7 hours is the stretch, and §10 shows it needs nothing extra.
+**Goal:** first 70.3, finished without time stress. Under 7 hours is the stretch. On this course it's a real stretch rather than a given, and §10 has the budget.
 
 **Sources.** The athlete's original handoff and its 26-week outline are gitignored, and were not available when this was written. This plan is built from what the repo holds: the Prep skeleton (the written base phase), the Arc phase table, and the Strength block's closing numbers. Where the handoff's own numbers differ, reconcile them here before implementation.
 
@@ -114,13 +114,14 @@ Monday: strength 40′ (30′ in W9, W12 and W16), plus the optional 2,000 m tec
 | 11 | Feb 15 | 75′ · 3×12′ Z4 | 2,600 · 6×200 @ CSS+3, 4×50 fast · 30′ | 55′ · 3×10′ Z4 | 2,300 · 1,200 straight | 3:15 · 3×20′ Z3 → 20′ | 90′ | 10.3 |
 | *12* | *Feb 22* | *60′ + spin-ups* | *2,000 · 8×100 · 20′* | *40′ + strides* | *1,800 easy* | *2:00 → 10′* | *60′* | *7.1* |
 | 13 | Mar 1 | 90′ · 3×15′ Z4 | 2,600 · 4×300 @ CSS+3, 4×50 fast · 30′ | 60′ · 4×8′ Z4 | 2,500 · 1,400 straight | 3:15 · 2×30′ Z3 → 20′ | 90′ | 10.7 |
-| 14 | Mar 8 | 90′ · 2×20′ Z4 | 2,800 · 3×500 @ CSS+5, 2×50 fast · 30′ | 60′ · 3×12′ Z4 | 2,700 · 1,600 straight | 3:30 · 3×25′ Z3 → 25′ | 95′, last 15′ Z3 | 11.2 |
+| 14 | Mar 8 | 90′ · 2×20′ Z4 climbing | 2,800 · 3×500 @ CSS+5, 2×50 fast · 30′ | 60′ · 3×12′ Z4 | 2,700 · 1,600 straight | 3:30 · 3×25′ Z3 → 25′ | 95′, last 15′ Z3 | 11.2 |
 | 15 | Mar 15 | 90′ · 2×25′ Z4 | 2,800 · 16×100 @ CSS · 30′ | 60′ · 2×15′ Z4 | 3,000 · **1,900 straight** | 3:30 · 2×40′ Z3 → 30′ | 100′, last 20′ Z3 | 11.5 |
 | *16* | *Mar 22* | *60′* | *2,000 · 8×100 · 20′* | *40′ + strides* | *1,800 easy* | *2:00 → 10′* | *60′* | *7.1* |
 
 - **Z4 intervals:** hold an even effort. The last rep should look like the first. If you can't hold it, start the next session's reps a notch easier rather than cutting them short.
 - **Brick runs:** be running within 5 minutes of getting off the bike. Keep them easy, with short quick steps for the first 5 minutes. The point is teaching the legs the transition, not fitness.
 - **W15 Friday is the first milestone:** the full race swim distance, non-stop.
+- **Climbing bike (W14, then W19 and W22):** the Zone 4 work is done seated at 70–80 rpm, on a real climb or with the trainer's grade raised. The road to Hawi is a long, steady climb into the wind.
 
 ### Race-specific — W17–24
 
@@ -131,18 +132,19 @@ Monday: strength 30′, plus the optional 2,000 m technique swim.
 |---|---|---|---|---|---|---|---|---|
 | 17 | Mar 29 | 60′ **20′ test** | 2,000 **CSS test** · 25′ | 55′ **30′ test** | 2,300 · 6×200 sighting | 3:30 · 2×40′ RE → 30′ | 95′ | 10.0 |
 | 18 | Apr 5 | 90′ · 2×20′ Z4 | 2,800 · 2×800 RE · 30′ | 60′ · 3×12′ RE | 2,700 · 4×400 sighting | 3:30 · 3×30′ RE → 30′ | 100′, last 20′ RE | 11.2 |
-| 19 | Apr 12 | 90′ · 3×15′ Z4 | 3,000 · 1,500 straight RE, 6×50 fast · 30′ | 60′ · 2×20′ RE | 2,300 · 3×400 sighting | 3:45 · 2×50′ RE → 40′ | 105′ | 11.7 |
+| 19 | Apr 12 | 90′ · 3×15′ Z4 climbing | 3,000 · 1,500 straight RE, 6×50 fast · 30′ | 60′ · 2×20′ RE | 2,300 · 3×400 sighting | 3:45 · 2×50′ RE → 40′ | 105′ | 11.7 |
 | *20* | *Apr 19* | *60′* | *2,000 · 8×100 · 20′* | *40′ + strides* | *1,800 easy* | *2:00 → 15′* | *60′* | *7.2* |
 | 21 | Apr 26 | 90′ · 4×10′ Z4 | 3,000 · 3×600 RE · 30′ | 60′ · 3×15′ RE | 2,400 · open water* | 3:45 · 2×60′ RE → 40′ | 105′ | 11.7 |
-| 22 | May 3 | 90′ · 2×20′ Z4 | 3,100 · **1,900 straight RE** · 30′ | 60′ · 40′ straight RE | 2,400 · open water* | 3:45 · 90′ RE → 45′ | 90′, last 20′ RE | 11.6 |
+| 22 | May 3 | 90′ · 2×20′ Z4 climbing | 3,100 · **1,900 straight RE** · 30′ | 60′ · 40′ straight RE | 2,400 · open water* | 3:45 · 90′ RE → 45′ | 90′, last 20′ RE | 11.6 |
 | 23 | May 10 | 75′ · 3×10′ Z4 | 2,600 · 3×400 RE, 4×50 fast · 25′ | 50′ · 3×8′ RE | 2,000 easy | **Rehearsal** · 3:00 RE → 50′ | 45′ easy | 9.3 |
 | 24 | May 17 | 75′ · 3×10′ RE | 2,400 · 6×200 RE · 25′ | 55′ · 2×15′ RE | 2,400 · open water* | 2:30 · 2×30′ RE → 30′ | 80′ — last long run | 9.2 |
 
-\* Open water only when the water is at least 16 °C / 60 °F, in a wetsuit, and never alone. Otherwise do a pool swim of the same length with sighting.
+\* Open water only when the water is at least 16 °C / 60 °F, and never alone. A wetsuit at home is for warmth; race day will almost certainly be without one. Otherwise do a pool swim of the same length with sighting.
 
 - **Race-effort blocks are done exactly as you'll race:** in race position, with race nutrition, and in race kit when you can.
 - **W22 Wednesday is the second milestone:** the race swim distance, non-stop, at race effort.
-- **The W23 rehearsal, Sat May 15, three weeks out:** treat it as race day. Have the race breakfast 3 h before, wear race kit and use race nutrition. Ride 3:00 at race effort (≈ 90 km), practise T2, then run 50′ with the first 30′ at race effort. If you can get to water first, swim 20–30′ before the ride. Everything you'll use on race day gets used once here.
+- **W24 starts the heat block** (§10).
+- **The W23 rehearsal, Sat May 15, three weeks out:** treat it as race day. Have the race breakfast 3 h before, wear race kit and use race nutrition. Ride 3:00 at race effort on the hilliest route you have, practise T2, then run 50′ with the first 30′ at race effort. If you can get to water first, swim 20–30′ before the ride. Everything you'll use on race day gets used once here.
 
 ### Taper — W25–26
 
@@ -190,7 +192,7 @@ Swim is the weakest discipline and the newest, so it gets three things: frequenc
 | 1,000 m non-stop | W7 Fri — Jan 22 |
 | 1,900 m non-stop: race distance, in the pool | W15 Fri — Mar 19 |
 | 1,900 m non-stop at race effort | W22 Wed — May 5 |
-| First open-water swim in a wetsuit | W21 or as soon as the water allows |
+| First open-water swim | W21, or as soon as the water allows |
 
 **Session frames.** Only the main set changes week to week.
 
@@ -198,7 +200,9 @@ Swim is the weakest discipline and the newest, so it gets three things: frequenc
 - **Wednesday:** 300 easy · 4×50 build · 6×50 drill · **main set** · 4×50 pull buoy · 200 easy. Total = main + 1,200.
 - **Friday:** 400 easy · 6×50 drill · **main set** · 200 kick · 200 easy. Total = main + 1,100.
 
-**Sighting** starts in W17: lift your eyes ("crocodile eyes") every sixth stroke during the main set. **Wetsuit:** own or rent one by W16, and do your first wetsuit swim in a pool in W17–18 if the pool allows it.
+**Sighting** starts in W17: lift your eyes ("crocodile eyes") every sixth stroke during the main set. In an ocean swim with chop and current, sighting matters more than pace.
+
+**No wetsuit on race day.** Honu's water averages about 24 °C / 75 °F, and racers report the swim is almost always non-wetsuit. That makes the pool race-specific: there's no wetsuit buoyancy to lean on, so a long body line and a small, steady kick carry the legs. A swimskin is optional. Any wetsuit you use at home is for warmth in cold spring water.
 
 ## 8. Strength
 
@@ -245,65 +249,87 @@ New day types:
 **Race day:**
 
 - **Breakfast** ~3 h before the start: 1–2 g carb per kg of bodyweight, food you've eaten before every long ride.
-- **Bike:** 60–90 g carb per hour (whatever you trained), 500–750 ml of fluid per hour, plus electrolytes, with more in the heat.
-- **Run:** a gel or on-course carbs every ~30 minutes, and water at every aid station.
+- **Bike:** 60–90 g carb per hour (whatever you trained), 500–750 ml of fluid per hour, plus electrolytes. In Hawaii heat, plan on the top of that fluid range. Your W17–24 sweat test (§11) sets the number.
+- **Run:** a gel or on-course carbs every ~30 minutes, with water and ice at every aid station.
 - **Nothing new on race day.**
 
-## 10. Race week, race day and sub-7
+## 10. Hawaii: the course, the heat, race week, race day and sub-7
+
+### The course
+
+IRONMAN 70.3 Hawaii ("Honu") runs on the Kohala Coast of the Big Island, north of Kona. It is one of the slowest 70.3 courses on the circuit.
+
+| Leg | What it is | What the plan does about it |
+|---|---|---|
+| Swim | Ocean, about 24 °C / 75 °F. Almost always non-wetsuit. Chop and current are possible. | Pool swimming is race-specific; sighting from W17; open water when you can get it |
+| Bike | About 700 m of climbing on the road to Hawi, into headwind and crosswind for roughly the first 30 miles, then back. Hot. | Climbing intervals in W14, W19 and W22; race effort on climbs and into wind; no deep front wheel |
+| Run | Hot, sunny and exposed. Rolling, over golf-course fairways, lava-field paths and coastal paths. | A heat block; some long-run time on grass or trail; pacing by effort, not pace |
+
+### Heat
+
+Heat is the variable that decides Honu. Train for it in two steps:
+
+- **Heat block, W24–W25 (May 18–30).** After most sessions, spend 20–30 minutes in a sauna or a hot bath. Ride indoors without a fan, and run overdressed. Ten to fourteen days of heat exposure brings most of the adaptation: more plasma volume, and earlier, heavier sweating. If it's new to you, start shorter. Drink before and after, and get out if you feel dizzy.
+- **Arrive early.** Fly in on Memorial Day, Monday May 31, so five days on the island finish the job. Hawaii is 6 hours behind US Eastern time, so an early-morning start will feel like midday at home.
+
+In the heat, pace by power and effort, never by speed or run pace. Expect the run to be 20–40 seconds per km slower than the same effort in cool weather.
+
+### Race week
 
 | Day | Session |
 |---|---|
-| Mon May 31 | Rest (Memorial Day) |
-| Tue Jun 1 | Bike 45′ with 3×3′ at race effort |
-| Wed Jun 2 | Swim 1,500: 500 easy · 4×50 drill · 4×100 RE · 400 easy. Then run 20′ with 4 strides. |
-| Thu Jun 3 | Run 20′ easy + 4 strides. Travel day if needed. Carb load starts. |
-| Fri Jun 4 | Bike 20′ shakeout with 3×1′ at race effort. Swim 15′ at the venue if it's allowed. Check in. Feet up. |
+| Mon May 31 | Fly to Kona (KOA), on Memorial Day. Optional: walk or jog 15′ easy after the flight. |
+| Tue Jun 1 | Build the bike. Ride 45′ with 3×3′ at race effort, on part of the course if you can. |
+| Wed Jun 2 | Swim 1,500 in the ocean at the venue if you can: 500 easy · 4×50 drill · 4×100 RE · 400 easy. Then run 20′ with 4 strides. |
+| Thu Jun 3 | Run 20′ easy + 4 strides. Athlete check-in. Carb load starts. |
+| Fri Jun 4 | Bike 20′ shakeout with 3×1′ at race effort. Swim 15′ in the race water if it's allowed. Bike check-in. Feet up, in the shade. |
 | **Sat Jun 5** | **Race: 1.9 km · 90 km · 21.1 km** |
 | Sun Jun 6 | Nothing structured. Walk. Eat. |
 
-**Pacing a first 70.3:**
+### Pacing a first 70.3, in Hawaii
 
-- **Swim:** start at the side or the back of your wave. Sight every 6–8 strokes. Keep it steady, not hard.
-- **Bike:** ride the first 20 minutes easy, then race effort and no higher. If you're passing people on the climbs, you're riding too hard. Eat every 20 minutes, on a timer.
-- **Run:** run the first 5 km at the bottom of race effort. It will feel too easy, and that's the point. Then settle in. Walk the aid stations if that's what it takes to eat and drink.
+- **Swim:** start at the side or the back of your wave. Sight every 6–8 strokes. Keep it steady, not hard. With no wetsuit, keep the body long and the kick small and steady so the legs don't sink.
+- **Bike:** ride the first 20 minutes easy. Then hold the low end of race effort, about 70% of FTP in this heat. On the climb to Hawi, hold the power and let the speed go; you get it back on the way down. If you're passing people on the climbs, you're riding too hard. Eat every 20 minutes on a timer, and drink to the top of your range, with salt. In the gusts, stay aero only while you're in control.
+- **Run:** run the first 5 km at the bottom of race effort. It will feel too easy, and that's the point. Then settle in. Put ice in your hat and tri suit, and take a sponge and a drink at every aid station. Walk the aid stations if that's what it takes to cool down, eat and drink.
 
 ### Sub-7
 
-Sub-7 needs nothing the plan isn't already doing. First 70.3s are lost by riding too hard and walking the run, not by training too little, so the race-effort rules protect it better than an extra session would. Here is a budget with time to spare:
+On an average course, this plan points to around 6:40. Honu isn't an average course: the wind, the climb, the heat and the non-wetsuit swim all cost time. So sub-7 here is a genuine stretch, not a given. It's realistic if the checkpoints below land, and the effort rules don't change to chase it.
 
 | Leg | Budget | Pace it implies |
 |---|---|---|
-| Swim 1.9 km | 0:45 | ~2:22 per 100 m |
-| T1 | 0:07 | Wetsuit off, run to the bike |
-| Bike 90 km | 3:20 | ~27 km/h |
+| Swim 1.9 km | 0:47 | ~2:28 per 100 m, no wetsuit |
+| T1 | 0:07 | |
+| Bike 90 km | 3:28 | ~26 km/h, with the climb and the wind |
 | T2 | 0:04 | |
-| Run 21.1 km | 2:25 | ~6:52 per km, aid-station walks included |
-| **Total** | **6:41** | **19 minutes under 7:00** |
+| Run 21.1 km | 2:28 | ~7:01 per km in the heat, aid-station walks included |
+| **Total** | **6:54** | **6 minutes under 7:00** |
 
 The cut-off for an IRONMAN 70.3 is usually 8:30, so even a bad day has margin.
 
 **Checkpoints.** Training tells you whether each leg's budget holds, well before June:
 
-- **Swim:** W15 and W22 are 1,900 m non-stop. About 45 minutes or less in the pool means the swim budget holds, and a wetsuit makes race day faster still.
-- **Bike:** the W23 rehearsal is 3 hours at race effort. Covering about 80 km or more means the 3:20 bike is on.
-- **Run:** the W23 brick run, after that ride, should hold race effort at about 6:50 per km or faster.
+- **Swim:** W15 and W22 are 1,900 m non-stop in the pool, which is non-wetsuit, like race day. About 47 minutes or less means the swim budget holds.
+- **Bike:** the W23 rehearsal is 3 hours at race effort on your hilliest route. Covering about 78 km or more means 3:28 at Honu is realistic.
+- **Run:** in cool May weather, the W23 brick run should hold race effort at about 6:40 per km or faster. Hawaii's heat will take some of that back.
 
-If a checkpoint misses, that leg's budget moves, not the effort. Race the effort and let the clock follow.
+If a checkpoint misses, that leg's budget moves, not the effort. A first 70.3 finished strong in Hawaii is the goal; sub-7 is the bonus.
 
 ## 11. Off the training calendar
 
 | By | Item |
 |---|---|
 | Before W1 (Dec 7) | Trainer set up. Make it a direct-drive smart trainer: it measures power, so it doubles as your power meter all winter. Add a fan and a towel, and plan on a bottle an hour. |
-| W4 (Jan 3) | Registration, travel and lodging booked. |
+| W4 (Jan 3) | Registration done. Flights booked to land in Kona (KOA) on Mon May 31, Memorial Day. Lodging on the Kohala Coast. A bike case or bike-shipping service booked. |
 | W8 (Jan 31) | Get a bike fit, especially if you're adding aero bars. |
 | W12 (Feb 28) | Outdoor power meter, if you're getting one; pedals are the simplest. Have it before outdoor riding resumes, so race-specific rides and race day are paced by power. Without one, RPE and HR still work. |
 | W9–16 | Build time in the aero position: 10′ blocks, working up to 30′ and more. |
-| W16 (Mar 28) | Wetsuit sorted, bought or rented. |
+| W16 (Mar 28) | Swim kit: no wetsuit needed for race day. A swimskin is optional. |
 | W17 (Apr 4) | Decide race nutrition, ideally the brand served on course. |
-| W21 on | Open water as soon as it's warm enough. Never alone. |
+| W17–W24 | Sweat test once: weigh yourself before and after a 1-hour session. Each kg lost is about a litre of fluid you didn't replace, and it sets your race-day drinking. |
+| W21 on | Open water as soon as it's warm enough. Never alone. Race wheels decided: no deep front wheel in the Hawi crosswinds. |
 | W23 (May 15) | Race rehearsal in full kit. |
-| W24 (May 23) | Bike serviced. Not in race week. |
+| W24 (May 23) | Bike serviced, not in race week. Practise packing and rebuilding it once before you fly. The heat block is under way (§10). |
 | W25 (May 30) | Race shoes have 100+ km on them. Elastic laces. Packing list done. |
 
 ## 12. When life happens
@@ -317,7 +343,7 @@ If a checkpoint misses, that leg's budget moves, not the effort. Race the effort
 
 ## 13. Confirmed with the athlete — 2026-10-06
 
-1. **The race is Saturday 2027-06-05.** The date is certain. The course details (hills, heat, water temperature) are still to note, and they would sharpen W13–24.
+1. **The race is IRONMAN 70.3 Hawaii on Saturday 2027-06-05**, on the Kohala Coast. §10 covers what that course changes.
 2. **Hours:** a peak of ~11.7 h a week (~12.4 h with the Monday swim) is realistic.
 3. **Trainer: getting one.** Power meter: likely. Efforts carry % FTP alongside heart rate, so the plan works either way. A smart trainer covers the winter by itself (§11).
 4. **First 70.3**, finished without time stress. Under 7 hours is the stretch (§10).
@@ -360,6 +386,5 @@ This mirrors the Strength block: week templates plus a progression row per week.
 
 ## 15. Out of scope
 
-- Course-specific tuning (climbing, heat, water temperature), until the course is noted.
 - Showing test results on the site. They live in Strava and in the athlete's own notes.
 - Anything after June 6.

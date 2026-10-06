@@ -2,7 +2,7 @@
 
 **Live:** https://saroldhand.github.io/ironman-coach/
 
-Static training site for an Ironman 70.3 on 2027-06-05. No build step, no dependencies.
+Static training site for IRONMAN 70.3 Hawaii on 2027-06-05. No build step, no dependencies.
 
 ## What is here
 
