@@ -26,6 +26,12 @@ then three for weeks 9–12 (powerbuilding) as cardio ramps back up. Its weeks c
 from `weekTemplates` in `plan.json` rather than the global `skeleton`, because its
 shape alternates week to week.
 
+Arc is the build to the race: Base (weeks 1–8), Build (9–16), Race-specific (17–24)
+and a two-week Taper that ends on race day. It also draws on `weekTemplates`, one per
+phase plus race week, and each row of `progression.arc` carries that week's durations,
+distances and session text. The reasoning behind the numbers is in
+`docs/superpowers/specs/2026-10-05-arc-block-design.md`.
+
 ## Views
 
 Four zoom levels, each linked to the ones either side of it:

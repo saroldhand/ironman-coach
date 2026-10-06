@@ -1,7 +1,7 @@
 # Arc Block — 26 Weeks to the 70.3 — Design
 
 **Date:** 2026-10-05
-**Status:** Draft — for review. Not yet in `plan.json`.
+**Status:** Approved 2026-10-06 — the athlete's answers are in §13. Encoded in `plan.json` (§14).
 **Supersedes:** the Arc phase table in `2026-08-20-ironman-training-site-design.md` §3 (taper shortened from four weeks to two)
 
 ---
@@ -12,7 +12,7 @@ Write the triathlon block that runs from the end of the lifting cycle to race da
 
 The Strength block ends on Sunday 2026-12-06. By then the athlete has a 2-hour Z2 ride, a 55-minute long run, a 40-minute easy run and one 2,000 m swim a week. Arc takes that to a 70.3 (1.9 km swim, 90 km bike, 21.1 km run) on Saturday 2027-06-05.
 
-**Assumed goal:** first 70.3, finish strong, run the whole half marathon. No time target (see §13).
+**Goal:** first 70.3, finished without time stress. Under 7 hours is the stretch, and §10 shows it needs nothing extra.
 
 **Sources.** The athlete's original handoff and its 26-week outline are gitignored, and were not available when this was written. This plan is built from what the repo holds: the Prep skeleton (the written base phase), the Arc phase table, and the Strength block's closing numbers. Where the handoff's own numbers differ, reconcile them here before implementation.
 
@@ -43,7 +43,7 @@ Total hours barely change between Strength W12 (~7.8 h) and Arc W1 (~7.1 h). Lif
 
 **Recovery weeks** are every fourth week: W4, W8, W12, W16 and W20. Each is 60–70% of the week before. Intensity comes out except strides, and Monday strength goes light. You should finish them feeling restless, same rule as Prep.
 
-**Test weeks** are W1 (swim only), W9 and W17 (all three). W9 and W17 fall straight after recovery weeks, so you test fresh. The results set CSS swim pace and check the heart-rate zones (§6).
+**Test weeks** are W1 (swim and bike), W9 and W17 (all three). W9 and W17 fall straight after recovery weeks, so you test fresh. The results set CSS swim pace and check the heart-rate zones (§6).
 
 **Calendar collisions:**
 
@@ -85,11 +85,11 @@ Weekly hours are core hours, which exclude the optional Monday swim (add ~40–4
 
 ### Base — W1–8
 
-Monday: strength 45′ (30′ in W4 and W8), plus an optional technique swim of 1,800–2,000 m (1,500 in W4 and W8).
+Monday: strength 45′ (30′ in W4 and W8), plus an optional 1,800 m technique swim.
 
 | Wk | Week of | Tue bike | Wed swim · run | Thu run | Fri swim | Sat ride | Sun run | Hrs |
 |---|---|---|---|---|---|---|---|---|
-| 1 | Dec 7 | 60′ | 1,800 **CSS test** · 20′ | 40′ + 6 strides | 2,000 · 9×100 | 2:00 | 55′ | 7.1 |
+| 1 | Dec 7 | 60′ **20′ test** | 2,000 **CSS test** · 20′ | 40′ + 6 strides | 2,000 · 9×100 | 2:00 | 55′ | 7.2 |
 | 2 | Dec 14 | 60′ + 6×30s spin-ups | 2,000 · 8×100 @ CSS+8 · 25′ | 40′ + strides | 2,000 · 3×300 | 2:15 | 60′ | 7.6 |
 | 3 | Dec 21 | 75′ + spin-ups | 2,200 · 5×200 @ CSS+8 · 25′ | 45′ + strides | 2,200 · 600 + 500 | 2:30 | 65′ | 8.4 |
 | *4* | *Dec 28* | *45′* | *1,800 · 6×100 · 20′* | *30′* | *1,800 easy* | *1:30* | *45′* | *5.7* |
@@ -105,11 +105,11 @@ Monday: strength 45′ (30′ in W4 and W8), plus an optional technique swim of 
 
 ### Build — W9–16
 
-Monday: strength 40′ (30′ in W9, W12 and W16), plus the optional technique swim of 2,000 m (1,500 in W12 and W16).
+Monday: strength 40′ (30′ in W9, W12 and W16), plus the optional 2,000 m technique swim.
 
 | Wk | Week of | Tue bike | Wed swim · run | Thu run | Fri swim | Sat ride → brick run | Sun run | Hrs |
 |---|---|---|---|---|---|---|---|---|
-| 9 | Feb 1 | 60′ **20′ test** | 1,800 **CSS test** · 25′ | 55′ **30′ test** | 2,400 · 1,000 straight, 3×100 | 2:45 · 2×20′ Z3 → 10′ | 80′ | 8.7 |
+| 9 | Feb 1 | 60′ **20′ test** | 2,000 **CSS test** · 25′ | 55′ **30′ test** | 2,400 · 1,000 straight, 3×100 | 2:45 · 2×20′ Z3 → 10′ | 80′ | 8.7 |
 | 10 | Feb 8 | 75′ · 3×10′ Z4 | 2,400 · 12×100 @ CSS · 30′ | 55′ · 4×6′ Z4 | 2,300 · 2×600 | 3:00 · 2×25′ Z3 → 15′ | 85′ | 9.8 |
 | 11 | Feb 15 | 75′ · 3×12′ Z4 | 2,600 · 6×200 @ CSS+3, 4×50 fast · 30′ | 55′ · 3×10′ Z4 | 2,300 · 1,200 straight | 3:15 · 3×20′ Z3 → 20′ | 90′ | 10.3 |
 | *12* | *Feb 22* | *60′ + spin-ups* | *2,000 · 8×100 · 20′* | *40′ + strides* | *1,800 easy* | *2:00 → 10′* | *60′* | *7.1* |
@@ -124,12 +124,12 @@ Monday: strength 40′ (30′ in W9, W12 and W16), plus the optional technique s
 
 ### Race-specific — W17–24
 
-Monday: strength 30′, plus the optional technique swim of 2,000 m (1,500 in W20).
+Monday: strength 30′, plus the optional 2,000 m technique swim.
 **RE = race effort** (§6). In this phase, brick runs start with 10–20′ at run race effort, then ease off.
 
 | Wk | Week of | Tue bike | Wed swim · run | Thu run | Fri swim | Sat ride → brick run | Sun run | Hrs |
 |---|---|---|---|---|---|---|---|---|
-| 17 | Mar 29 | 60′ **20′ test** | 1,800 **CSS test** · 25′ | 55′ **30′ test** | 2,300 · 6×200 sighting | 3:30 · 2×40′ RE → 30′ | 95′ | 10.0 |
+| 17 | Mar 29 | 60′ **20′ test** | 2,000 **CSS test** · 25′ | 55′ **30′ test** | 2,300 · 6×200 sighting | 3:30 · 2×40′ RE → 30′ | 95′ | 10.0 |
 | 18 | Apr 5 | 90′ · 2×20′ Z4 | 2,800 · 2×800 RE · 30′ | 60′ · 3×12′ RE | 2,700 · 4×400 sighting | 3:30 · 3×30′ RE → 30′ | 100′, last 20′ RE | 11.2 |
 | 19 | Apr 12 | 90′ · 3×15′ Z4 | 3,000 · 1,500 straight RE, 6×50 fast · 30′ | 60′ · 2×20′ RE | 2,300 · 3×400 sighting | 3:45 · 2×50′ RE → 40′ | 105′ | 11.7 |
 | *20* | *Apr 19* | *60′* | *2,000 · 8×100 · 20′* | *40′ + strides* | *1,800 easy* | *2:00 → 15′* | *60′* | *7.2* |
@@ -155,19 +155,19 @@ W25 Monday is a light 20′ bodyweight session with an optional 1,500 m swim. Th
 
 ## 6. Intensity
 
-The zones are unchanged from Prep and are set as a percentage of max HR.
+Heart-rate zones are unchanged from Prep and are set as a percentage of max HR. Bike sessions also carry power as a percentage of FTP. A smart trainer measures power, so every indoor ride has it from W1.
 
-| Zone | % max HR | RPE | Talk test | Used for |
-|---|---|---|---|---|
-| Z1 | < 65% | 1–2 | Full conversation | Warm-ups, cool-downs |
-| Z2 | 65–75% | 3–4 | Conversation | Most of the plan |
-| Z3 | 76–82% | 5–6 | Short sentences | Tempo; 70.3 race effort |
-| Z4 | 83–89% | 7–8 | A few words | Threshold intervals |
-| Z5 | 90%+ | 9 | None | Strides only |
+| Zone | % max HR | % FTP (bike) | RPE | Talk test | Used for |
+|---|---|---|---|---|---|
+| Z1 | < 65% | < 56% | 1–2 | Full conversation | Warm-ups, cool-downs |
+| Z2 | 65–75% | 56–75% | 3–4 | Conversation | Most of the plan |
+| Z3 | 76–82% | 76–87% | 5–6 | Short sentences | Tempo; run race effort |
+| Z4 | 83–89% | 88–95% | 7–8 | A few words | Threshold intervals |
+| Z5 | 90%+ | > 100% | 9 | None | Strides only |
 
 **Race effort (RE) is the most important number in the plan:**
 
-- **Bike:** low Z3, RPE 5–6. With a power meter, that's ~75% of FTP. Bike HR runs 5–10 bpm below run HR at the same effort, so on the bike trust RPE over the number.
+- **Bike:** 70–75% of FTP, RPE 5. That's a notch above Zone 2, an effort you could hold all day. By heart rate it's the top of Zone 2 into low Zone 3, but bike HR runs 5–10 bpm below run HR at the same effort, so trust power first, then RPE.
 - **Run:** mid Z3, RPE 6. It's what you could hold for about two hours fresh, and on race day you hold it after three hours of riding.
 - **Swim:** CSS + 5–8 s per 100 m. Steady enough to breathe every two or three strokes the whole way.
 
@@ -176,7 +176,7 @@ The zones are unchanged from Prep and are set as a percentage of max HR.
 | Test | When | Protocol | What it gives you |
 |---|---|---|---|
 | Swim CSS | W1, W9, W17 (Wed) | Warm-up · 400 m all-out · 5′ easy · 200 m all-out · cool-down | CSS pace per 100 m = (400 time − 200 time) ÷ 2. Every "@ CSS" set uses it. |
-| Bike 20′ | W9, W17 (Tue) | 15′ warm-up with 3×1′ hard · 20′ best even effort · 25′ easy | With power: FTP ≈ 95% of the 20′ average. With HR only: the 20′ average ≈ your bike threshold HR, and Z4 intervals sit just under it. |
+| Bike 20′ | W1, W9, W17 (Tue) | 15′ warm-up with 3×1′ hard · 20′ best even effort · 25′ easy | With power: FTP ≈ 95% of the 20′ average. With HR only: the 20′ average ≈ your bike threshold HR, and Z4 intervals sit just under it. |
 | Run 30′ | W9, W17 (Thu) | 15′ warm-up · 30′ solo best even effort · 10′ easy | Average HR of the last 20′ ≈ run threshold HR. The distance covered shows run progress between tests. |
 
 If a test disagrees with the % max HR table, trust the test, and re-cut the zones from it.
@@ -194,7 +194,7 @@ Swim is the weakest discipline and the newest, so it gets three things: frequenc
 
 **Session frames.** Only the main set changes week to week.
 
-- **Monday:** 300–400 easy · 8×50 drill (rotate fingertip drag, catch-up, single-arm, 6-3-6) · 6–8×100 on ONE cue · 200–400 easy.
+- **Monday:** 300–400 easy · 8×50 drill (rotate fingertip drag, catch-up, single-arm, 6-3-6) · 8×100 on ONE cue · 300–400 easy. That's 1,800 m in Base and 2,000 m after; the taper week has 5×100 for 1,500 m.
 - **Wednesday:** 300 easy · 4×50 build · 6×50 drill · **main set** · 4×50 pull buoy · 200 easy. Total = main + 1,200.
 - **Friday:** 400 easy · 6×50 drill · **main set** · 200 kick · 200 easy. Total = main + 1,100.
 
@@ -239,7 +239,7 @@ New day types:
 | Phase | Long ride | Brick and long runs |
 |---|---|---|
 | Base | 60 g carb/h from 30′ (as now) | Water for the first hour, then 20–30 g/h |
-| Build | 60–75 g/h | Practise taking one gel on brick runs |
+| Build | 60–75 g/h | Water for the first hour, then 30–45 g/h |
 | Race-specific | 75–90 g/h, using the exact products you'll race with | Race-run fuelling on every brick: ~30–45 g/h |
 
 **Race day:**
@@ -249,7 +249,7 @@ New day types:
 - **Run:** a gel or on-course carbs every ~30 minutes, and water at every aid station.
 - **Nothing new on race day.**
 
-## 10. Race week and race day
+## 10. Race week, race day and sub-7
 
 | Day | Session |
 |---|---|
@@ -267,12 +267,37 @@ New day types:
 - **Bike:** ride the first 20 minutes easy, then race effort and no higher. If you're passing people on the climbs, you're riding too hard. Eat every 20 minutes, on a timer.
 - **Run:** run the first 5 km at the bottom of race effort. It will feel too easy, and that's the point. Then settle in. Walk the aid stations if that's what it takes to eat and drink.
 
+### Sub-7
+
+Sub-7 needs nothing the plan isn't already doing. First 70.3s are lost by riding too hard and walking the run, not by training too little, so the race-effort rules protect it better than an extra session would. Here is a budget with time to spare:
+
+| Leg | Budget | Pace it implies |
+|---|---|---|
+| Swim 1.9 km | 0:45 | ~2:22 per 100 m |
+| T1 | 0:07 | Wetsuit off, run to the bike |
+| Bike 90 km | 3:20 | ~27 km/h |
+| T2 | 0:04 | |
+| Run 21.1 km | 2:25 | ~6:52 per km, aid-station walks included |
+| **Total** | **6:41** | **19 minutes under 7:00** |
+
+The cut-off for an IRONMAN 70.3 is usually 8:30, so even a bad day has margin.
+
+**Checkpoints.** Training tells you whether each leg's budget holds, well before June:
+
+- **Swim:** W15 and W22 are 1,900 m non-stop. About 45 minutes or less in the pool means the swim budget holds, and a wetsuit makes race day faster still.
+- **Bike:** the W23 rehearsal is 3 hours at race effort. Covering about 80 km or more means the 3:20 bike is on.
+- **Run:** the W23 brick run, after that ride, should hold race effort at about 6:50 per km or faster.
+
+If a checkpoint misses, that leg's budget moves, not the effort. Race the effort and let the clock follow.
+
 ## 11. Off the training calendar
 
 | By | Item |
 |---|---|
-| W4 (Jan 3) | Pick the race and register. Book travel and lodging. |
+| Before W1 (Dec 7) | Trainer set up. Make it a direct-drive smart trainer: it measures power, so it doubles as your power meter all winter. Add a fan and a towel, and plan on a bottle an hour. |
+| W4 (Jan 3) | Registration, travel and lodging booked. |
 | W8 (Jan 31) | Get a bike fit, especially if you're adding aero bars. |
+| W12 (Feb 28) | Outdoor power meter, if you're getting one; pedals are the simplest. Have it before outdoor riding resumes, so race-specific rides and race day are paced by power. Without one, RPE and HR still work. |
 | W9–16 | Build time in the aero position: 10′ blocks, working up to 30′ and more. |
 | W16 (Mar 28) | Wetsuit sorted, bought or rented. |
 | W17 (Apr 4) | Decide race nutrition, ideally the brand served on course. |
@@ -290,37 +315,51 @@ New day types:
 - **Pain that changes your stride, or gets worse as you run:** stop. Take two days off. If it's still there, see a physio before the next run.
 - **Indoor rides:** the durations are written for a trainer as much as for the road. If a long indoor ride has to shrink, keep the effort blocks and cut the easy tail.
 
-## 13. Assumptions — confirm or correct
+## 13. Confirmed with the athlete — 2026-10-06
 
-1. **The race.** It is still "TBD 70.3" on Sat 2027-06-05, and everything counts back from that date. A different date moves the Arc start or changes its length. A hilly, hot or non-wetsuit course changes the content of W13–24.
-2. **Hours.** The peak is ~11.7 h a week in W19 and W21 (~12.4 h with the Monday swim), and Base runs 7–10 h. If that's more than your life holds, every week scales down proportionally and the shape stays.
-3. **An indoor trainer** for the December–February long rides, which run 2:00 → 3:00 in Base.
-4. **First 70.3, goal is to finish strong.** A time target would change the Build intensity.
-5. **Max HR is known**, since the zones use it, as Prep does. **Power meter?** If you have one, bike targets get FTP percentages.
-6. **A pool three times a week**, and open water from May.
+1. **The race is Saturday 2027-06-05.** The date is certain. The course details (hills, heat, water temperature) are still to note, and they would sharpen W13–24.
+2. **Hours:** a peak of ~11.7 h a week (~12.4 h with the Monday swim) is realistic.
+3. **Trainer: getting one.** Power meter: likely. Efforts carry % FTP alongside heart rate, so the plan works either way. A smart trainer covers the winter by itself (§11).
+4. **First 70.3**, finished without time stress. Under 7 hours is the stretch (§10).
+
+**Still assumed:** max HR is known, as in Prep; a pool three times a week; open water from May.
 
 ## 14. Encoding in plan.json
 
-This mirrors the Strength block, with no new mechanisms.
+This mirrors the Strength block: week templates plus a progression row per week.
 
-- **Arc block:** `authored: true` and `weekSource: "weekTemplates"`. Phases become Base 1–8, Build 9–16, Race-specific 17–24, Taper 25–26.
-- **Templates:** five of them: `arcBase`, `arcBuild`, `arcRace`, `arcTaper` and `arcRaceWeek`. Each carries the `dayTypes` from §9.
-- **Progression rows** carry durations and distances through the existing `fromProgression`: `strMin`, `monSwimM`, `tueMin`, `wedSwimM`, `wedRunMin`, `thuMin`, `friSwimM`, `rideMin`, `brickMin`, `runMin`. They carry the week's set text through `{placeholders}`: `tueSet`, `wedMain`, `thuSet`, `friMain`, `satSet`, `sunSet`.
-- **Test and recovery weeks** are ordinary rows. `type: "recovery"` labels a recovery week. Template blocks already ignore the tri recovery deltas, so the lighter numbers live in the row itself.
+- **Arc block:** `authored: true`, `weekSource: "weekTemplates"`, with phases Base 1–8, Build 9–16, Race-specific 17–24, Taper 25–26.
+- **Templates:** `arcBase`, `arcBuild`, `arcRace`, `arcTaper` and `arcRaceWeek`. Each carries the §9 `dayTypes`, and from Build on, a `fuel` map.
+- **Progression rows** carry the week through `fromProgression` amounts and `{placeholders}`:
+  - `strMin`
+  - `tueTitle` / `tueMin` / `tueEffort`
+  - `wedSwimM` / `wedMain` / `wedRunMin`
+  - `thuTitle` / `thuMin` / `thuEffort`
+  - `friSwimM` / `friMain`
+  - `rideMin` / `satEffort`
+  - `brickMin`, plus `brickEffort` in Race-specific
+  - `runMin` / `sunEffort`
+
+  W25 and W26 carry no values, because each is the only week its template serves, so the numbers are written into the template.
+- **Recovery weeks** are ordinary rows typed `recovery`. Template blocks already ignore the tri recovery deltas, so the lighter numbers live in the row itself.
 - **Nutrition** gains four day types: `key`, `maintain`, `carbLoad` and `race`.
-- **Race day** prescribes three sessions by distance: 1,900 m, 90 km and 21.1 km. Today `prescribedText` would render the bike as "90,000 m", so it needs a km format at ≥ 10,000 m.
-- **Tests:**
-  - Arc has 26 rows.
-  - Each row's template matches its phase label, the same guard the Strength block has.
-  - New guard: every `fromProgression` key a template uses is supplied by every row that uses it. Today only `{placeholders}` are guarded.
-  - Race day resolves to swim, bike and run on 2027-06-05.
-  - Each recovery week is lighter than the week before it.
-  - The "arc is not authored" assertions are rewritten.
-- **README:** the calendar table gains Arc's phases.
+- **Engine changes**, each small and tested:
+  - `{placeholders}` fill titles, efforts and detail lines, not just set lines.
+  - A template's `fuel` merges over the global fuelling rules.
+  - Distances of 10 km and up render in km.
+  - A swim's day-cell summary is its `MAIN SET:` line.
+  - Race-day bike and run, prescribed by distance, count as long for fuelling.
+  - The month view's narrow week gutter fits two-digit weeks.
+- **Tests** guard:
+  - The phase labels match each row's template.
+  - Every `fromProgression` amount and every `{placeholder}` is supplied, in every text field.
+  - Recovery weeks fall on W4/8/12/16/20 and are lighter than the week before.
+  - Running never ramps more than 15% between loading weeks.
+  - Race day resolves to 1.9 km, 90 km and 21.1 km on 2027-06-05.
+  - No Arc week shows an unfilled placeholder or a missing amount.
 
 ## 15. Out of scope
 
-- Choosing the race.
-- Power targets, until a power meter is confirmed.
+- Course-specific tuning (climbing, heat, water temperature), until the course is noted.
 - Showing test results on the site. They live in Strava and in the athlete's own notes.
 - Anything after June 6.
