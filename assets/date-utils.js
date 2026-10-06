@@ -61,6 +61,20 @@ export function monthLabel(ym) {
   return `${MONTHS[m - 1]} ${y}`;
 }
 
+// "Aug 2026": the month as a breadcrumb has room for it on a phone.
+export function shortMonthLabel(ym) {
+  const [y, m] = ym.split('-').map(Number);
+  return `${MONTHS[m - 1].slice(0, 3)} ${y}`;
+}
+
+const DOW_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+// "Sat 1 May": the short form a breadcrumb or a pager link has room for.
+export function dayLabel(iso) {
+  const d = parseISO(iso);
+  return `${DOW_SHORT[d.getUTCDay()]} ${d.getUTCDate()} ${MONTHS[d.getUTCMonth()].slice(0, 3)}`;
+}
+
 function daysInMonth(ym) {
   const [y, m] = ym.split('-').map(Number);
   // Day 0 of the NEXT month is the last day of this one, which spares us

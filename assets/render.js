@@ -1,5 +1,5 @@
 import { planStart, blocksInOrder } from './plan-model.js';
-import { addDays, monthLabel, addMonths } from './date-utils.js';
+import { addDays, monthLabel } from './date-utils.js';
 
 const DOW = { mon: 'Monday', tue: 'Tuesday', wed: 'Wednesday', thu: 'Thursday',
               fri: 'Friday', sat: 'Saturday', sun: 'Sunday' };
@@ -136,26 +136,38 @@ function sessionCard(session, entry) {
   return el('section', { class: `card ${session.discipline}` }, body);
 }
 
-// Links out of the day to the levels either side of it: the days before and
-// after, and the week that contains it. Rendered even when the date falls
-// outside the plan, so a wrong turn is always one click from being undone.
-function dayNav(day, date, today) {
-  return el('nav', { class: 'levelnav' }, [
-    el('a', { href: `#/day/${addDays(date, -1)}` }, '‹ prev day'),
-    day.inPlan
-      ? el('a', { href: `#/week/${day.blockId}/${day.week}` }, 'week')
-      : null,
-    el('a', { href: `#/month/${date.slice(0, 7)}` }, 'month'),
-    date === today ? null : el('a', { href: '#/today' }, 'today'),
-    el('a', { href: `#/day/${addDays(date, 1)}` }, 'next day ›')
+// Back and the path down to this page. They live in the sticky header, so
+// the way out never scrolls away on a long page. Back is a real link to the
+// level above, so it works on a page opened cold; app.js turns it into a step
+// back through the app's own history when there is one. Rendered even for a
+// date outside the plan, so a wrong turn is always one tap from being undone.
+export function renderCrumbs(nav) {
+  return [
+    el('a', { class: 'back', href: nav.up || '#/today', 'data-back': '' }, '‹ Back'),
+    el('ol', { class: 'crumbs' }, nav.crumbs.map(c => el('li', {},
+      c.href ? el('a', { href: c.href }, c.label) : el('span', { 'aria-current': 'page' }, c.label))))
+  ];
+}
+
+// Every page opens with its neighbours at the same level.
+
+function pagerBar({ prev, home, next }) {
+  return el('nav', { class: 'pager' }, [
+    prev ? el('a', { href: prev.href }, `‹ ${prev.label}`) : null,
+    home ? el('a', { class: 'home', href: home.href }, home.label) : null,
+    next ? el('a', { href: next.href }, `${next.label} ›`) : null
   ]);
 }
 
+function pageNav(nav) {
+  return [pagerBar(nav.pager)];
+}
+
 export function renderDay(ctx) {
-  const { plan, day, week, entriesByKey, extras, date, today } = ctx;
+  const { plan, day, week, entriesByKey, extras, date, today, nav } = ctx;
   const out = el('div', { class: 'dayview' });
 
-  out.append(dayNav(day, date, today));
+  out.append(...pageNav(nav));
 
   if (!day.inPlan) {
     const msg = day.reason === 'before-start'
@@ -219,12 +231,7 @@ export function renderWeek(ctx) {
     week.type === 'recovery' ? 'recovery week' : null
   ].filter(Boolean).join(' · ');
 
-  out.append(el('nav', { class: 'levelnav' }, [
-    nav.prev ? el('a', { href: `#/week/${nav.prev.blockId}/${nav.prev.week}` }, '‹ prev week') : null,
-    el('a', { href: `#/month/${week.startDate.slice(0, 7)}` }, 'month'),
-    el('a', { href: '#/season' }, 'season'),
-    nav.next ? el('a', { href: `#/week/${nav.next.blockId}/${nav.next.week}` }, 'next week ›') : null
-  ]));
+  out.append(...pageNav(nav));
   out.append(el('h1', {}, title));
 
   if (!week.authored) {
@@ -269,12 +276,9 @@ export function renderWeek(ctx) {
 }
 
 export function renderSeason(ctx) {
-  const { plan, entries, today, resolveWeek, weekCompletion } = ctx;
+  const { plan, entries, today, resolveWeek, weekCompletion, nav, focusWeek } = ctx;
   const out = el('div');
-  out.append(el('nav', { class: 'levelnav' }, [
-    el('a', { href: '#/today' }, 'today'),
-    el('a', { href: `#/month/${today.slice(0, 7)}` }, 'month')
-  ]));
+  out.append(...pageNav(nav));
   out.append(el('h1', {}, 'Season'));
 
   const todayWeekStart = w => w.startDate <= today && today < addDays(w.startDate, 7);
@@ -295,6 +299,8 @@ export function renderSeason(ctx) {
       const classes = ['seasonrow'];
       if (week.type === 'recovery') classes.push('recovery');
       if (todayWeekStart(week)) classes.push('current');
+      // The week the season was opened from, so zooming out keeps your place.
+      if (focusWeek && focusWeek.blockId === block.id && focusWeek.week === n) classes.push('focus');
 
       // The phase cell is always emitted, empty when the block has no phases:
       // omitting it shifted every following column out of line with the rows
@@ -368,15 +374,10 @@ function weekGutter(week) {
 }
 
 export function renderMonth(ctx) {
-  const { rows, ym, entriesByKey, today } = ctx;
+  const { rows, ym, entriesByKey, today, nav } = ctx;
   const out = el('div');
 
-  out.append(el('nav', { class: 'levelnav' }, [
-    el('a', { href: `#/month/${addMonths(ym, -1)}` }, '‹ prev month'),
-    el('a', { href: '#/today' }, 'today'),
-    el('a', { href: '#/season' }, 'season'),
-    el('a', { href: `#/month/${addMonths(ym, 1)}` }, 'next month ›')
-  ]));
+  out.append(...pageNav(nav));
   out.append(el('h1', {}, monthLabel(ym)));
 
   const grid = el('div', { class: 'monthgrid' });

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { addDays, daysBetween, weekdayKey, todayISO, hoursSince,
+import { dayLabel, shortMonthLabel, addDays, daysBetween, weekdayKey, todayISO, hoursSince,
          ymOf, addMonths, monthLabel, monthGrid } from '../assets/date-utils.js';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -132,4 +132,15 @@ test('monthGrid keeps dates contiguous across a DST transition', () => {
   for (let i = 1; i < days.length; i++) {
     assert.equal(addDays(days[i - 1], 1), days[i]);
   }
+});
+
+test('shortMonthLabel abbreviates the month and keeps the year', () => {
+  assert.equal(shortMonthLabel('2026-08'), 'Aug 2026');
+  assert.equal(shortMonthLabel('2027-05'), 'May 2027');
+});
+
+test('dayLabel is the short form a breadcrumb or pager link has room for', () => {
+  assert.equal(dayLabel('2027-05-01'), 'Sat 1 May');
+  assert.equal(dayLabel('2026-12-25'), 'Fri 25 Dec');
+  assert.equal(dayLabel('2027-06-05'), 'Sat 5 Jun');
 });
