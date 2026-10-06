@@ -18,20 +18,32 @@ export function el(tag, attrs = {}, children = []) {
   return node;
 }
 
+// Race-length distances read in kilometres - "90,000 m" looks like a typo -
+// while pool distances stay in metres.
+function distanceText(metres) {
+  return metres >= 10000
+    ? `${Number((metres / 1000).toFixed(1))} km`
+    : `${Math.round(metres).toLocaleString()} m`;
+}
+
 export function prescribedText(p) {
-  return p.metric === 'distance' ? `${p.value.toLocaleString()} m` : `${p.value} min`;
+  return p.metric === 'distance' ? distanceText(p.value) : `${p.value} min`;
 }
 
 const SUMMARY_MAX = 38;
 
+const MAIN_SET = 'MAIN SET: ';
+
 // The one line a day cell shows under a session's title. A lift is named by its
-// main set - always the first line - while everything else is named by its
-// effort, because a swim's first set line is the warmup and says nothing about
-// the session.
+// main set - always the first line. A swim's first line is the warmup, which
+// says nothing about the session, so a swim is named by its MAIN SET line when
+// it has one. Everything else is named by its effort.
 export function summaryLine(session) {
-  const source = session.discipline === 'strength' && session.setLines.length
-    ? session.setLines[0]
-    : firstClause(session.effort);
+  if (session.discipline === 'strength' && session.setLines.length) {
+    return truncate(session.setLines[0], SUMMARY_MAX);
+  }
+  const main = session.setLines.find(l => l.startsWith(MAIN_SET));
+  const source = main ? firstClause(main.slice(MAIN_SET.length)) : firstClause(session.effort);
   return truncate(source, SUMMARY_MAX);
 }
 
@@ -48,7 +60,7 @@ function truncate(text, max) {
 function actualText(strava, metric) {
   const mins = Math.round(strava.movingTime / 60);
   const parts = metric === 'distance'
-    ? [`${Math.round(strava.distance).toLocaleString()} m`, `${mins} min`]
+    ? [distanceText(strava.distance), `${mins} min`]
     : [`${mins} min`, `${(strava.distance / 1000).toFixed(1)} km`];
   if (strava.avgHr) parts.push(`${Math.round(strava.avgHr)} bpm avg`);
   return parts.join(' · ');
@@ -57,11 +69,18 @@ function actualText(strava, metric) {
 // Which fuelling rules apply today, chosen by the day's actual sessions rather
 // than hardcoded into them — a 70-minute recovery ride and a 135-minute long
 // ride must not get the same advice.
+//
+// A week template can carry its own rules - race-specific long rides fuel at a
+// higher carb rate than base ones - so the day's merged map wins when present.
 export function fuelLines(plan, resolved) {
-  const f = plan.nutrition.fuel;
+  const f = resolved.fuel || plan.nutrition.fuel;
   const lines = [];
-  const long = resolved.sessions.filter(s =>
-    s.prescribed.metric === 'duration' && s.prescribed.value >= 75);
+  // Race-day legs are prescribed by distance, and any bike or run worth
+  // prescribing by distance is long enough to fuel.
+  const isLong = s => (s.prescribed.metric === 'duration'
+    ? s.prescribed.value >= 75
+    : s.discipline === 'bike' || s.discipline === 'run');
+  const long = resolved.sessions.filter(isLong);
 
   for (const s of long) {
     if (s.discipline === 'bike') lines.push(f.longRide);

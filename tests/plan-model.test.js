@@ -50,7 +50,9 @@ test('arc weeks carry a phase label', () => {
   assert.equal(dayForDate(plan, '2026-12-07').phaseLabel, 'Base');
   assert.equal(dayForDate(plan, '2027-02-01').phaseLabel, 'Build');
   assert.equal(dayForDate(plan, '2027-03-29').phaseLabel, 'Race-specific');
-  assert.equal(dayForDate(plan, '2027-05-10').phaseLabel, 'Taper');
+  // A two-week taper: race-specific work runs to May 23.
+  assert.equal(dayForDate(plan, '2027-05-23').phaseLabel, 'Race-specific');
+  assert.equal(dayForDate(plan, '2027-05-24').phaseLabel, 'Taper');
   assert.equal(dayForDate(plan, '2026-08-24').phaseLabel, null);
 });
 
@@ -74,6 +76,14 @@ test('planStart is the earliest block regardless of array order', () => {
 });
 
 import { resolveWeek } from '../assets/plan-model.js';
+
+// Every live block is authored, so the unwritten-block path is exercised on a
+// clone - it is what any future block shows before its weeks are written.
+function withArcUnwritten() {
+  const p = JSON.parse(JSON.stringify(plan));
+  p.blocks.find(b => b.id === 'arc').authored = false;
+  return p;
+}
 
 // A minimal plan exercising weekTemplates, independent of data/plan.json.
 function templatePlan() {
@@ -132,7 +142,7 @@ test('resolveWeek still reads skeleton blocks from the global skeleton', () => {
 });
 
 test('an unauthored block resolves to a stub with no days', () => {
-  const w = resolveWeek(plan, 'arc', 1);
+  const w = resolveWeek(withArcUnwritten(), 'arc', 1);
   assert.equal(w.authored, false);
   assert.deepEqual(w.days, []);
   assert.equal(w.startDate, '2026-12-07');
@@ -346,9 +356,10 @@ test('monthRows crosses a block boundary inside one month', () => {
 });
 
 test('monthRows gives an unauthored block no sessions rather than guessing', () => {
-  const cell = monthRows(plan, '2026-12')
+  const cell = monthRows(withArcUnwritten(), '2026-12')
     .flatMap(r => r.cells).find(c => c && c.date === '2026-12-08');
   assert.equal(cell.blockLabel, 'Arc');
+  assert.equal(cell.authored, false);
   assert.deepEqual(cell.sessions, []);
 });
 
@@ -456,4 +467,81 @@ test('literal template setLines win over the weekday-derived swim set', () => {
   const swim = tue.sessions.find(s => s.discipline === 'swim');
   // The interpolated template.setLines survive intact.
   assert.deepEqual(swim.setLines, ['technique × 100 steady']);
+});
+
+test('placeholders fill titles, efforts and detail lines, not only set lines', () => {
+  // One Arc template serves easy, test and interval weeks alike, so the words
+  // that name a session have to change with the row - not just its set lines.
+  const p = templatePlan();
+  Object.assign(p.weekTemplates.alpha.days.mon[0], {
+    title: '{liftTitle}',
+    effort: '{liftEffort} - then rest.',
+    detail: ['Note: {liftNote}']
+  });
+  Object.assign(p.progression.lift[0],
+    { liftTitle: 'Light lift', liftEffort: 'One fewer set', liftNote: 'easy week' });
+
+  const s = resolveWeek(p, 'lift', 1).days.find(d => d.dayKey === 'mon').sessions[0];
+  assert.equal(s.title, 'Light lift');
+  assert.equal(s.effort, 'One fewer set - then rest.');
+  assert.deepEqual(s.detail, ['Note: easy week']);
+});
+
+test('a session with no effort or detail still resolves', () => {
+  const p = templatePlan();
+  delete p.weekTemplates.alpha.days.mon[0].effort;
+
+  const s = resolveWeek(p, 'lift', 1).days.find(d => d.dayKey === 'mon').sessions[0];
+  assert.equal(s.effort, undefined);
+  assert.deepEqual(s.detail, []);
+});
+
+test('a week template overrides fuelling rules one by one, like day types', () => {
+  // Race-specific long rides train the gut at 75-90 g/hr; base ones fuel at
+  // 60. A template that changes only the long-ride rule must still inherit
+  // the global short-session and recovery rules, so the maps merge.
+  const p = templatePlan();
+  p.nutrition.fuel = { under75min: 'Water.', longRide: 'Global ride.',
+                       longRun: 'Global run.', post: 'Global post.' };
+  p.weekTemplates.alpha.fuel = { longRide: 'Template ride.' };
+
+  const mon = resolveWeek(p, 'lift', 1).days.find(d => d.dayKey === 'mon');
+  assert.deepEqual(mon.fuel, { under75min: 'Water.', longRide: 'Template ride.',
+                               longRun: 'Global run.', post: 'Global post.' });
+});
+
+test('a skeleton block day carries the global fuelling rules', () => {
+  const tue = resolveWeek(plan, 'prep', 1).days.find(d => d.dayKey === 'tue');
+  assert.deepEqual(tue.fuel, plan.nutrition.fuel);
+});
+
+test('race day resolves to the three legs at full 70.3 distance', () => {
+  const sat = resolveWeek(plan, 'arc', 26).days.find(d => d.dayKey === 'sat');
+  assert.equal(sat.date, plan.race.date);
+  assert.deepEqual(sat.sessions.map(s => [s.discipline, s.prescribed.metric, s.prescribed.value]),
+    [['swim', 'distance', 1900], ['bike', 'distance', 90000], ['run', 'distance', 21100]]);
+  assert.equal(sat.nutrition.label, 'Race day');
+});
+
+test('no arc week leaves a placeholder unfilled or an amount missing', () => {
+  // The guard in plan-json checks the rows supply each key; this checks what
+  // actually reaches the page, through the real resolver, for all 26 weeks.
+  for (let week = 1; week <= 26; week++) {
+    for (const day of resolveWeek(plan, 'arc', week).days) {
+      for (const s of day.sessions) {
+        for (const text of [s.title, s.effort, ...s.setLines, ...s.detail]) {
+          assert.ok(!/\{\w+\}/.test(text), `arc W${week} ${day.dayKey} ${s.title}: ${text}`);
+        }
+        assert.equal(typeof s.prescribed.value, 'number', `arc W${week} ${day.dayKey} ${s.title}`);
+      }
+    }
+  }
+});
+
+test('race-specific weeks fuel the long ride at race rates, base weeks do not', () => {
+  const satFuel = week => resolveWeek(plan, 'arc', week).days.find(d => d.dayKey === 'sat').fuel;
+  assert.equal(satFuel(1).longRide, plan.nutrition.fuel.longRide);
+  assert.match(satFuel(21).longRide, /75-90g/);
+  assert.equal(satFuel(21).under75min, plan.nutrition.fuel.under75min,
+    'a template that overrides one rule keeps the rest');
 });

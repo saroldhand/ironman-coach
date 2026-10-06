@@ -73,8 +73,9 @@ function swimSetLines(plan, template, dayKey, progression) {
 
 const PLACEHOLDER = /\{(\w+)\}/g;
 
-// Set lines in a week template carry {name} tokens filled from that week's
-// progression row, which is what lets four GVT weeks share one template.
+// Text in a week template carries {name} tokens filled from that week's
+// progression row, which is what lets four GVT weeks share one template and
+// one Arc template serve easy, test and interval weeks alike.
 // An unknown token is left as written: a visible "{gvt}" on the page is a
 // bug that reports itself, where "undefined" reads like prescribed text.
 function fillPlaceholders(line, progression) {
@@ -84,13 +85,16 @@ function fillPlaceholders(line, progression) {
 
 function buildSession(plan, template, ctx) {
   const { blockId, week, dayKey, progression, isRecovery, fromWeekTemplate } = ctx;
+  // Every word a session shows can carry a token, not only its set lines: the
+  // title and effort are what change between an easy week and a test week.
+  const fill = text => (typeof text === 'string' ? fillPlaceholders(text, progression) : text);
   const s = {
     key: `${blockId}:${week}:${dayKey}:${template.discipline}`,
     discipline: template.discipline,
-    title: template.title,
+    title: fill(template.title),
     optional: Boolean(template.optional),
-    effort: template.effort,
-    detail: [...(template.detail || [])],
+    effort: fill(template.effort),
+    detail: (template.detail || []).map(fill),
     setLines: [],
     prescribed: { ...template.prescribed }
   };
@@ -117,7 +121,7 @@ function buildSession(plan, template, ctx) {
   // Set lines, first match wins: a session's own literal lines beat the shared
   // strength circuit, which beats the weekday-derived swim set.
   if (template.setLines) {
-    s.setLines = template.setLines.map(l => fillPlaceholders(l, progression));
+    s.setLines = template.setLines.map(fill);
   } else if (template.setRef === 'strength') {
     s.setLines = [...plan.sets.strength];
   } else if (skeletonSwim) {
@@ -158,6 +162,10 @@ export function resolveWeek(plan, blockId, week) {
     : null;
   const source = weekTemplate ? weekTemplate.days : plan.skeleton;
   const dayTypes = (weekTemplate && weekTemplate.dayTypes) || plan.nutrition.dayTypes;
+  // Fuelling merges key by key where dayTypes replaces wholesale: a template
+  // that only raises the long-ride carb rate still needs the global rules for
+  // short sessions and recovery.
+  const fuel = { ...plan.nutrition.fuel, ...((weekTemplate && weekTemplate.fuel) || {}) };
 
   // The recovery deltas describe the tri week specifically — skipStrength
   // would delete a whole lifting week. A template block carries its own
@@ -175,6 +183,7 @@ export function resolveWeek(plan, blockId, week) {
       dayKey,
       date: addDays(startDate, i),
       nutrition: plan.nutrition.types[typeKey],
+      fuel,
       sessions: templates.map(t =>
         buildSession(plan, t, { blockId, week, dayKey, progression, isRecovery,
                                 fromWeekTemplate: Boolean(weekTemplate) }))

@@ -2,7 +2,7 @@
 
 **Live:** https://saroldhand.github.io/ironman-coach/
 
-Static training site for an Ironman 70.3 on 2027-06-05. No build step, no dependencies.
+Static training site for IRONMAN 70.3 Hawaii on 2027-06-05. No build step, no dependencies.
 
 ## What is here
 
@@ -25,6 +25,12 @@ The Strength block is a lifting cycle: five mornings a week for weeks 1–8 (GVT
 then three for weeks 9–12 (powerbuilding) as cardio ramps back up. Its weeks come
 from `weekTemplates` in `plan.json` rather than the global `skeleton`, because its
 shape alternates week to week.
+
+Arc is the build to the race: Base (weeks 1–8), Build (9–16), Race-specific (17–24)
+and a two-week Taper that ends on race day. It also draws on `weekTemplates`, one per
+phase plus race week, and each row of `progression.arc` carries that week's durations,
+distances and session text. The reasoning behind the numbers is in
+`docs/superpowers/specs/2026-10-05-arc-block-design.md`.
 
 ## Views
 

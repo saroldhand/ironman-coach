@@ -107,7 +107,10 @@ test('a week with no entries at all reports null, not zero', () => {
 });
 
 test('an unauthored week reports null completion', () => {
-  assert.equal(weekCompletion(resolveWeek(plan, 'arc', 1), []).pct, null);
+  // Arc is authored now; a clone with it unwritten keeps this path covered.
+  const p = JSON.parse(JSON.stringify(plan));
+  p.blocks.find(b => b.id === 'arc').authored = false;
+  assert.equal(weekCompletion(resolveWeek(p, 'arc', 1), []).pct, null);
 });
 
 test('matching picks the activity that fits the session, not the first one', () => {
