@@ -336,7 +336,9 @@ h1 {
   .dayrow { grid-template-columns: 1fr; gap: var(--s-2); }
   .dayrow .dow { padding-top: 0; }
 
-  .monthgrid { grid-template-columns: 1.75rem repeat(7, minmax(0, 1fr)); gap: .15rem; }
+  /* Wide enough for a two-digit week (W10-W26): at 1.75rem the label ran
+     under Monday's cell. */
+  .monthgrid { grid-template-columns: 2.25rem repeat(7, minmax(0, 1fr)); gap: .15rem; }
   .mcell { min-height: 52px; padding: .2rem; }
   .mdot { width: .42rem; height: .42rem; }
   .wk .wkblock { display: none; }
