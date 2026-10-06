@@ -1,5 +1,5 @@
 {
-  "race": { "name": "TBD 70.3", "date": "2027-06-05" },
+  "race": { "name": "IRONMAN 70.3 Hawaii", "date": "2027-06-05" },
 
   "blocks": [
     { "id": "prep", "label": "Prep", "start": "2026-08-24", "weeks": 3, "authored": true,
@@ -614,6 +614,7 @@
             "effort": "{satEffort}",
             "detail": [
               "The anchor session of the week. Put the Zone 3 blocks in the middle hours, not the first.",
+              "Hawi is a long climb into the wind: if you have hills, put the Zone 3 blocks on them. Indoors, set a 2-4% grade.",
               "Build time in the aero position: 10-minute blocks, working toward 30 and more.",
               "Indoors: if it has to shrink, keep the Zone 3 work and cut the easy tail."
             ] },
@@ -715,7 +716,10 @@
               "200 kick with board (easy)",
               "200 easy cooldown"
             ],
-            "detail": ["Open water: never alone, and with a tow float."] }
+            "detail": [
+              "Open water: never alone, and with a tow float.",
+              "Race day in Hawaii is almost certainly non-wetsuit, so pool swimming is race-specific swimming."
+            ] }
         ],
         "sat": [
           { "discipline": "bike", "title": "Long ride",
@@ -723,6 +727,7 @@
             "effort": "{satEffort}",
             "detail": [
               "Race-effort blocks go exactly as you'll race: aero position, race nutrition, race kit when you can.",
+              "Put race effort on climbs and into headwinds when you can - that is the road to Hawi. Indoor apps such as Rouvy have the actual 70.3 Hawaii course.",
               "Indoors: if it has to shrink, keep the race-effort work and cut the easy tail."
             ] },
           { "discipline": "run", "title": "Brick run",
@@ -738,7 +743,8 @@
             "prescribed": { "metric": "duration", "value": null, "unit": "min", "fromProgression": "runMin" },
             "effort": "{sunEffort}",
             "detail": [
-              "Run it by effort, not pace. The day after a big Saturday the pace will be slow - that is the point."
+              "Run it by effort, not pace. The day after a big Saturday the pace will be slow - that is the point.",
+              "Put some of it on grass or trail: the race run crosses golf-course fairways and lava-field paths."
             ] }
         ]
       }
@@ -781,7 +787,10 @@
           { "discipline": "bike", "title": "Race-effort bike",
             "prescribed": { "metric": "duration", "value": 60, "unit": "min" },
             "effort": "3 × 8 min at race effort - 70-75% FTP, RPE 5. 4 min easy between.",
-            "detail": ["Taper: the volume drops, the intensity doesn't. Feeling flat or twitchy this week is normal."] }
+            "detail": [
+              "Taper: the volume drops, the intensity doesn't. Feeling flat or twitchy this week is normal.",
+              "Heat block: no fan, dress warm, then 20-30 min in a sauna or hot bath. Start shorter if it's new to you, drink before and after, and get out if you feel dizzy."
+            ] }
         ],
         "wed": [
           { "discipline": "swim", "title": "Main swim",
@@ -805,7 +814,10 @@
           { "discipline": "run", "title": "Race-effort run",
             "prescribed": { "metric": "duration", "value": 45, "unit": "min" },
             "effort": "3 × 6 min at race effort - mid Zone 3, RPE 6. 2 min jog between.",
-            "detail": ["Warm up 10-15 min easy first; jog easy to the full time."] }
+            "detail": [
+              "Warm up 10-15 min easy first; jog easy to the full time.",
+              "Heat block: overdress - long sleeves and a hat - then the sauna or hot bath."
+            ] }
         ],
         "fri": [
           { "discipline": "swim", "title": "Aerobic swim",
@@ -834,7 +846,10 @@
           { "discipline": "run", "title": "Long run",
             "prescribed": { "metric": "duration", "value": 60, "unit": "min" },
             "effort": "Zone 2 with 4 × 3 min at race effort - 2 min easy between.",
-            "detail": ["Run it by effort, not pace."] }
+            "detail": [
+              "Run it by effort, not pace.",
+              "Pack tonight for tomorrow's flight: bike case, race kit, nutrition, sunscreen."
+            ] }
         ]
       }
     },
@@ -842,16 +857,27 @@
       "dayTypes": { "mon": "maintain", "tue": "maintain", "wed": "maintain", "thu": "carbLoad",
                     "fri": "carbLoad", "sat": "race", "sun": "big" },
       "fuel": {
-        "longRide": "Race: 60-90g carb/hr - whatever you trained - with 500-750ml fluid/hr and electrolytes, more in the heat. Eat every 20 min on a timer.",
-        "longRun": "Race: a gel or on-course carbs every ~30 min. Water at every aid station."
+        "longRide": "Race: 60-90g carb/hr - whatever you trained - with 500-750ml fluid/hr and electrolytes. In Hawaii heat, plan on the top of that fluid range. Eat every 20 min on a timer.",
+        "longRun": "Race: a gel or on-course carbs every ~30 min. Water and ice at every aid station."
       },
       "days": {
-        "mon": [],
+        "mon": [
+          { "discipline": "run", "title": "Travel day", "optional": true,
+            "prescribed": { "metric": "duration", "value": 15, "unit": "min" },
+            "effort": "Fly to Kona (KOA). Walk or jog 15 min easy after the flight to loosen up.",
+            "detail": [
+              "Memorial Day.",
+              "Hawaii is 6 hours behind US Eastern time, so an early-morning race start will feel like midday at home. The time change is on your side."
+            ] }
+        ],
         "tue": [
           { "discipline": "bike", "title": "Openers",
             "prescribed": { "metric": "duration", "value": 45, "unit": "min" },
             "effort": "3 × 3 min at race effort - 3 min easy between, then spin easy.",
-            "detail": ["Short and sharp. You are reminding your legs, not training them."] }
+            "detail": [
+              "Short and sharp. You are reminding your legs, not training them.",
+              "Build the bike first and check every gear. Ride part of the course if you can, and feel the wind before Saturday."
+            ] }
         ],
         "wed": [
           { "discipline": "swim", "title": "Main swim",
@@ -863,7 +889,9 @@
               "MAIN SET: 4 × 100 @ race effort - 20s rest",
               "400 easy cooldown"
             ],
-            "detail": [] },
+            "detail": [
+              "In the ocean at the race venue if you can: sight off the buoys and get used to salt water and chop."
+            ] },
           { "discipline": "run", "title": "Run off the swim",
             "prescribed": { "metric": "duration", "value": 20, "unit": "min" },
             "effort": "Zone 2 - easy, with 4 × 20s strides.",
@@ -873,37 +901,42 @@
           { "discipline": "run", "title": "Shakeout run",
             "prescribed": { "metric": "duration", "value": 20, "unit": "min" },
             "effort": "Easy - 20 min with 4 × 20s strides.",
-            "detail": ["Travel day if you need it.", "Carb load starts today."] }
+            "detail": ["Athlete check-in.", "Carb load starts today."] }
         ],
         "fri": [
           { "discipline": "bike", "title": "Shakeout ride",
             "prescribed": { "metric": "duration", "value": 20, "unit": "min" },
             "effort": "Easy - 20 min with 3 × 1 min at race effort.",
-            "detail": ["Bike check-in. Then feet up."] },
+            "detail": ["Bike check-in. Then feet up, in the shade."] },
           { "discipline": "swim", "title": "Venue swim", "optional": true,
             "prescribed": { "metric": "duration", "value": 15, "unit": "min" },
-            "effort": "Easy - a few minutes to feel the water, if the venue allows it.",
+            "effort": "Easy - a few minutes in the race water, if the venue allows it.",
             "detail": [] }
         ],
         "sat": [
           { "discipline": "swim", "title": "Race swim",
             "prescribed": { "metric": "distance", "value": 1900, "unit": "m" },
             "effort": "Steady, not hard - start at the side or back of your wave. Sight every 6-8 strokes.",
-            "detail": ["Sub-7 budget: about 45 min. The effort matters; the clock doesn't."] },
+            "detail": [
+              "Ocean, almost certainly no wetsuit: a swimskin or just your tri suit.",
+              "Sub-7 budget: about 47 min. The effort matters; the clock doesn't."
+            ] },
           { "discipline": "bike", "title": "Race bike",
             "prescribed": { "metric": "distance", "value": 90000, "unit": "m" },
-            "effort": "Race effort and no higher - 70-75% FTP, RPE 5. Ride the first 20 min easy.",
+            "effort": "Race effort and no higher - the low end, about 70% FTP, in this heat. Ride the first 20 min easy.",
             "detail": [
+              "The climb to Hawi is long and into the wind: hold the power and let the speed go. You get it back on the way down.",
               "If you're passing people on the climbs, you're riding too hard.",
-              "Eat every 20 minutes, on a timer.",
-              "Sub-7 budget: about 3:20."
+              "Eat every 20 minutes, on a timer. Drink to the top of your range, with salt.",
+              "Sub-7 budget: about 3:28."
             ] },
           { "discipline": "run", "title": "Race run",
             "prescribed": { "metric": "distance", "value": 21100, "unit": "m" },
             "effort": "Ease into it - the first 5 km at the bottom of race effort. It will feel too easy; then settle in.",
             "detail": [
-              "Walk the aid stations if that's what it takes to eat and drink.",
-              "Sub-7 budget: about 2:25. Sub-7 is the sum of the legs, not a target for any one of them."
+              "Heat decides this leg: ice in your hat and tri suit, a sponge and a drink at every aid station.",
+              "Walk the aid stations if that's what it takes to cool down, eat and drink.",
+              "Sub-7 budget: about 2:28. Sub-7 is the sum of the legs, not a target for any one of them."
             ] }
         ],
         "sun": []
@@ -1037,7 +1070,7 @@
         "brickMin": 20,
         "runMin": 90, "sunEffort": "Zone 2. Slower than you think." },
       { "week": 14, "type": "build", "template": "arcBuild", "strMin": 40,
-        "tueTitle": "Threshold bike", "tueMin": 90, "tueEffort": "2 × 20 min Zone 4 - 88-95% FTP, RPE 7. 5 min easy between.",
+        "tueTitle": "Climbing bike", "tueMin": 90, "tueEffort": "2 × 20 min Zone 4 climbing - seated at 70-80 rpm, 88-95% FTP, RPE 7. 5 min easy between. Hawi is a long, steady climb.",
         "wedSwimM": 2800, "wedMain": "3 × 500 @ CSS+5 - 30s rest, then 2 × 50 fast", "wedRunMin": 30,
         "thuTitle": "Threshold run", "thuMin": 60, "thuEffort": "3 × 12 min Zone 4 - RPE 7-8. 3 min jog between.",
         "friSwimM": 2700, "friMain": "1,600 non-stop",
@@ -1077,7 +1110,7 @@
         "brickMin": 30, "brickEffort": "First 15 min at race effort, then easy.",
         "runMin": 100, "sunEffort": "Zone 2, last 20 min at race effort - mid Zone 3, RPE 6." },
       { "week": 19, "type": "build", "template": "arcRace", "strMin": 30,
-        "tueTitle": "Threshold bike", "tueMin": 90, "tueEffort": "3 × 15 min Zone 4 - 88-95% FTP, RPE 7. 5 min easy between.",
+        "tueTitle": "Climbing bike", "tueMin": 90, "tueEffort": "3 × 15 min Zone 4 climbing - seated at 70-80 rpm, 88-95% FTP, RPE 7. 5 min easy between. Hawi is a long, steady climb.",
         "wedSwimM": 3000, "wedMain": "1,500 non-stop @ race effort - then 6 × 50 fast, 20s rest", "wedRunMin": 30,
         "thuTitle": "Race-effort run", "thuMin": 60, "thuEffort": "2 × 20 min at race effort - mid Zone 3, RPE 6. 3 min jog between.",
         "friSwimM": 2300, "friMain": "3 × 400 steady with sighting - 30s rest",
@@ -1096,15 +1129,15 @@
         "tueTitle": "Threshold bike", "tueMin": 90, "tueEffort": "4 × 10 min Zone 4 - 88-95% FTP, RPE 7. 3 min easy between.",
         "wedSwimM": 3000, "wedMain": "3 × 600 @ race effort - sighting every 6th stroke, 45s rest", "wedRunMin": 30,
         "thuTitle": "Race-effort run", "thuMin": 60, "thuEffort": "3 × 15 min at race effort - mid Zone 3, RPE 6. 3 min jog between.",
-        "friSwimM": 2400, "friMain": "1,300 non-stop with sighting - or, if the water is 16°C/60°F or warmer, 40 min continuous in open water in your wetsuit. Never alone.",
+        "friSwimM": 2400, "friMain": "1,300 non-stop with sighting - or 40 min continuous in open water, if it's 16°C/60°F or warmer. A wetsuit at home is for warmth; race day will almost certainly be without one. Never alone.",
         "rideMin": 225, "satEffort": "2 × 60 min race effort - inside a Zone 2 ride, 70-75% FTP, RPE 5.",
         "brickMin": 40, "brickEffort": "First 20 min at race effort, then easy.",
         "runMin": 105, "sunEffort": "Zone 2. Slower than you think." },
       { "week": 22, "type": "build", "template": "arcRace", "strMin": 30,
-        "tueTitle": "Threshold bike", "tueMin": 90, "tueEffort": "2 × 20 min Zone 4 - 88-95% FTP, RPE 7. 5 min easy between.",
+        "tueTitle": "Climbing bike", "tueMin": 90, "tueEffort": "2 × 20 min Zone 4 climbing - seated at 70-80 rpm, 88-95% FTP, RPE 7. 5 min easy between. Hawi is a long, steady climb.",
         "wedSwimM": 3100, "wedMain": "1,900 non-stop @ race effort - the race swim. Milestone.", "wedRunMin": 30,
         "thuTitle": "Race-effort run", "thuMin": 60, "thuEffort": "40 min straight at race effort - mid Zone 3, RPE 6.",
-        "friSwimM": 2400, "friMain": "1,300 non-stop with sighting - or, if the water is 16°C/60°F or warmer, 40 min continuous in open water in your wetsuit. Never alone.",
+        "friSwimM": 2400, "friMain": "1,300 non-stop with sighting - or 40 min continuous in open water, if it's 16°C/60°F or warmer. A wetsuit at home is for warmth; race day will almost certainly be without one. Never alone.",
         "rideMin": 225, "satEffort": "90 min straight at race effort - inside a Zone 2 ride, 70-75% FTP, RPE 5.",
         "brickMin": 45, "brickEffort": "First 20 min at race effort, then easy.",
         "runMin": 90, "sunEffort": "Zone 2, last 20 min at race effort - mid Zone 3, RPE 6." },
@@ -1113,14 +1146,14 @@
         "wedSwimM": 2600, "wedMain": "3 × 400 @ race effort - 30s rest, then 4 × 50 fast", "wedRunMin": 25,
         "thuTitle": "Race-effort run", "thuMin": 50, "thuEffort": "3 × 8 min at race effort - mid Zone 3, RPE 6. 2 min jog between.",
         "friSwimM": 2000, "friMain": "9 × 100 easy-steady - 15s rest. Saturday is the rehearsal.",
-        "rideMin": 180, "satEffort": "RACE REHEARSAL - 3 hours at race effort, about 90 km, then straight into the run. Race breakfast 3 h before, race kit, race nutrition - everything you'll use on June 5.",
+        "rideMin": 180, "satEffort": "RACE REHEARSAL - 3 hours at race effort on the hilliest route you have, then straight into the run. Race breakfast 3 h before, race kit, race nutrition - everything you'll use on June 5.",
         "brickMin": 50, "brickEffort": "First 30 min at race effort, then easy.",
         "runMin": 45, "sunEffort": "Easy - Zone 1-2, the day after the rehearsal. Walk breaks are fine." },
       { "week": 24, "type": "build", "template": "arcRace", "strMin": 30,
-        "tueTitle": "Race-effort bike", "tueMin": 75, "tueEffort": "3 × 10 min at race effort - 70-75% FTP, RPE 5 - then 4 × 1 min fast. 3 min easy between.",
+        "tueTitle": "Race-effort bike", "tueMin": 75, "tueEffort": "3 × 10 min at race effort - 70-75% FTP, RPE 5 - then 4 × 1 min fast. 3 min easy between. The heat block starts today: no fan, dress warm, then 20-30 min in a sauna or hot bath.",
         "wedSwimM": 2400, "wedMain": "6 × 200 @ race effort - 20s rest", "wedRunMin": 25,
-        "thuTitle": "Race-effort run", "thuMin": 55, "thuEffort": "2 × 15 min at race effort - mid Zone 3, RPE 6. 3 min jog between.",
-        "friSwimM": 2400, "friMain": "1,300 non-stop with sighting - or, if the water is 16°C/60°F or warmer, 40 min continuous in open water in your wetsuit. Never alone.",
+        "thuTitle": "Race-effort run", "thuMin": 55, "thuEffort": "2 × 15 min at race effort - mid Zone 3, RPE 6. 3 min jog between. Overdress for it - long sleeves and a hat.",
+        "friSwimM": 2400, "friMain": "1,300 non-stop with sighting - or 40 min continuous in open water, if it's 16°C/60°F or warmer. A wetsuit at home is for warmth; race day will almost certainly be without one. Never alone.",
         "rideMin": 150, "satEffort": "2 × 30 min race effort - inside a Zone 2 ride, 70-75% FTP, RPE 5.",
         "brickMin": 30, "brickEffort": "First 15 min at race effort, then easy.",
         "runMin": 80, "sunEffort": "Zone 2. The last long run - nothing to prove." },
