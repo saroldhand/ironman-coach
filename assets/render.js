@@ -1,5 +1,5 @@
 import { planStart, blocksInOrder } from './plan-model.js';
-import { addDays, monthLabel, weekdayKey } from './date-utils.js';
+import { addDays, monthLabel, weekdayKey, dayLabel } from './date-utils.js';
 import { clockText, morning, kitFor, fuelBefore, tonight, weekSummary, weekHours, hoursText } from './schedule-model.js';
 
 const DOW = { mon: 'Monday', tue: 'Tuesday', wed: 'Wednesday', thu: 'Thursday',
@@ -89,8 +89,7 @@ export function fuelLines(plan, resolved) {
   }
   if (!lines.length) lines.push(f.under75min);
 
-  const brick = resolved.dayKey === 'wed' && resolved.sessions.length > 1;
-  if (long.length || brick) lines.push(f.post);
+  if (long.length) lines.push(f.post);
 
   return lines;
 }
@@ -298,10 +297,12 @@ function dayBody(ctx, out, lead) {
 
   if (!day.inPlan) {
     const msg = day.reason === 'before-start'
-      ? `Plan starts ${planStart(plan)}.`
+      ? `The plan starts ${dayLabel(planStart(plan))}.`
       : 'Past the end of the plan.';
     out.append(el('h1', {}, 'Not in the plan'),
                el('p', { class: 'placeholder' }, `${date} — ${msg}`));
+    // The night before the plan starts is exactly when tonight's card matters.
+    if (lead) out.append(lead);
     return out;
   }
 
@@ -321,6 +322,7 @@ function dayBody(ctx, out, lead) {
   if (!day.authored) {
     out.append(el('p', { class: 'placeholder' },
       'This block has not been written yet. Nothing prescribed for today.'));
+    if (lead) out.append(lead);
     const extrasEl = extrasSection(extras);
     if (extrasEl) out.append(extrasEl);
     return out;

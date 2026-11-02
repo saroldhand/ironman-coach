@@ -433,7 +433,7 @@ h1 {
   .crumbs li:nth-child(2)::before { content: none; }
   .crumbs li + li::before { margin: 0 .3em; }
   /* The header's side margin matches the page's, and Back tightens, which is
-     the room "Strength W8" needs to stay on one line on a small phone. */
+     the room "Bridge W4" needs to stay on one line on a small phone. */
   .topbar { padding-left: var(--s-2); padding-right: var(--s-2); }
   .crumbbar { gap: var(--s-2); }
   .crumbbar .back { padding: var(--s-1) var(--s-2); }

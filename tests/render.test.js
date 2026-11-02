@@ -45,7 +45,7 @@ test('summaryLine takes the first clause of an effort, whichever separator comes
 });
 
 test('summaryLine truncates a long set line rather than letting a cell grow', () => {
-  // gvtA Thursday opens with a superset that is far wider than a grid column.
+  // A superset line is far wider than a grid column.
   const long = 'SUPERSET 4×: Leg Extensions 10-12 + Leg Curls 10-12';
   const out = summaryLine({ discipline: 'strength', effort: 'Volume day.', setLines: [long] });
   assert.ok(out.length <= 38, `got ${out.length} chars: ${out}`);

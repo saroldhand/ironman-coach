@@ -60,23 +60,12 @@ export function dayForDate(plan, iso) {
 
 const DAY_KEYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
 
-function swimSetLines(plan, template, dayKey, progression) {
-  if (dayKey === 'mon') return [...plan.sets.monTechnique];
-  if (dayKey === 'fri') return [...plan.sets.friMixed];
-  if (dayKey === 'wed') {
-    if (progression.wedStructureOverride) return [...progression.wedStructureOverride];
-    const { warmup, cooldown } = plan.sets.wedMain;
-    return [...warmup, `MAIN SET: ${progression.wedMainSet}`, ...cooldown];
-  }
-  return [];
-}
-
 const PLACEHOLDER = /\{(\w+)\}/g;
 
 // Text in a week template carries {name} tokens filled from that week's
-// progression row, which is what lets four GVT weeks share one template and
-// one Arc template serve easy, test and interval weeks alike.
-// An unknown token is left as written: a visible "{gvt}" on the page is a
+// progression row, which is what lets one Arc template serve easy, test and
+// interval weeks alike.
+// An unknown token is left as written: a visible "{wedMain}" on the page is a
 // bug that reports itself, where "undefined" reads like prescribed text.
 function fillPlaceholders(line, progression) {
   return line.replace(PLACEHOLDER, (token, name) =>
@@ -99,8 +88,8 @@ function placeSession(template, routineDay) {
   };
 }
 
-function buildSession(plan, template, ctx) {
-  const { blockId, week, dayKey, progression, isRecovery, fromWeekTemplate, routineDay } = ctx;
+function buildSession(template, ctx) {
+  const { blockId, week, dayKey, progression, routineDay } = ctx;
   // Every word a session shows can carry a token, not only its set lines: the
   // title and effort are what change between an easy week and a test week.
   const fill = text => (typeof text === 'string' ? fillPlaceholders(text, progression) : text);
@@ -111,48 +100,15 @@ function buildSession(plan, template, ctx) {
     optional: Boolean(template.optional),
     effort: fill(template.effort),
     detail: (template.detail || []).map(fill),
-    setLines: [],
+    setLines: (template.setLines || []).map(fill),
     prescribed: { ...template.prescribed },
     ...placeSession(template, routineDay)
   };
 
-  // Weekend long sessions read their duration from the progression table.
+  // Amounts that change week to week are read from the progression row.
   if (template.prescribed.fromProgression) {
     s.prescribed.value = progression[template.prescribed.fromProgression];
     delete s.prescribed.fromProgression;
-  }
-
-  // Deriving a swim from the weekday is a skeleton-only rule: wedDistance and
-  // plan.sets.monTechnique/friMixed/wedMain all describe the tri week. A week
-  // template's swim carries its own numbers and its own set lines, so - like
-  // the recovery deltas - these rules must not reach one.
-  const skeletonSwim = !fromWeekTemplate && template.discipline === 'swim';
-
-  if (skeletonSwim) {
-    if (dayKey === 'wed') s.prescribed.value = progression.wedDistance;
-    else if (isRecovery && plan.recovery.swimDeltaAppliesTo.includes(dayKey)) {
-      s.prescribed.value += plan.recovery.swimDeltaMetres;
-    }
-  }
-
-  // Set lines, first match wins: a session's own literal lines beat the shared
-  // strength circuit, which beats the weekday-derived swim set.
-  if (template.setLines) {
-    s.setLines = template.setLines.map(fill);
-  } else if (template.setRef === 'strength') {
-    s.setLines = [...plan.sets.strength];
-  } else if (skeletonSwim) {
-    s.setLines = swimSetLines(plan, template, dayKey, progression);
-  }
-
-  if (isRecovery) {
-    if (dayKey === 'tue') s.prescribed.value = plan.recovery.tue.durationMin;
-    if (dayKey === 'thu') {
-      s.prescribed.value = plan.recovery.thu.durationMin;
-      if (plan.recovery.thu.dropStrides) {
-        s.detail = s.detail.filter(line => !line.toLowerCase().includes('stride'));
-      }
-    }
   }
 
   return s;
@@ -171,46 +127,28 @@ export function resolveWeek(plan, blockId, week) {
     };
   }
 
-  // A block either draws its week from the one global skeleton (the tri
-  // blocks, whose shape never changes) or from a named template chosen by
-  // the progression row (the strength block, whose shape alternates).
-  const weekTemplate = block.weekSource === 'weekTemplates'
-    ? plan.weekTemplates[progression.template]
-    : null;
-  const source = weekTemplate ? weekTemplate.days : plan.skeleton;
-  const dayTypes = (weekTemplate && weekTemplate.dayTypes) || plan.nutrition.dayTypes;
+  // Each week is a named template filled from its progression row: one
+  // template serves every week of a phase, and a one-off week (the
+  // Thanksgiving trip, race week) gets its own. A recovery week is lighter
+  // because its row says so, not because of any rule applied here.
+  const weekTemplate = plan.weekTemplates[progression.template];
   // Fuelling merges key by key where dayTypes replaces wholesale: a template
   // that only raises the long-ride carb rate still needs the global rules for
   // short sessions and recovery.
-  const fuel = { ...plan.nutrition.fuel, ...((weekTemplate && weekTemplate.fuel) || {}) };
+  const fuel = { ...plan.nutrition.fuel, ...(weekTemplate.fuel || {}) };
 
-  // The recovery deltas describe the tri week specifically — skipStrength
-  // would delete a whole lifting week. A template block carries its own
-  // deload, so it opts out of the rules while keeping the label.
-  const isRecovery = !weekTemplate && progression.type === 'recovery';
+  const routine = weekTemplate.routine && plan.schedule ? plan.schedule.routine : null;
 
-  const routine = weekTemplate && weekTemplate.routine && plan.schedule
-    ? plan.schedule.routine
-    : null;
-
-  const days = DAY_KEYS.map((dayKey, i) => {
+  const days = DAY_KEYS.map((dayKey, i) => ({
+    dayKey,
+    date: addDays(startDate, i),
+    nutrition: plan.nutrition.types[weekTemplate.dayTypes[dayKey]],
+    fuel,
     // A template need not fill all seven days; the calendar still shows them.
-    let templates = source[dayKey] || [];
-    if (isRecovery && plan.recovery.skipStrength) {
-      templates = templates.filter(t => t.discipline !== 'strength');
-    }
-    const typeKey = dayTypes[dayKey];
-    return {
-      dayKey,
-      date: addDays(startDate, i),
-      nutrition: plan.nutrition.types[typeKey],
-      fuel,
-      sessions: templates.map(t =>
-        buildSession(plan, t, { blockId, week, dayKey, progression, isRecovery,
-                                fromWeekTemplate: Boolean(weekTemplate),
-                                routineDay: routine ? routine[dayKey] : null }))
-    };
-  });
+    sessions: (weekTemplate.days[dayKey] || []).map(t =>
+      buildSession(t, { blockId, week, dayKey, progression,
+                        routineDay: routine ? routine[dayKey] : null }))
+  }));
 
   return {
     blockId, blockLabel: block.label, week,

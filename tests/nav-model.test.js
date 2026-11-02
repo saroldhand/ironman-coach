@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 import { historyStep, resolvePage, weekOf, focusFor, levelHrefs, crumbs, upHref, pager } from '../assets/nav-model.js';
 
 const plan = JSON.parse(readFileSync(new URL('../data/plan.json', import.meta.url)));
-const TODAY = '2026-10-06';          // Strength W4, Tuesday
+const TODAY = '2026-11-17';          // Bridge W2, Tuesday
 const labels = trail => trail.map(c => c.label);
 const hrefs = trail => trail.map(c => c.href);
 
@@ -34,10 +34,10 @@ test('resolvePage fills defaults and never hands a renderer a page that does not
     { view: 'week', blockId: 'arc', week: 21 });
   for (const bad of [{ blockId: 'nope', week: 2 }, { blockId: 'arc', week: 27 }, { blockId: 'arc', week: NaN }]) {
     assert.deepEqual(resolvePage(plan, { view: 'week', ...bad }, TODAY),
-      { view: 'week', blockId: 'strength', week: 4 }, JSON.stringify(bad));
+      { view: 'week', blockId: 'bridge', week: 2 }, JSON.stringify(bad));
   }
-  assert.deepEqual(resolvePage(plan, { view: 'month', ym: null }, TODAY), { view: 'month', ym: '2026-10' });
-  assert.deepEqual(resolvePage(plan, { view: 'month', ym: null }, '2026-01-10'), { view: 'month', ym: '2026-08' },
+  assert.deepEqual(resolvePage(plan, { view: 'month', ym: null }, TODAY), { view: 'month', ym: '2026-11' });
+  assert.deepEqual(resolvePage(plan, { view: 'month', ym: null }, '2026-01-10'), { view: 'month', ym: '2026-11' },
     'before the plan, a bare month opens on the month it starts');
   assert.deepEqual(resolvePage(plan, { view: 'season', blockId: 'arc', week: 21 }, TODAY),
     { view: 'season', focusWeek: { blockId: 'arc', week: 21 } });
@@ -47,7 +47,11 @@ test('resolvePage fills defaults and never hands a renderer a page that does not
 
 test('weekOf clamps dates outside the plan to its first or last week', () => {
   assert.deepEqual(weekOf(plan, '2027-05-01'), { blockId: 'arc', week: 21 });
-  assert.deepEqual(weekOf(plan, '2026-08-01'), { blockId: 'prep', week: 1 });
+  assert.deepEqual(weekOf(plan, '2026-08-01'), { blockId: 'bridge', week: 1 });
+  // The week before the plan starts: "this week" is Bridge W1, not an error.
+  assert.deepEqual(weekOf(plan, '2026-11-03'), { blockId: 'bridge', week: 1 });
+  assert.deepEqual(resolvePage(plan, { view: 'week', blockId: 'nope', week: 1 }, '2026-11-03'),
+    { view: 'week', blockId: 'bridge', week: 1 });
   assert.deepEqual(weekOf(plan, '2027-07-01'), { blockId: 'arc', week: 26 });
 });
 
@@ -66,9 +70,9 @@ test('zooming out keeps the day in focus, so zooming back in returns to it', () 
 
 test('a level opened from elsewhere focuses today if it holds today, else its first day', () => {
   const away = '2027-03-03';
-  assert.equal(focusFor(plan, { view: 'week', blockId: 'strength', week: 4 }, TODAY, away), TODAY);
+  assert.equal(focusFor(plan, { view: 'week', blockId: 'bridge', week: 2 }, TODAY, away), TODAY);
   assert.equal(focusFor(plan, { view: 'week', blockId: 'arc', week: 21 }, TODAY, away), '2027-04-26');
-  assert.equal(focusFor(plan, { view: 'month', ym: '2026-10' }, TODAY, away), TODAY);
+  assert.equal(focusFor(plan, { view: 'month', ym: '2026-11' }, TODAY, away), TODAY);
   assert.equal(focusFor(plan, { view: 'month', ym: '2027-05' }, TODAY, away), '2027-05-01');
   assert.equal(focusFor(plan, { view: 'season', focusWeek: null }, TODAY, null), TODAY);
 });
@@ -81,7 +85,7 @@ test('the level tabs keep the date in focus instead of jumping to today', () => 
     season: '#/season/arc/21'
   });
   assert.equal(levelHrefs(plan, TODAY, TODAY).day, '#/today');
-  assert.equal(levelHrefs(plan, '2026-08-01', TODAY).week, '#/week/prep/1',
+  assert.equal(levelHrefs(plan, '2026-08-01', TODAY).week, '#/week/bridge/1',
     'a focus before the plan points the week tab at its first week');
 });
 
@@ -92,8 +96,8 @@ test('a day in the plan sits under its season, month and week', () => {
 });
 
 test('a day outside the plan has no week to sit under', () => {
-  const trail = crumbs(plan, { view: 'day', date: '2026-08-23' }, '2026-08-23');
-  assert.deepEqual(labels(trail), ['Season', 'Aug 2026', 'Sun 23 Aug']);
+  const trail = crumbs(plan, { view: 'day', date: '2026-11-08' }, '2026-11-08');
+  assert.deepEqual(labels(trail), ['Season', 'Nov 2026', 'Sun 8 Nov']);
 });
 
 test('the week, month and season pages close their own trails', () => {
@@ -127,20 +131,20 @@ test('the day pager names its neighbours and offers today from anywhere else', (
 });
 
 test('the week pager crosses block edges and stops at the ends of the plan', () => {
-  const edge = pager(plan, { view: 'week', blockId: 'strength', week: 8 }, TODAY);
-  assert.deepEqual(edge.next, { label: 'Bridge W1', href: '#/week/bridge/1' });
-  assert.deepEqual(edge.home, { label: 'This week', href: '#/week/strength/4' });
-  assert.equal(pager(plan, { view: 'week', blockId: 'prep', week: 1 }, TODAY).prev, null);
+  const edge = pager(plan, { view: 'week', blockId: 'bridge', week: 4 }, TODAY);
+  assert.deepEqual(edge.next, { label: 'Arc W1', href: '#/week/arc/1' });
+  assert.deepEqual(edge.home, { label: 'This week', href: '#/week/bridge/2' });
+  assert.equal(pager(plan, { view: 'week', blockId: 'bridge', week: 1 }, TODAY).prev, null);
   assert.equal(pager(plan, { view: 'week', blockId: 'arc', week: 26 }, TODAY).next, null);
-  assert.equal(pager(plan, { view: 'week', blockId: 'strength', week: 4 }, TODAY).home, null);
+  assert.equal(pager(plan, { view: 'week', blockId: 'bridge', week: 2 }, TODAY).home, null);
 });
 
 test('the month pager names months, adding the year only when it changes', () => {
   const p = pager(plan, { view: 'month', ym: '2027-01' }, TODAY);
   assert.deepEqual(p.prev, { label: 'December 2026', href: '#/month/2026-12' });
   assert.deepEqual(p.next, { label: 'February', href: '#/month/2027-02' });
-  assert.deepEqual(p.home, { label: 'This month', href: '#/month/2026-10' });
-  assert.equal(pager(plan, { view: 'month', ym: '2026-10' }, TODAY).home, null);
+  assert.deepEqual(p.home, { label: 'This month', href: '#/month/2026-11' });
+  assert.equal(pager(plan, { view: 'month', ym: '2026-11' }, TODAY).home, null);
 });
 
 test('the season pager only offers the way back to today', () => {

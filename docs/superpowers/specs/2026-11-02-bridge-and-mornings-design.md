@@ -21,6 +21,8 @@ The athlete's main goal for these weeks is **getting into the time commitment**.
 | **Bridge** *(new)* | 4 | **2026-11-09** | 2026-12-06 | back into triathlon |
 | Arc | 26 | 2026-12-07 | 2027-06-06 | dates unchanged |
 
+**Later the same day:** the athlete asked for everything before Nov 9 to be cut from the site, so Prep and Strength are gone and the plan starts at Bridge W1. With Prep went the engine's "skeleton" week and its recovery-week rules, which nothing else used: every week is now a template filled from its progression row. A day before the plan still shows tonight's card, so Sunday Nov 8 sets up Monday's first alarm.
+
 The Bridge takes powerbuilding's job of getting the athlete ready for Arc W1, using swimming, cycling and running instead of three lifting days. In effect, Base grows from 8 weeks to 12. Arc week numbers, recovery weeks, tests and milestones don't move.
 
 The alternative was stretching the Arc to 30 weeks. That would renumber every Arc week to deliver the same training, so it was rejected.

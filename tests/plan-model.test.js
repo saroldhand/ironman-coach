@@ -6,43 +6,27 @@ import { dayForDate, planStart, blocksInOrder, weekNav, monthRows } from '../ass
 const plan = JSON.parse(readFileSync(new URL('../data/plan.json', import.meta.url)));
 
 test('a date before the plan starts is not in the plan', () => {
-  assert.deepEqual(dayForDate(plan, '2026-08-23'), { inPlan: false, reason: 'before-start' });
+  assert.deepEqual(dayForDate(plan, '2026-11-08'), { inPlan: false, reason: 'before-start' });
 });
 
 test('a date after the plan ends is not in the plan', () => {
   assert.deepEqual(dayForDate(plan, '2027-06-07'), { inPlan: false, reason: 'after-end' });
 });
 
-test('first day of the plan is Prep week 1 Monday', () => {
-  const d = dayForDate(plan, '2026-08-24');
-  assert.equal(d.blockId, 'prep');
+test('first day of the plan is Bridge week 1 Monday', () => {
+  const d = dayForDate(plan, '2026-11-09');
+  assert.equal(d.blockId, 'bridge');
   assert.equal(d.week, 1);
   assert.equal(d.dayKey, 'mon');
   assert.equal(d.weekType, 'build');
   assert.equal(d.authored, true);
 });
 
-test('prep to strength boundary', () => {
-  const last = dayForDate(plan, '2026-09-13');
-  assert.equal(last.blockId, 'prep');
-  assert.equal(last.week, 3);
-
-  const first = dayForDate(plan, '2026-09-14');
-  assert.equal(first.blockId, 'strength');
-  assert.equal(first.week, 1);
-  assert.equal(first.dayKey, 'mon');
-});
-
-test('strength to bridge to arc boundaries', () => {
-  // The lifting block stops after its eight GVT weeks; the Bridge takes the
-  // four weeks powerbuilding had, so the Arc still starts on Dec 7.
-  assert.equal(dayForDate(plan, '2026-11-08').blockId, 'strength');
-  assert.equal(dayForDate(plan, '2026-11-08').week, 8);
-  assert.equal(dayForDate(plan, '2026-11-09').blockId, 'bridge');
-  assert.equal(dayForDate(plan, '2026-11-09').week, 1);
+test('bridge to arc boundary', () => {
   assert.equal(dayForDate(plan, '2026-12-06').blockId, 'bridge');
   assert.equal(dayForDate(plan, '2026-12-06').week, 4);
   assert.equal(dayForDate(plan, '2026-12-07').blockId, 'arc');
+  assert.equal(dayForDate(plan, '2026-12-07').week, 1);
 });
 
 test('race day is Arc week 26 Saturday', () => {
@@ -59,26 +43,26 @@ test('arc weeks carry a phase label', () => {
   // A two-week taper: race-specific work runs to May 23.
   assert.equal(dayForDate(plan, '2027-05-23').phaseLabel, 'Race-specific');
   assert.equal(dayForDate(plan, '2027-05-24').phaseLabel, 'Taper');
-  assert.equal(dayForDate(plan, '2026-08-24').phaseLabel, null);
+  assert.equal(dayForDate(plan, '2026-11-09').phaseLabel, null, 'the Bridge has no phases');
 });
 
 test('block order in plan.json does not affect the result', () => {
   const shuffled = { ...plan, blocks: [...plan.blocks].reverse() };
 
-  // A prep date must still resolve, even with arc listed first.
-  const d = dayForDate(shuffled, '2026-08-24');
+  // A Bridge date must still resolve, even with arc listed first.
+  const d = dayForDate(shuffled, '2026-11-09');
   assert.equal(d.inPlan, true);
-  assert.equal(d.blockId, 'prep');
+  assert.equal(d.blockId, 'bridge');
   assert.equal(d.week, 1);
 
   // And the out-of-plan reasons must still be the right way round.
-  assert.deepEqual(dayForDate(shuffled, '2026-08-23'), { inPlan: false, reason: 'before-start' });
+  assert.deepEqual(dayForDate(shuffled, '2026-11-08'), { inPlan: false, reason: 'before-start' });
   assert.deepEqual(dayForDate(shuffled, '2027-06-07'), { inPlan: false, reason: 'after-end' });
 });
 
 test('planStart is the earliest block regardless of array order', () => {
-  assert.equal(planStart(plan), '2026-08-24');
-  assert.equal(planStart({ ...plan, blocks: [...plan.blocks].reverse() }), '2026-08-24');
+  assert.equal(planStart(plan), '2026-11-09');
+  assert.equal(planStart({ ...plan, blocks: [...plan.blocks].reverse() }), '2026-11-09');
 });
 
 import { resolveWeek } from '../assets/plan-model.js';
@@ -91,15 +75,13 @@ function withArcUnwritten() {
   return p;
 }
 
-// A minimal plan exercising weekTemplates, independent of data/plan.json.
+// A minimal plan, independent of data/plan.json.
 function templatePlan() {
   return {
     race: { name: 'Test', date: '2027-06-05' },
     blocks: [
-      { id: 'lift', label: 'Lift', start: '2026-09-14', weeks: 2,
-        authored: true, weekSource: 'weekTemplates' }
+      { id: 'lift', label: 'Lift', start: '2026-09-14', weeks: 2, authored: true }
     ],
-    skeleton: { mon: [], tue: [], wed: [], thu: [], fri: [], sat: [{ discipline: 'bike', title: 'Skeleton bike', prescribed: { metric: 'duration', value: 90, unit: 'min' }, effort: 'Easy.' }], sun: [] },
     weekTemplates: {
       alpha: {
         dayTypes: { mon: 'low', tue: 'low', wed: 'low', thu: 'low',
@@ -112,19 +94,14 @@ function templatePlan() {
       }
     },
     progression: { lift: [{ week: 1, type: 'build', template: 'alpha' }] },
-    recovery: { swimDeltaAppliesTo: [], swimDeltaMetres: 0, skipStrength: true,
-                tue: { durationMin: 40 }, thu: { durationMin: 30 } },
-    sets: {},
     nutrition: {
-      dayTypes: { mon: 'big', tue: 'big', wed: 'big', thu: 'big',
-                  fri: 'big', sat: 'big', sun: 'big' },
       types: { big: { label: 'Big day', approach: 'Eat.' },
                low: { label: 'Low day', approach: 'Less.' } }
     }
   };
 }
 
-test('resolveWeek reads a weekTemplates block from its named template', () => {
+test('resolveWeek reads a week from the template its row names', () => {
   const w = resolveWeek(templatePlan(), 'lift', 1);
   assert.equal(w.authored, true);
   assert.equal(w.startDate, '2026-09-14');
@@ -140,13 +117,6 @@ test('resolveWeek gives a template day with no entry an empty session list', () 
   assert.deepEqual(w.days.find(d => d.dayKey === 'sat').sessions, []);
 });
 
-test('resolveWeek still reads skeleton blocks from the global skeleton', () => {
-  // Regression: the real plan's prep block must be untouched by this change.
-  const w = resolveWeek(plan, 'prep', 1);
-  assert.equal(w.authored, true);
-  assert.ok(w.days.find(d => d.dayKey === 'tue').sessions.length > 0);
-});
-
 test('an unauthored block resolves to a stub with no days', () => {
   const w = resolveWeek(withArcUnwritten(), 'arc', 1);
   assert.equal(w.authored, false);
@@ -155,212 +125,112 @@ test('an unauthored block resolves to a stub with no days', () => {
 });
 
 test('a build week has seven dated days starting Monday', () => {
-  const w = resolveWeek(plan, 'prep', 1);
+  const w = resolveWeek(plan, 'bridge', 1);
   assert.equal(w.days.length, 7);
   assert.deepEqual(w.days.map(d => d.dayKey), ['mon','tue','wed','thu','fri','sat','sun']);
-  assert.equal(w.days[0].date, '2026-08-24');
-  assert.equal(w.days[6].date, '2026-08-30');
+  assert.equal(w.days[0].date, '2026-11-09');
+  assert.equal(w.days[6].date, '2026-11-15');
 });
 
-test('weekend durations come from the progression table', () => {
-  // Two consumers of fromProgression: the skeleton path (prep, a plain
-  // block) and the template path (bridge, a weekTemplates block). Both
-  // must resolve their sat/sun duration from that week's progression row,
-  // and the fromProgression marker must not leak into the resolved object.
-  const prepRow = plan.progression.prep.find(w => w.week === 1);
-  const prepWeek = resolveWeek(plan, 'prep', 1);
-  const prepSat = prepWeek.days.find(d => d.dayKey === 'sat').sessions.find(s => s.discipline === 'bike');
-  const prepSun = prepWeek.days.find(d => d.dayKey === 'sun').sessions.find(s => s.discipline === 'run');
-  assert.equal(prepSat.prescribed.value, prepRow.rideMin);
-  assert.equal(typeof prepSat.prescribed.value, 'number');
-  assert.ok(!('fromProgression' in prepSat.prescribed));
-  assert.equal(prepSun.prescribed.value, prepRow.runMin);
-  assert.equal(typeof prepSun.prescribed.value, 'number');
-  assert.ok(!('fromProgression' in prepSun.prescribed));
-
-  const strengthRow = plan.progression.bridge.find(w => w.week === 2);
-  const strengthWeek = resolveWeek(plan, 'bridge', 2);
-  const liftSat = strengthWeek.days.find(d => d.dayKey === 'sat').sessions.find(s => s.discipline === 'bike');
-  const liftSun = strengthWeek.days.find(d => d.dayKey === 'sun').sessions.find(s => s.discipline === 'run');
-  assert.equal(liftSat.prescribed.value, strengthRow.rideMin);
-  assert.equal(typeof liftSat.prescribed.value, 'number');
-  assert.ok(!('fromProgression' in liftSat.prescribed));
-  assert.equal(liftSun.prescribed.value, strengthRow.runMin);
-  assert.equal(typeof liftSun.prescribed.value, 'number');
-  assert.ok(!('fromProgression' in liftSun.prescribed));
+test('amounts that change week to week come from the progression row', () => {
+  // The fromProgression marker must resolve to that week's number and must
+  // not leak into the resolved object.
+  for (const [blockId, week] of [['bridge', 2], ['arc', 14]]) {
+    const row = plan.progression[blockId].find(w => w.week === week);
+    const days = resolveWeek(plan, blockId, week).days;
+    const on = (k, d) => days.find(x => x.dayKey === k).sessions.find(s => s.discipline === d);
+    for (const [s, key] of [[on('sat', 'bike'), 'rideMin'], [on('sun', 'run'), 'runMin'],
+                            [on('wed', 'swim'), 'wedSwimM'], [on('mon', 'run'), 'monRunMin']]) {
+      assert.equal(s.prescribed.value, row[key], `${blockId} W${week} ${key}`);
+      assert.equal(typeof s.prescribed.value, 'number');
+      assert.ok(!('fromProgression' in s.prescribed));
+    }
+  }
 });
 
 test('session keys are stable and block-qualified', () => {
-  const w = resolveWeek(plan, 'prep', 3);
-  const keys = w.days.find(d => d.dayKey === 'wed').sessions.map(s => s.key);
-  assert.deepEqual(keys, ['prep:3:wed:swim', 'prep:3:wed:run']);
+  const w = resolveWeek(plan, 'bridge', 1);
+  const keys = w.days.find(d => d.dayKey === 'mon').sessions.map(s => s.key);
+  assert.deepEqual(keys, ['bridge:1:mon:swim', 'bridge:1:mon:strength', 'bridge:1:mon:run']);
 });
 
-test('wednesday is a brick: swim then run', () => {
-  const wed = resolveWeek(plan, 'prep', 1).days.find(d => d.dayKey === 'wed');
-  assert.deepEqual(wed.sessions.map(s => s.discipline), ['swim', 'run']);
+test('monday is the swim, then strength in the same trip, then the lunch run', () => {
+  const mon = resolveWeek(plan, 'arc', 5).days.find(d => d.dayKey === 'mon');
+  assert.deepEqual(mon.sessions.map(s => [s.discipline, s.when]),
+    [['swim', 'before-work'], ['strength', 'before-work'], ['run', 'lunch']]);
 });
 
-test('a recovery week in a template block keeps its lifting sessions', () => {
-  // recovery.skipStrength drops every strength session. On a lifting block
-  // that would silently empty the week, so the tri recovery rules must not
-  // reach a template block at all.
+test('a recovery week is lighter only because its row says so', () => {
+  // No rule cuts sessions from a recovery week: its lighter numbers live in
+  // its progression row, and the type is only the label.
   const p = templatePlan();
   p.progression.lift[0].type = 'recovery';
 
   const w = resolveWeek(p, 'lift', 1);
   const mon = w.days.find(d => d.dayKey === 'mon');
-  assert.equal(mon.sessions.length, 1, 'the lift survives the recovery week');
-  assert.equal(w.type, 'recovery', 'but the week is still labelled recovery');
+  assert.equal(mon.sessions.length, 1, 'the session survives the recovery week');
+  assert.equal(mon.sessions[0].prescribed.value, 60);
+  assert.equal(w.type, 'recovery', 'and the week is labelled recovery');
 });
 
-test('skeleton blocks still honour recovery rules', () => {
-  // Regression guard, on a clone rather than the real plan: after the
-  // calendar re-cut no live block has a recovery week, and this machinery
-  // still has to work when Arc is authored.
-  const p = JSON.parse(JSON.stringify(plan));
-  const prep = p.blocks.find(b => b.id === 'prep');
-  prep.weeks = 4;
-  p.progression.prep = [
-    ...p.progression.prep.slice(0, 3),
-    { week: 4, type: 'recovery', rideMin: 70, runMin: 40,
-      wedDistance: 1700, wedMainSet: '6 x 100 easy, 20s rest' }
-  ];
-
-  const week4 = resolveWeek(p, 'prep', 4);
-  const dayOf = k => week4.days.find(d => d.dayKey === k);
-
-  const fri = dayOf('fri');
-  assert.equal(fri.sessions.filter(s => s.discipline === 'strength').length, 0,
-    'recovery drops the optional strength circuit');
-  assert.equal(dayOf('tue').sessions[0].prescribed.value, 40,
-    'recovery shortens the tuesday bike');
-
-  const thu = dayOf('thu').sessions[0];
-  assert.equal(thu.prescribed.value, 30, 'recovery shortens the thursday run');
-  assert.ok(!thu.detail.some(line => line.toLowerCase().includes('stride')),
-    'strides are dropped from the thursday detail');
-
-  assert.equal(dayOf('mon').sessions.find(s => s.discipline === 'swim').prescribed.value, 1300,
-    'recovery cuts the monday swim by 500m');
-  assert.equal(fri.sessions.find(s => s.discipline === 'swim').prescribed.value, 1500,
-    'recovery cuts the friday swim by 500m');
-  assert.equal(dayOf('wed').sessions.find(s => s.discipline === 'swim').prescribed.value, 1700,
-    "wednesday's swim is immune to the recovery delta - its cut is already in wedDistance");
-});
-
-test('the skeleton swim rules do not reach a template block', () => {
-  // Deriving a swim from the weekday is a tri-skeleton rule: Wednesday's
-  // metres come from progression.wedDistance, Monday and Friday inherit
-  // plan.sets. A lifting week supplies neither, so ungated a template
-  // Wednesday swim resolves to prescribed.value === undefined - which throws
-  // in render.js at p.value.toLocaleString() - and a template Monday or
-  // Friday swim silently inherits a triathlon set.
-  const p = templatePlan();
-  p.sets = {
-    monTechnique: ['TRI monday technique set'],
-    friMixed: ['TRI friday mixed set'],
-    wedMain: { warmup: ['TRI wednesday warmup'], cooldown: ['TRI wednesday cooldown'] }
-  };
-  p.weekTemplates.alpha.days.wed = [{
-    discipline: 'swim', title: 'Alpha wednesday swim',
-    prescribed: { metric: 'distance', value: 1200, unit: 'm' },
-    effort: 'Easy.', setLines: ['Alpha wednesday set']
-  }];
-  p.weekTemplates.alpha.days.fri = [{
-    discipline: 'swim', title: 'Alpha friday swim',
-    prescribed: { metric: 'distance', value: 1100, unit: 'm' },
-    effort: 'Easy.'
-  }];
-  // A strength progression row carries no wedDistance, and never would.
-  assert.equal(p.progression.lift[0].wedDistance, undefined);
-
-  const w = resolveWeek(p, 'lift', 1);
-  const swimOn = k =>
-    w.days.find(d => d.dayKey === k).sessions.find(s => s.discipline === 'swim');
-
-  const wed = swimOn('wed');
-  assert.equal(wed.prescribed.value, 1200, 'the template swim keeps its own distance');
-  assert.deepEqual(wed.setLines, ['Alpha wednesday set']);
-
-  const fri = swimOn('fri');
-  assert.equal(fri.prescribed.value, 1100);
-  assert.deepEqual(fri.setLines, [],
-    'a template swim with no set lines gets none, not the triathlon set');
-});
-
-test('each day carries its nutrition day type', () => {
-  const w = resolveWeek(plan, 'prep', 1);
-  assert.equal(w.days.find(d => d.dayKey === 'mon').nutrition.label, 'Low day');
+test('each day carries the nutrition day type its template names', () => {
+  const w = resolveWeek(plan, 'bridge', 1);
+  assert.equal(w.days.find(d => d.dayKey === 'mon').nutrition.label, 'Moderate day');
+  assert.equal(w.days.find(d => d.dayKey === 'wed').nutrition.label, 'Low day');
   assert.equal(w.days.find(d => d.dayKey === 'sat').nutrition.label, 'Big day');
 });
 
-test('a template block reads its nutrition from the template, not the global map', () => {
-  // Strength week 1 runs gvtA: five lifting mornings, so Monday is a lifting
-  // day and Sunday is the light one. The global map says the opposite on both
-  // - 'low' on Monday, 'big' on Sunday - so dropping the template's dayTypes
-  // override would show Monday as "Low day / ~500 kcal deficit" in a week
-  // that is meant to hold maintenance calories.
-  assert.equal(plan.nutrition.dayTypes.mon, 'low');
-  assert.equal(plan.nutrition.dayTypes.sun, 'big');
-
-  const w = resolveWeek(plan, 'strength', 1);
-  assert.equal(w.days.find(d => d.dayKey === 'mon').nutrition.label, 'Lifting day');
-  assert.equal(w.days.find(d => d.dayKey === 'sun').nutrition.label, 'Low day');
-});
-
 test('blocksInOrder sorts chronologically regardless of array order', () => {
-  assert.deepEqual(blocksInOrder(plan).map(b => b.id), ['prep', 'strength', 'bridge', 'arc']);
+  assert.deepEqual(blocksInOrder(plan).map(b => b.id), ['bridge', 'arc']);
   const shuffled = { ...plan, blocks: [...plan.blocks].reverse() };
-  assert.deepEqual(blocksInOrder(shuffled).map(b => b.id), ['prep', 'strength', 'bridge', 'arc']);
+  assert.deepEqual(blocksInOrder(shuffled).map(b => b.id), ['bridge', 'arc']);
 });
 
 test('weekNav walks across block boundaries', () => {
-  // Last week of prep -> first week of strength, and back.
-  assert.deepEqual(weekNav(plan, 'prep', 3).next, { blockId: 'strength', week: 1 });
-  assert.deepEqual(weekNav(plan, 'strength', 1).prev, { blockId: 'prep', week: 3 });
-  assert.deepEqual(weekNav(plan, 'strength', 8).next, { blockId: 'bridge', week: 1 });
+  // Last week of the Bridge -> first week of the Arc, and back.
+  assert.deepEqual(weekNav(plan, 'bridge', 1).next, { blockId: 'bridge', week: 2 });
   assert.deepEqual(weekNav(plan, 'bridge', 4).next, { blockId: 'arc', week: 1 });
   assert.deepEqual(weekNav(plan, 'arc', 1).prev, { blockId: 'bridge', week: 4 });
 });
 
 test('weekNav returns null at both ends of the plan', () => {
-  assert.equal(weekNav(plan, 'prep', 1).prev, null);
+  assert.equal(weekNav(plan, 'bridge', 1).prev, null);
   assert.equal(weekNav(plan, 'arc', 26).next, null);
 });
 
 test('weekNav does not depend on the order blocks appear in plan.json', () => {
   const shuffled = { ...plan, blocks: [...plan.blocks].reverse() };
-  assert.deepEqual(weekNav(shuffled, 'prep', 3).next, { blockId: 'strength', week: 1 });
-  assert.equal(weekNav(shuffled, 'prep', 1).prev, null);
+  assert.deepEqual(weekNav(shuffled, 'bridge', 4).next, { blockId: 'arc', week: 1 });
+  assert.equal(weekNav(shuffled, 'bridge', 1).prev, null);
   assert.equal(weekNav(shuffled, 'arc', 26).next, null);
 });
 
 test('monthRows returns Monday-first rows of seven cells', () => {
-  const rows = monthRows(plan, '2026-10');
+  // 2027-01-01 is a Friday.
+  const rows = monthRows(plan, '2027-01');
   assert.ok(rows.every(r => r.cells.length === 7));
-  assert.deepEqual(rows[0].cells.slice(0, 3), [null, null, null]);
-  assert.equal(rows[0].cells[3].date, '2026-10-01');
+  assert.deepEqual(rows[0].cells.slice(0, 4), [null, null, null, null]);
+  assert.equal(rows[0].cells[4].date, '2027-01-01');
 });
 
 test('monthRows labels each row with the plan week it covers', () => {
-  const rows = monthRows(plan, '2026-10');
-  // Strength starts Mon 2026-09-14, so the week containing 2026-10-01 is W3.
-  assert.equal(rows[0].week.blockId, 'strength');
-  assert.equal(rows[0].week.week, 3);
-  assert.equal(rows[0].week.blockLabel, 'Strength');
+  const rows = monthRows(plan, '2027-01');
+  // The Arc starts Mon 2026-12-07, so the week containing 2027-01-01 is W4.
+  assert.equal(rows[0].week.blockId, 'arc');
+  assert.equal(rows[0].week.week, 4);
+  assert.equal(rows[0].week.blockLabel, 'Arc');
 });
 
 test('monthRows crosses a block boundary inside one month', () => {
-  const cells = monthRows(plan, '2026-09').flatMap(r => r.cells).filter(Boolean);
+  const cells = monthRows(plan, '2026-12').flatMap(r => r.cells).filter(Boolean);
   const byDate = Object.fromEntries(cells.map(c => [c.date, c]));
 
-  // Prep runs through Sun 2026-09-13; Strength starts Mon 2026-09-14.
-  assert.equal(byDate['2026-09-13'].blockId, 'prep');
-  assert.equal(byDate['2026-09-13'].authored, true);
-  assert.equal(byDate['2026-09-14'].blockId, 'strength');
-  assert.equal(byDate['2026-09-14'].week, 1);
-  assert.equal(byDate['2026-09-14'].authored, true);
+  // The Bridge runs through Sun 2026-12-06; the Arc starts Mon 2026-12-07.
+  assert.equal(byDate['2026-12-06'].blockId, 'bridge');
+  assert.equal(byDate['2026-12-06'].authored, true);
+  assert.equal(byDate['2026-12-07'].blockId, 'arc');
+  assert.equal(byDate['2026-12-07'].week, 1);
+  assert.equal(byDate['2026-12-07'].authored, true);
 });
 
 test('monthRows gives an unauthored block no sessions rather than guessing', () => {
@@ -372,25 +242,28 @@ test('monthRows gives an unauthored block no sessions rather than guessing', () 
 });
 
 test('monthRows resolves sessions for an authored day with the same keys as the week view', () => {
-  const cell = monthRows(plan, '2026-10')
-    .flatMap(r => r.cells).find(c => c && c.date === '2026-10-06');  // a Tuesday
-  const lift = cell.sessions.find(s => s.discipline === 'strength');
-  assert.ok(lift, 'Tuesday in the GVT block prescribes a lift');
-  assert.equal(lift.key, `${cell.blockId}:${cell.week}:tue:strength`);
+  const cell = monthRows(plan, '2026-11')
+    .flatMap(r => r.cells).find(c => c && c.date === '2026-11-10');  // a Tuesday
+  const ride = cell.sessions.find(s => s.discipline === 'bike');
+  assert.ok(ride, 'Tuesday in the Bridge prescribes a ride');
+  assert.equal(ride.key, `${cell.blockId}:${cell.week}:tue:bike`);
 });
 
 test('monthRows marks dates outside every block as not in the plan', () => {
-  const rows = monthRows(plan, '2026-08');
+  const rows = monthRows(plan, '2026-11');
   const cells = rows.flatMap(r => r.cells).filter(Boolean);
-  const before = cells.find(c => c.date === '2026-08-23');
+  const before = cells.find(c => c.date === '2026-11-08');
   assert.equal(before.inPlan, false);
   assert.deepEqual(before.sessions, []);
-  assert.equal(cells.find(c => c.date === '2026-08-24').inPlan, true);
+  assert.equal(cells.find(c => c.date === '2026-11-09').inPlan, true);
 });
 
 test('monthRows leaves a row with no plan days unlabelled', () => {
-  // The first week of August 2026 is entirely before the plan starts.
-  assert.equal(monthRows(plan, '2026-08')[0].week, null);
+  // The first two rows of November 2026 are entirely before the plan starts.
+  const rows = monthRows(plan, '2026-11');
+  assert.equal(rows[0].week, null);
+  assert.equal(rows[1].week, null);
+  assert.deepEqual(rows[2].week && [rows[2].week.blockId, rows[2].week.week], ['bridge', 1]);
 });
 
 test('monthRows flags recovery weeks so the calendar can mark them', () => {
@@ -402,79 +275,40 @@ test('monthRows flags recovery weeks so the calendar can mark them', () => {
 
 test('set lines interpolate values from the progression row', () => {
   const p = templatePlan();
-  p.weekTemplates.alpha.days.mon[0].setLines = ['Bench Press {gvt}', 'Fly 4×12'];
-  p.progression.lift[0].gvt = '10×10';
+  p.weekTemplates.alpha.days.mon[0].setLines = ['Squat {reps}', 'Pull Ups 3×6'];
+  p.progression.lift[0].reps = '3×5';
 
   const mon = resolveWeek(p, 'lift', 1).days.find(d => d.dayKey === 'mon');
-  assert.deepEqual(mon.sessions[0].setLines, ['Bench Press 10×10', 'Fly 4×12']);
+  assert.deepEqual(mon.sessions[0].setLines, ['Squat 3×5', 'Pull Ups 3×6']);
 });
 
 test('an unmatched placeholder survives verbatim rather than becoming undefined', () => {
-  // It must stay visible: "Bench Press {gvt}" on screen is a bug you can see,
-  // "Bench Press undefined" is one you might not, and a silently dropped
-  // token is one you certainly would not.
+  // It must stay visible: "Squat {reps}" on screen is a bug you can see,
+  // "Squat undefined" is one you might not, and a silently dropped token is
+  // one you certainly would not.
   const p = templatePlan();
-  p.weekTemplates.alpha.days.mon[0].setLines = ['Bench Press {missing}'];
+  p.weekTemplates.alpha.days.mon[0].setLines = ['Squat {missing}'];
 
   const mon = resolveWeek(p, 'lift', 1).days.find(d => d.dayKey === 'mon');
-  assert.deepEqual(mon.sessions[0].setLines, ['Bench Press {missing}']);
+  assert.deepEqual(mon.sessions[0].setLines, ['Squat {missing}']);
 });
 
 test('the wednesday main set advances with the week', () => {
-  // Every prep week carries wedMainSet, and swimSetLines() splices it between
-  // the shared wedMain warmup and cooldown. Two ways that breaks. The line
-  // stops tracking the row - which every prep week must be checked against,
-  // since they do not all prescribe the same set and one hardcoded line
-  // cannot satisfy all three. Or the row loses the key, and the page reads
-  // "MAIN SET: undefined" - reading the row straight into the expectation
-  // would happily agree, so its presence is asserted separately.
-  const { warmup, cooldown } = plan.sets.wedMain;
+  // Every Bridge and Arc row up to the taper names its Wednesday main set, and
+  // the template splices it into the swim's set lines. Reading the row straight
+  // into the expectation would agree with a row that lost the key, so its
+  // presence is asserted separately.
   const distinct = new Set();
-
-  for (const row of plan.progression.prep) {
-    assert.equal(typeof row.wedMainSet, 'string', `week ${row.week} names a main set`);
-    assert.ok(row.wedMainSet.length > 0, `week ${row.week} names a main set`);
-    distinct.add(row.wedMainSet);
-
-    const wed = resolveWeek(plan, 'prep', row.week).days.find(d => d.dayKey === 'wed');
-    const swim = wed.sessions.find(s => s.discipline === 'swim');
-    assert.deepEqual(swim.setLines,
-      [...warmup, `MAIN SET: ${row.wedMainSet}`, ...cooldown], `week ${row.week}`);
+  for (const blockId of ['bridge', 'arc']) {
+    for (const row of plan.progression[blockId].filter(r => r.wedMain !== undefined)) {
+      assert.ok(typeof row.wedMain === 'string' && row.wedMain.length > 0, `${blockId} W${row.week}`);
+      distinct.add(row.wedMain);
+      const wed = resolveWeek(plan, blockId, row.week).days.find(d => d.dayKey === 'wed');
+      const swim = wed.sessions.find(s => s.discipline === 'swim');
+      assert.ok(swim.setLines.includes(`MAIN SET: ${row.wedMain}`), `${blockId} W${row.week}`);
+    }
   }
-
-  assert.ok(distinct.size > 1,
-    'the prep weeks all prescribe the same main set - this test no longer discriminates');
-});
-
-test('interpolation does not disturb a skeleton block swim set', () => {
-  const wed = resolveWeek(plan, 'prep', 1).days.find(d => d.dayKey === 'wed');
-  const swim = wed.sessions.find(s => s.discipline === 'swim');
-  assert.ok(swim.setLines.length > 0);
-  assert.ok(swim.setLines.every(l => !l.includes('{')));
-});
-
-test('literal template setLines win over the weekday-derived swim set', () => {
-  // A session carrying both discipline: 'swim' and its own setLines only
-  // occurs in weekTemplates, not in skeleton blocks. Its literal lines are
-  // what must reach the page: the swim branch must neither clobber them nor
-  // run at all here.
-  const p = templatePlan();
-  // Tuesday is chosen because swimSetLines() returns [] for tue (unlike
-  // wed/mon/fri), so the template's lines are visibly distinct from what the
-  // swim branch would produce.
-  p.weekTemplates.alpha.days.tue = [{
-    discipline: 'swim',
-    title: 'Swim {main}',
-    prescribed: { metric: 'distance', value: 1500, unit: 'm' },
-    effort: 'Steady.',
-    setLines: ['{main} × 100 steady']
-  }];
-  p.progression.lift[0].main = 'technique';
-
-  const tue = resolveWeek(p, 'lift', 1).days.find(d => d.dayKey === 'tue');
-  const swim = tue.sessions.find(s => s.discipline === 'swim');
-  // The interpolated template.setLines survive intact.
-  assert.deepEqual(swim.setLines, ['technique × 100 steady']);
+  assert.ok(distinct.size > 10, 'the weeks should not all prescribe the same main set');
 });
 
 test('placeholders fill titles, efforts and detail lines, not only set lines', () => {
@@ -518,8 +352,8 @@ test('a week template overrides fuelling rules one by one, like day types', () =
                                longRun: 'Global run.', post: 'Global post.' });
 });
 
-test('a skeleton block day carries the global fuelling rules', () => {
-  const tue = resolveWeek(plan, 'prep', 1).days.find(d => d.dayKey === 'tue');
+test('a template with no fuelling rules of its own carries the global ones', () => {
+  const tue = resolveWeek(plan, 'bridge', 1).days.find(d => d.dayKey === 'tue');
   assert.deepEqual(tue.fuel, plan.nutrition.fuel);
 });
 
@@ -564,7 +398,7 @@ test('a routine template places its sessions; a session can say otherwise', () =
   mon.push({ discipline: 'run', title: 'Away run', when: 'anytime', kit: [],
              prescribed: { metric: 'duration', value: 20, unit: 'min' }, effort: 'Easy.' });
 
-  // Without the opt-in the routine is ignored: older blocks stay unplaced.
+  // Without the opt-in the routine is ignored, as in race week in Hawaii.
   let sessions = resolveWeek(p, 'lift', 1).days[0].sessions;
   assert.deepEqual(sessions.map(s => [s.when, s.venue, s.kit]),
     [['anytime', null, []], ['anytime', null, []]]);

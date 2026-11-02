@@ -2,19 +2,11 @@
   "race": { "name": "IRONMAN 70.3 Hawaii", "date": "2027-06-05" },
 
   "blocks": [
-    { "id": "prep", "label": "Prep", "start": "2026-08-24", "weeks": 3, "authored": true,
-      "note": "The opening three weeks of the written base phase, before the strength block." },
-    { "id": "strength", "label": "Strength", "start": "2026-09-14", "weeks": 8,
-      "authored": true, "weekSource": "weekTemplates",
-      "note": "The ETS lifting cycle: eight weeks of GVT, five mornings a week. Its last four weeks became the Bridge.",
-      "phases": [
-        { "label": "GVT", "from": 1, "to": 8 }
-      ] },
     { "id": "bridge", "label": "Bridge", "start": "2026-11-09", "weeks": 4,
-      "authored": true, "weekSource": "weekTemplates",
+      "authored": true,
       "note": "Four weeks back into triathlon: the Arc's week at lower volume, all Zone 2, three swims a week." },
     { "id": "arc", "label": "Arc", "start": "2026-12-07", "weeks": 26,
-      "authored": true, "weekSource": "weekTemplates",
+      "authored": true,
       "note": "The 26-week build to the race: base, build, race-specific, taper.",
       "phases": [
         { "label": "Base", "from": 1, "to": 8 },
@@ -25,302 +17,7 @@
     }
   ],
 
-  "skeleton": {
-    "mon": [
-      { "discipline": "swim", "title": "Technique swim", "optional": true,
-        "prescribed": { "metric": "distance", "value": 1800, "unit": "m" },
-        "effort": "Easy throughout. Technique is the point, not the distance.",
-        "setRef": "monTechnique",
-        "detail": ["Alternative: full rest, if last week was hard.",
-                   "Pick ONE cue for the whole session."] }
-    ],
-    "tue": [
-      { "discipline": "bike", "title": "Easy-steady bike",
-        "prescribed": { "metric": "duration", "value": 60, "unit": "min" },
-        "effort": "Zone 2 - 65-75% max HR - cadence 85-95",
-        "detail": ["Conversational the whole way.",
-                   "The most common way to ruin base is letting this drift into moderately hard."] }
-    ],
-    "wed": [
-      { "discipline": "swim", "title": "Main swim",
-        "prescribed": { "metric": "distance", "value": 2000, "unit": "m" },
-        "effort": "Steady - repeatable. Same pace on the last rep as the first.",
-        "setRef": "wedMain",
-        "detail": ["Count strokes per length on the main set.",
-                   "If the count climbs more than 3-4 from first rep to last, the stroke is falling apart - note when."] },
-      { "discipline": "run", "title": "Brick run off the swim",
-        "prescribed": { "metric": "duration", "value": 30, "unit": "min" },
-        "effort": "Zone 2 - easy",
-        "detail": ["Short on purpose. Do not extend it."] }
-    ],
-    "thu": [
-      { "discipline": "run", "title": "Easy run + strides",
-        "prescribed": { "metric": "duration", "value": 45, "unit": "min" },
-        "effort": "Zone 2 - 65-75% max HR",
-        "detail": ["Finish with 6 x 20s strides.",
-                   "Strides are relaxed accelerations, not sprints. Smooth, controlled, no straining."] }
-    ],
-    "fri": [
-      { "discipline": "swim", "title": "Mixed swim",
-        "prescribed": { "metric": "distance", "value": 2000, "unit": "m" },
-        "effort": "Alternating steady and easy",
-        "setRef": "friMixed", "detail": [] },
-      { "discipline": "strength", "title": "Strength", "optional": true,
-        "prescribed": { "metric": "duration", "value": 30, "unit": "min" },
-        "effort": "Light. Durability work, not a lifting program.",
-        "setRef": "strength",
-        "detail": ["Two rounds, minimal rest between exercises, 90s between rounds.",
-                   "If it is making Saturday worse, cut it."] }
-    ],
-    "sat": [
-      { "discipline": "bike", "title": "Long ride",
-        "prescribed": { "metric": "duration", "value": null, "unit": "min", "fromProgression": "rideMin" },
-        "effort": "Zone 2 - 65-75% max HR. Yes, even the long one.",
-        "detail": ["The anchor session of the week."] }
-    ],
-    "sun": [
-      { "discipline": "run", "title": "Long run",
-        "prescribed": { "metric": "duration", "value": null, "unit": "min", "fromProgression": "runMin" },
-        "effort": "Zone 2. Slower than you think.",
-        "detail": [] }
-    ]
-  },
-
   "weekTemplates": {
-    "gvtA": {
-      "dayTypes": { "mon": "lift", "tue": "lift", "wed": "lift", "thu": "lift",
-                    "fri": "lift", "sat": "moderate", "sun": "low" },
-      "days": {
-        "mon": [
-          { "discipline": "strength", "title": "GVT - Chest",
-            "prescribed": { "metric": "duration", "value": 60, "unit": "min" },
-            "effort": "90 sec rest between sets. Same weight for all ten sets - pick something you could do 20 reps with.",
-            "setLines": [
-              "Bench Press {gvt}",
-              "Incline Fly 4×12-15",
-              "Weighted Dips 4×15-20",
-              "Floor Press 3×8-10",
-              "Rope Cable Pushdowns 4×12-15",
-              "Push Ups - 15 every minute on the minute for 10 min (150 total)",
-              "Hanging Leg Raises 4×15-20"
-            ],
-            "detail": ["Before work."] }
-        ],
-        "tue": [
-          { "discipline": "strength", "title": "Lower Body",
-            "prescribed": { "metric": "duration", "value": 60, "unit": "min" },
-            "effort": "Heavy. Squats at 75% 1RM.",
-            "setLines": [
-              "Barbell Squat 5×5 (75% 1RM)",
-              "Hip Thrusters 6×10 (barbell)",
-              "Leg Extension Tri-Set - 4 rounds of 12 / 8 / AMRAP (15 sec between, stay in the chair; 90 sec between rounds)",
-              "Stiff Leg Deadlifts 5×10",
-              "SUPERSET 4×: Barbell Walking Lunges 15 + Barbell Squats AMRAP"
-            ],
-            "detail": ["Before work."] },
-          { "discipline": "swim", "title": "Technique swim",
-            "prescribed": { "metric": "distance", "value": 2000, "unit": "m" },
-            "effort": "Easy throughout. Technique is the point, not the distance.",
-            "setLines": [
-              "400 easy free",
-              "8 × 50 drill - 15s rest",
-              "8 × 100 steady - 20s rest",
-              "200 easy cooldown"
-            ],
-            "detail": [
-              "Evening. Your legs are wrecked from this morning - that is the point of swimming today.",
-              "Pick ONE cue for the whole session."
-            ] }
-        ],
-        "wed": [
-          { "discipline": "strength", "title": "GVT - Back",
-            "prescribed": { "metric": "duration", "value": 60, "unit": "min" },
-            "effort": "90 sec rest between sets. Same weight for all ten sets.",
-            "setLines": [
-              "Deadlift {gvt}",
-              "SUPERSET 4×: Pull Ups AMRAP + Lat Pulldowns 10-12",
-              "One Arm DB Row 4×8-10",
-              "Low Cable Row 3×12-15",
-              "SUPERSET 4×: DB Curl 6-8 + Hammer Curl AMRAP (same weight)",
-              "Hanging Leg Raises 4×15-20"
-            ],
-            "detail": ["Before work."] }
-        ],
-        "thu": [
-          { "discipline": "strength", "title": "Lower Body",
-            "prescribed": { "metric": "duration", "value": 60, "unit": "min" },
-            "effort": "Volume day. Nothing here should be a grinder.",
-            "setLines": [
-              "SUPERSET 4×: Leg Extensions 10-12 + Leg Curls 10-12",
-              "Goblet Squats 4×10-12",
-              "Bulgarian Split Squats 6×10 each leg",
-              "Calf Raises 4×15-20",
-              "Sissy Squats 4×AMRAP",
-              "Overhead Walking Lunges 4×15 (25 or 45 lb plate overhead)"
-            ],
-            "detail": ["Before work."] },
-          { "discipline": "swim", "title": "Aerobic swim",
-            "prescribed": { "metric": "distance", "value": 2000, "unit": "m" },
-            "effort": "Steady and repeatable. Same pace on the last rep as the first.",
-            "setLines": [
-              "300 easy free",
-              "6 × 50 drill - 15s rest",
-              "10 × 100 alternating: odd steady, even easy - 15s rest",
-              "200 easy cooldown"
-            ],
-            "detail": ["Evening."] }
-        ],
-        "fri": [
-          { "discipline": "strength", "title": "Shoulders / Arms",
-            "prescribed": { "metric": "duration", "value": 60, "unit": "min" },
-            "effort": "Moderate. Nothing to failure except where it says AMRAP.",
-            "setLines": [
-              "Overhead Barbell Press 4×8",
-              "SUPERSET 4×: Arnold Press 8 + DB Shoulder Press AMRAP",
-              "Side Lateral Raises 3×15-20",
-              "SUPERSET 4×: DB Shrugs 10-12 + Facepulls 12-15",
-              "Straight Barbell Curls 6×10-12",
-              "Close Grip Bench Press 6×10-12"
-            ],
-            "detail": ["Before work."] }
-        ],
-        "sat": [
-          { "discipline": "bike", "title": "Easy ride",
-            "prescribed": { "metric": "duration", "value": 60, "unit": "min" },
-            "effort": "Zone 2 - 65-75% max HR. Conversational the whole way.",
-            "detail": [
-              "Maintenance only. This does not progress during the GVT block.",
-              "If your legs are still wrecked from Thursday, ride it easier - do not skip it."
-            ] }
-        ],
-        "sun": [
-          { "discipline": "run", "title": "Easy run", "optional": true,
-            "prescribed": { "metric": "duration", "value": 30, "unit": "min" },
-            "effort": "Zone 2. Slower than you think.",
-            "detail": ["Optional. Full rest is the right call if the week beat you up."] }
-        ]
-      }
-    },
-    "gvtB": {
-      "dayTypes": { "mon": "lift", "tue": "lift", "wed": "lift", "thu": "lift",
-                    "fri": "lift", "sat": "moderate", "sun": "low" },
-      "days": {
-        "mon": [
-          { "discipline": "strength", "title": "Chest, Shoulders & Triceps",
-            "prescribed": { "metric": "duration", "value": 60, "unit": "min" },
-            "effort": "Moderate volume. Leave one rep in the tank on the pressing.",
-            "setLines": [
-              "DB Chest Press 5×8-10",
-              "Incline Barbell Press 4×8-10",
-              "Chest Flys 4×12-15",
-              "Barbell Overhead Press 4×8-10",
-              "TRI-SET 3 rounds: Upright BB Rows 15-20 + Side Laterals 12-15 + DB Shrugs 15-20",
-              "Bodyweight Dips 4×AMRAP",
-              "Hanging Leg Raises 4×15-20"
-            ],
-            "detail": ["Before work."] }
-        ],
-        "tue": [
-          { "discipline": "strength", "title": "Lower Body",
-            "prescribed": { "metric": "duration", "value": 60, "unit": "min" },
-            "effort": "Work up to the heavy triple, then back off.",
-            "setLines": [
-              "Barbell Squat 3×8-10",
-              "Barbell Squat 3×3 (heavier)",
-              "Leg Extensions 6×15",
-              "Goblet Squats 4×10-12",
-              "Walking Barbell Lunges 4×15",
-              "Calf Raises 4×15-20",
-              "Sissy Squats 4×AMRAP"
-            ],
-            "detail": ["Before work."] },
-          { "discipline": "swim", "title": "Technique swim",
-            "prescribed": { "metric": "distance", "value": 2000, "unit": "m" },
-            "effort": "Easy throughout. Technique is the point, not the distance.",
-            "setLines": [
-              "400 easy free",
-              "8 × 50 drill - 15s rest",
-              "8 × 100 steady - 20s rest",
-              "200 easy cooldown"
-            ],
-            "detail": [
-              "Evening. Your legs are wrecked from this morning - that is the point of swimming today.",
-              "Pick ONE cue for the whole session."
-            ] }
-        ],
-        "wed": [
-          { "discipline": "strength", "title": "Back & Biceps",
-            "prescribed": { "metric": "duration", "value": 60, "unit": "min" },
-            "effort": "Deadlifts at 80% 1RM. Everything after is accessory.",
-            "setLines": [
-              "Deadlifts {deadlift}",
-              "Back Extensions 4×15-20",
-              "SUPERSET 3×: Pendlay Rows 8-10 + DB Row 10-12 (two hands at once)",
-              "Pull Ups 4×AMRAP",
-              "Cable Pull Over 4×15-20",
-              "SUPERSET 4×: Preacher Curl 10-12 + Rope Concentration Curl 12-15",
-              "Hanging Leg Raises 4×15-20"
-            ],
-            "detail": ["Before work."] }
-        ],
-        "thu": [
-          { "discipline": "strength", "title": "Lower Body",
-            "prescribed": { "metric": "duration", "value": 60, "unit": "min" },
-            "effort": "Posterior chain focus. Hinge, do not squat, the hip thrusts.",
-            "setLines": [
-              "Hip Thrusters 2×10 then 5×5 (barbell)",
-              "Leg Curl 6×12-15",
-              "Stiff Legged Deadlift 4×8-10",
-              "Goblet Squats 4×10-12",
-              "Jefferson Squats 4×20",
-              "Walking Barbell Lunges 3×15",
-              "Calf Raises 4×15-20"
-            ],
-            "detail": ["Before work."] },
-          { "discipline": "swim", "title": "Aerobic swim",
-            "prescribed": { "metric": "distance", "value": 2000, "unit": "m" },
-            "effort": "Steady and repeatable. Same pace on the last rep as the first.",
-            "setLines": [
-              "300 easy free",
-              "6 × 50 drill - 15s rest",
-              "10 × 100 alternating: odd steady, even easy - 15s rest",
-              "200 easy cooldown"
-            ],
-            "detail": ["Evening."] }
-        ],
-        "fri": [
-          { "discipline": "strength", "title": "Chest / Back",
-            "prescribed": { "metric": "duration", "value": 60, "unit": "min" },
-            "effort": "Bench at 75% 1RM. Alternate push and pull throughout.",
-            "setLines": [
-              "Bench Press {bench}",
-              "Pendlay Rows 4×8-10",
-              "Floor Press 4×8-10",
-              "Lat Pulldown 5×12-15",
-              "Incline DB Press 4×6-8",
-              "Pull Ups 4×AMRAP",
-              "Push Ups - 15 every minute on the minute for 10 min",
-              "Hanging Leg Raises 4×15-20"
-            ],
-            "detail": ["Before work."] }
-        ],
-        "sat": [
-          { "discipline": "bike", "title": "Easy ride",
-            "prescribed": { "metric": "duration", "value": 60, "unit": "min" },
-            "effort": "Zone 2 - 65-75% max HR. Conversational the whole way.",
-            "detail": [
-              "Maintenance only. This does not progress during the GVT block.",
-              "If your legs are still wrecked from Thursday, ride it easier - do not skip it."
-            ] }
-        ],
-        "sun": [
-          { "discipline": "run", "title": "Easy run", "optional": true,
-            "prescribed": { "metric": "duration", "value": 30, "unit": "min" },
-            "effort": "Zone 2. Slower than you think.",
-            "detail": ["Optional. Full rest is the right call if the week beat you up."] }
-        ]
-      }
-    },
     "bridge": {
       "dayTypes": { "mon": "moderate", "tue": "moderate", "wed": "low", "thu": "moderate",
                     "fri": "moderate", "sat": "big", "sun": "big" },
@@ -1116,25 +813,6 @@
   },
 
   "progression": {
-    "prep": [
-      { "week": 1, "type": "build",    "rideMin": 90,  "runMin": 50, "wedDistance": 2000, "wedMainSet": "8 x 100 steady, 20s rest" },
-      { "week": 2, "type": "build",    "rideMin": 100, "runMin": 55, "wedDistance": 2000, "wedMainSet": "8 x 100 steady, 20s rest" },
-      { "week": 3, "type": "build",    "rideMin": 110, "runMin": 60, "wedDistance": 2100, "wedMainSet": "6 x 150 steady, 20s rest" }
-    ],
-    "strength": [
-      { "week": 1, "type": "build", "template": "gvtA", "gvt": "10×10" },
-      { "week": 2, "type": "build", "template": "gvtB",
-        "deadlift": "5×5 (80% 1RM)", "bench": "5×5 (75% 1RM)" },
-      { "week": 3, "type": "build", "template": "gvtA", "gvt": "10×6" },
-      { "week": 4, "type": "build", "template": "gvtB",
-        "deadlift": "6×3 (80% 1RM)", "bench": "6×3 (75% 1RM)" },
-      { "week": 5, "type": "build", "template": "gvtA", "gvt": "10×4" },
-      { "week": 6, "type": "build", "template": "gvtB",
-        "deadlift": "6×2 (80% 1RM)", "bench": "6×2 (75% 1RM)" },
-      { "week": 7, "type": "build", "template": "gvtA", "gvt": "10×3" },
-      { "week": 8, "type": "build", "template": "gvtB",
-        "deadlift": "4×8 (80% 1RM)", "bench": "4×8 (75% 1RM)" }
-    ],
     "bridge": [
       { "week": 1, "type": "build", "template": "bridge", "strMin": 35, "monRunMin": 15,
         "tueTitle": "Easy bike", "tueMin": 45, "tueEffort": "Zone 2 - 65-75% max HR. Easy spinning: this is the habit, not the workout.",
@@ -1351,44 +1029,6 @@
     ]
   },
 
-  "recovery": {
-    "note": "Applied when a week's type is 'recovery'. You should finish feeling slightly restless. That is the target.",
-    "tue": { "durationMin": 40 },
-    "thu": { "durationMin": 30, "dropStrides": true },
-    "swimDeltaMetres": -500,
-    "swimDeltaAppliesTo": ["mon", "fri"],
-    "skipStrength": true
-  },
-
-  "sets": {
-    "monTechnique": [
-      "300 easy free",
-      "8 x 50 drill - 20s rest (rotate: fingertip drag, catch-up, single-arm, 6-3-6)",
-      "6 x 100 on ONE cue only - 20s rest",
-      "200 easy cooldown"
-    ],
-    "wedMain": {
-      "warmup": ["300 easy free", "4 x 50 build easy to moderate - 15s rest", "6 x 50 drill - 15s rest"],
-      "cooldown": ["4 x 50 pull buoy, high elbow - 15s rest", "200 easy cooldown"]
-    },
-    "friMixed": [
-      "400 easy free",
-      "6 x 50 drill - 15s rest",
-      "10 x 100 alternating: odd steady, even easy - 15s rest",
-      "200 kick with board (easy)",
-      "200 cooldown"
-    ],
-    "strength": [
-      "Goblet squat x 10",
-      "Single-leg Romanian deadlift x 8 each side",
-      "Push-up x 10-15",
-      "Split squat x 8 each side",
-      "Plank 45s",
-      "Side plank 30s each side",
-      "Glute bridge x 15"
-    ]
-  },
-
   "cues": [
     { "name": "Exhale, don't hold", "detail": "Steady bubbles the whole time your face is in the water. Breath-holding is what causes the panic-breathing spiral." },
     { "name": "Look down", "detail": "Eyes at the bottom of the pool, slight pressure through the chest. Head lifts as you tire, hips sink, drag." },
@@ -1397,15 +1037,10 @@
   ],
 
   "nutrition": {
-    "dayTypes": { "mon": "low", "tue": "moderate", "wed": "moderate", "thu": "moderate", "fri": "moderate", "sat": "big", "sun": "big" },
     "types": {
       "big":      { "label": "Big day", "approach": "Maintenance or slightly above. Fuel during the session." },
       "moderate": { "label": "Moderate day", "approach": "~300-400 kcal deficit. Carbs concentrated around training." },
       "low":      { "label": "Low day", "approach": "~500 kcal deficit. Protein high, carbs lower." },
-      "lift": {
-        "label": "Lifting day",
-        "approach": "Maintenance calories. Protein 1.8-2.2 g/kg. Do not run a deficit while ramping strength."
-      },
       "key":      { "label": "Quality day", "approach": "Maintenance calories. Carbs before and after the session - intervals run on glycogen. No deficit today." },
       "maintain": { "label": "Maintenance day", "approach": "Maintenance calories, no deficit. Weight should hold steady from here to race day." },
       "carbLoad": { "label": "Carb load", "approach": "7-10g carb per kg bodyweight. Cut fibre and fat so it fits. Nothing new." },

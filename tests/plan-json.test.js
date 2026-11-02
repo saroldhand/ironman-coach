@@ -10,10 +10,12 @@ const plan = JSON.parse(readFileSync(new URL('../data/plan.json', import.meta.ur
 test('race date and blocks are anchored correctly', () => {
   assert.equal(plan.race.date, '2027-06-05');
   const ids = plan.blocks.map(b => b.id);
-  assert.deepEqual(ids, ['prep', 'strength', 'bridge', 'arc']);
+  // The plan starts at the Bridge: Prep and the lifting block were cut on
+  // 2026-11-02, once nothing before Nov 9 mattered any more.
+  assert.deepEqual(ids, ['bridge', 'arc']);
   assert.deepEqual(
     plan.blocks.map(b => [b.start, b.weeks]),
-    [['2026-08-24', 3], ['2026-09-14', 8], ['2026-11-09', 4], ['2026-12-07', 26]]
+    [['2026-11-09', 4], ['2026-12-07', 26]]
   );
 });
 
@@ -26,40 +28,18 @@ test('blocks are contiguous with no gap or overlap', () => {
 });
 
 test('every block is authored, through race day', () => {
-  for (const id of ['prep', 'strength', 'bridge', 'arc']) {
+  for (const id of ['bridge', 'arc']) {
     assert.equal(plan.blocks.find(b => b.id === id).authored, true, id);
   }
 });
 
-test('skeleton covers all seven days', () => {
-  assert.deepEqual(Object.keys(plan.skeleton), ['mon','tue','wed','thu','fri','sat','sun']);
-});
-
-test('prep progression is three build weeks', () => {
-  assert.equal(plan.progression.prep.length, 3);
-  assert.deepEqual(plan.progression.prep.map(w => w.type),
-    ['build', 'build', 'build']);
-});
-
-test('weekend progression matches the written plan', () => {
-  assert.deepEqual(plan.progression.prep.map(w => w.rideMin), [90, 100, 110]);
-  assert.deepEqual(plan.progression.prep.map(w => w.runMin), [50, 55, 60]);
-});
-
-test('every wednesday swim lands in the 1700-2400m band', () => {
-  for (const wk of plan.progression.prep) {
-    assert.ok(wk.wedDistance >= 1700 && wk.wedDistance <= 2400,
-      `week ${wk.week} wednesday swim is ${wk.wedDistance}m`);
-  }
-});
-
-test('nutrition assigns a day type to all seven days', () => {
-  assert.deepEqual(Object.keys(plan.nutrition.dayTypes), ['mon','tue','wed','thu','fri','sat','sun']);
-  assert.equal(plan.nutrition.dayTypes.mon, 'low');
-  assert.equal(plan.nutrition.dayTypes.sat, 'big');
-  for (const t of Object.values(plan.nutrition.dayTypes)) {
-    assert.ok(plan.nutrition.types[t], `missing definition for day type ${t}`);
-  }
+test('nothing from before the Bridge is left in the plan', () => {
+  // Every week is a template now; the old skeleton week, its recovery rules
+  // and shared swim sets, and the lifting templates went with their blocks.
+  for (const key of ['skeleton', 'recovery', 'sets']) assert.ok(!(key in plan), key);
+  for (const name of ['gvtA', 'gvtB', 'ppl']) assert.ok(!plan.weekTemplates[name], name);
+  assert.deepEqual(Object.keys(plan.progression), ['bridge', 'arc']);
+  assert.ok(!plan.nutrition.types.lift, 'the lifting-day type went with the lifting block');
 });
 
 test('every week template covers all seven days', () => {
@@ -74,17 +54,6 @@ test('every week template covers all seven days', () => {
   }
 });
 
-test('the GVT block alternates its two templates by week parity', () => {
-  const first8 = plan.progression.strength.slice(0, 8);
-  assert.deepEqual(first8.map(w => w.template),
-    ['gvtA','gvtB','gvtA','gvtB','gvtA','gvtB','gvtA','gvtB']);
-});
-
-test('the GVT rep scheme descends across the block', () => {
-  const gvt = plan.progression.strength.filter(w => w.gvt).map(w => w.gvt);
-  assert.deepEqual(gvt, ['10×10', '10×6', '10×4', '10×3']);
-});
-
 test('every nutrition day type named by a template is defined', () => {
   for (const [name, tpl] of Object.entries(plan.weekTemplates)) {
     for (const t of Object.values(tpl.dayTypes)) {
@@ -93,36 +62,8 @@ test('every nutrition day type named by a template is defined', () => {
   }
 });
 
-test('the strength block is the eight GVT weeks, and nothing after', () => {
-  // Powerbuilding (weeks 9-12) was cut on 2026-11-02: the Bridge has its dates.
-  assert.equal(plan.progression.strength.length, 8);
-  assert.ok(!plan.weekTemplates.ppl, 'the powerbuilding template is gone');
-  assert.deepEqual(plan.blocks.find(b => b.id === 'strength').phases.map(p => p.label), ['GVT']);
-});
-
-test('the strength phase labels match the template each week runs', () => {
-  // The phase labels live on plan.blocks; the templates that make a week GVT
-  // or powerbuilding live in progression.strength. Nothing links the two, so
-  // moving one boundary without the other labels a ppl week "GVT" on the page
-  // and nothing throws.
-  const phases = plan.blocks.find(b => b.id === 'strength').phases;
-  const labelFor = week => {
-    const p = phases.find(p => week >= p.from && week <= p.to);
-    return p ? p.label : null;
-  };
-
-  const phaseOfTemplate = { gvtA: 'GVT', gvtB: 'GVT' };
-
-  for (const w of plan.progression.strength) {
-    const expected = phaseOfTemplate[w.template];
-    assert.ok(expected, `week ${w.week} runs unmapped template ${w.template}`);
-    assert.equal(labelFor(w.week), expected,
-      `week ${w.week} runs ${w.template} but is labelled ${labelFor(w.week)}`);
-  }
-});
-
 test('every placeholder in a template is supplied by every week that uses it', () => {
-  // A set line reading "Bench Press {gvt}" renders that literally on the page.
+  // A set line reading "MAIN SET: {wedMain}" renders that literally on the page.
   // Nothing throws, so only this test catches it.
   const PLACEHOLDER = /\{(\w+)\}/g;
 
@@ -152,26 +93,11 @@ test('every placeholder in a template is supplied by every week that uses it', (
   }
 });
 
-test('every template names a progression that exists, and vice versa', () => {
-  for (const rows of Object.values(plan.progression)) {
-    for (const w of rows) {
-      if (!w.template) continue;
-      assert.ok(plan.weekTemplates[w.template],
-        `week ${w.week} names missing template ${w.template}`);
-    }
-  }
-
-  // A block whose weekSource is 'weekTemplates' resolves through
-  // plan.weekTemplates[progression.template] in resolveWeek. If a row in
-  // such a block loses its template key, resolveWeek does not throw - it
-  // silently falls back to the tri-discipline skeleton for what should be
-  // a lifting week. The loop above only catches a *named* missing template;
-  // this catches a row that should have named one and didn't.
+test('every progression row names a template that exists', () => {
+  // resolveWeek reads plan.weekTemplates[row.template]; a row with no
+  // template, or a misspelt one, has no week to show.
   for (const [blockId, rows] of Object.entries(plan.progression)) {
-    const block = plan.blocks.find(b => b.id === blockId);
-    if (!block || block.weekSource !== 'weekTemplates') continue;
     for (const w of rows) {
-      assert.ok(w.template, `${blockId} week ${w.week} is missing its template`);
       assert.ok(plan.weekTemplates[w.template],
         `${blockId} week ${w.week} names missing template ${w.template}`);
     }
@@ -181,10 +107,7 @@ test('every template names a progression that exists, and vice versa', () => {
 test('no day prescribes two sessions of the same discipline', () => {
   // Session keys are blockId:week:day:discipline. A duplicate discipline on
   // one day collides, and the second session vanishes from the log silently.
-  const sources = [
-    ['skeleton', plan.skeleton],
-    ...Object.entries(plan.weekTemplates).map(([n, t]) => [n, t.days])
-  ];
+  const sources = Object.entries(plan.weekTemplates).map(([n, t]) => [n, t.days]);
 
   for (const [name, days] of sources) {
     for (const [dayKey, sessions] of Object.entries(days)) {
@@ -196,7 +119,7 @@ test('no day prescribes two sessions of the same discipline', () => {
 });
 
 test('every prescribed session carries a usable metric', () => {
-  const sources = [plan.skeleton, ...Object.values(plan.weekTemplates).map(t => t.days)];
+  const sources = Object.values(plan.weekTemplates).map(t => t.days);
   for (const days of sources) {
     for (const sessions of Object.values(days)) {
       for (const s of sessions) {

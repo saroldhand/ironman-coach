@@ -40,7 +40,7 @@ const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 const ISO_MONTH = /^\d{4}-(0[1-9]|1[0-2])$/;
 
 // Every level of the plan is addressable, so a link can move between them:
-//   #/day/2026-10-06  #/week/prep/6  #/month/2026-10  #/season
+//   #/day/2026-11-17  #/week/bridge/2  #/month/2026-11  #/season
 // A malformed date or month is not an error page — it degrades to "now",
 // because a mistyped URL should still show the athlete something useful.
 export function route(hash) {
