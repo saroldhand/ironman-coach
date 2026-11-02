@@ -2,6 +2,7 @@
 
 **Date:** 2026-08-24
 **Status:** Approved (brainstorming complete, pre-implementation)
+**Amended 2026-11-02:** the block ends after the eight GVT weeks. Powerbuilding (weeks 9–12) is dropped and its dates go to the Bridge; see `2026-11-02-bridge-and-mornings-design.md`.
 **Supersedes:** the block calendar in `2026-08-20-ironman-training-site-design.md` §3
 
 ---
