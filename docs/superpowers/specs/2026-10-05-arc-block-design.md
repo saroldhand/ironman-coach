@@ -3,6 +3,7 @@
 **Date:** 2026-10-05
 **Status:** Approved 2026-10-06. The race is IRONMAN 70.3 Hawaii, and the athlete's answers are in §13. Encoded in `plan.json` (§14).
 **Supersedes:** the Arc phase table in `2026-08-20-ironman-training-site-design.md` §3 (taper shortened from four weeks to two)
+**Amended 2026-11-02:** `2026-11-02-bridge-and-mornings-design.md` fits the week to the athlete's mornings. The Wednesday run moves to Monday lunch, Wednesday swims are capped at 2,000 m with the long swims on Friday, the Monday swim is 1,500 m and no longer optional, strength is slimmer, and Wednesday is the low day. Where the two disagree, the amendment wins.
 
 ---
 

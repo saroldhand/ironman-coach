@@ -15,22 +15,43 @@ Static training site for IRONMAN 70.3 Hawaii on 2027-06-05. No build step, no de
 
 | Block | Weeks | Start | End |
 |---|---|---|---|
-| Prep | 3 | 2026-08-24 | 2026-09-13 |
-| Strength | 12 | 2026-09-14 | 2026-12-06 |
+| Bridge | 4 | 2026-11-09 | 2026-12-06 |
 | Arc | 26 | 2026-12-07 | 2027-06-06 |
 
-Prep, Strength and Arc each number weeks from 1, so week labels always name their block.
+The plan starts on Monday 9 November 2026. Everything before it (a three-week
+prep block and an eight-week lifting block) was cut from the site on 2026-11-02;
+its designs stay in `docs/superpowers/` as history.
 
-The Strength block is a lifting cycle: five mornings a week for weeks 1–8 (GVT),
-then three for weeks 9–12 (powerbuilding) as cardio ramps back up. Its weeks come
-from `weekTemplates` in `plan.json` rather than the global `skeleton`, because its
-shape alternates week to week.
+Each block numbers its weeks from 1, so week labels always name their block.
+Every week is a named template in `weekTemplates`, filled from that week's row
+in `progression`: one template per phase, plus one-off weeks for the
+Thanksgiving trip and race week. A recovery week is lighter because its row's
+numbers are, not because of a rule.
+
+The Bridge is four weeks back into triathlon: the Arc's week at lower volume, all
+Zone 2, three swims a week, with the Thanksgiving trip written into weeks 3 and 4.
 
 Arc is the build to the race: Base (weeks 1–8), Build (9–16), Race-specific (17–24)
-and a two-week Taper that ends on race day. It also draws on `weekTemplates`, one per
-phase plus race week, and each row of `progression.arc` carries that week's durations,
-distances and session text. The reasoning behind the numbers is in
-`docs/superpowers/specs/2026-10-05-arc-block-design.md`.
+and a two-week Taper that ends on race day. Each row of `progression.arc` carries
+that week's durations, distances and session text. The reasoning behind the numbers is in
+`docs/superpowers/specs/2026-10-05-arc-block-design.md`, as amended by
+`docs/superpowers/specs/2026-11-02-bridge-and-mornings-design.md`.
+
+## Training to the clock
+
+Most sessions happen before work, so the site works out each morning from
+`plan.schedule`: when you have to be ready (7:45 to leave for the office, 8:15 at
+the desk at home), how far the pool is and when it opens, and 8 hours of sleep.
+From those it gives the alarm, lights-out the night before, the timeline from
+leaving to ready, whether to eat first, and the kit to lay out (`plan.kit`).
+
+`schedule.routine` says where each weekday session happens (Monday swim and
+strength before work at the pool, the Monday run at lunch, Tuesday on the
+trainer at home, and so on). Templates opt in with `routine: true`.
+`schedule.daysOff` lists holidays and travel, which get no alarm. The arithmetic
+is in `assets/schedule-model.js`, and the data tests hold every work morning in
+the plan to the athlete's hours: never in the pool before it opens, never an
+alarm before 5:30.
 
 ## Views
 
@@ -38,10 +59,10 @@ Four zoom levels: Season › Month › Week › Day.
 
 | View | Hash | Shows |
 |---|---|---|
-| Day | `#/day/2026-10-06`, `#/today` | Every session prescribed that day, plus what Strava recorded |
-| Week | `#/week/strength/6` | The seven days side by side |
+| Day | `#/day/2026-11-17`, `#/today` | Every session prescribed that day, plus what Strava recorded. A work day opens with its alarm, lights-out and kit; today also has a *Tonight* card for tomorrow, which leads the page after midday. |
+| Week | `#/week/bridge/2` | The seven days side by side, with the week's hours and each morning's alarm |
 | Month | `#/month/2026-10` | A calendar grid; one dot per session, coloured by discipline |
-| Season | `#/season`, `#/season/arc/21` | Every week of every block, with completion bars; opened on a week, it scrolls to it |
+| Season | `#/season`, `#/season/arc/21` | Every week of every block, with hours and completion bars; opened on a week, it scrolls to it |
 
 In the month grid the left gutter names each row's plan week and links to it;
 each day cell links to its day. A malformed date in the hash falls back to today

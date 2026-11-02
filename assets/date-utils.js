@@ -39,6 +39,12 @@ export function todayISO(now = new Date()) {
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 }
 
+// The local hour, 0-23. The day page uses it to decide whether it is being
+// read for today or, after midday, for tomorrow.
+export function localHour(now = new Date()) {
+  return now.getHours();
+}
+
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June',
                 'July', 'August', 'September', 'October', 'November', 'December'];
 

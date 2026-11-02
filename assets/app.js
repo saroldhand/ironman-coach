@@ -1,7 +1,7 @@
 import { dayForDate, resolveWeek, monthRows } from './plan-model.js';
 import { weekCompletion } from './log-model.js';
 import { renderDay, renderWeek, renderMonth, renderSeason, renderCrumbs } from './render.js';
-import { daysBetween, todayISO } from './date-utils.js';
+import { daysBetween, todayISO, localHour } from './date-utils.js';
 import { syncMessages, indexEntries, route } from './app-state.js';
 import { historyStep, resolvePage, focusFor, levelHrefs, crumbs, upHref, pager } from './nav-model.js';
 
@@ -128,7 +128,9 @@ async function start() {
     const week = day.inPlan && day.authored
       ? resolveWeek(plan, day.blockId, day.week)
       : { days: [] };
-    return renderDay({ plan, day, week, entriesByKey: byKey, extras, date, today, nav });
+    // The hour decides whether tonight's card leads the page or closes it.
+    return renderDay({ plan, day, week, entriesByKey: byKey, extras, date, today, nav,
+                       hour: localHour() });
   }
 
   // Back steps back through the app's own history when there is some. On a

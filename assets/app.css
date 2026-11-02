@@ -266,6 +266,59 @@ h1 {
 }
 .wrest { color: var(--dim); font-style: italic; font-size: var(--text-sm); }
 
+/* The alarm under each date: the week read as a run of mornings. */
+.dayrow .dow .alarm {
+  display: block; margin-top: .15rem; text-transform: none; letter-spacing: 0;
+  font-size: var(--text-sm); font-weight: 600; color: var(--accent-ink);
+}
+.dayrow .dow .alarm.off { color: var(--dim); font-weight: 400; }
+.weekhead { margin: calc(-1 * var(--s-2)) 0 var(--s-3); }
+
+/* ---- the clock: the day's before-work card and tonight's card ----
+   The alarm is the one number on the page meant to be read from across the
+   room; everything else in these cards is the small print under it. */
+
+.card.clock, .card.tonight { border-left-color: var(--accent); }
+.card.tonight { background: linear-gradient(var(--accent-soft), var(--card) 6rem); }
+.alarmline {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 var(--s-3);
+  margin: var(--s-2) 0; font-variant-numeric: var(--nums);
+}
+.alarmline .big { font-size: var(--text-xl); font-weight: 700; color: var(--accent-ink); }
+.alarmline .sub { color: var(--dim); font-size: var(--text-sm); }
+.warnline {
+  margin: var(--s-2) 0; padding: var(--s-2) var(--s-3); border-radius: var(--r-sm);
+  color: var(--warn-ink); background: #fdf1de; border: 1px solid var(--warn); font-size: var(--text-sm);
+}
+.timeline {
+  list-style: none; margin: var(--s-2) 0; padding: 0;
+  display: grid; grid-template-columns: auto 1fr; gap: .1rem var(--s-3);
+  font-size: var(--text-sm); font-variant-numeric: var(--nums);
+}
+.timeline li { display: contents; }
+.timeline .t { color: var(--dim); text-align: right; }
+.kit {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
+  gap: var(--s-2) var(--s-4); margin-top: var(--s-2);
+}
+.kit h3 {
+  margin: 0; font-size: var(--text-xs); font-weight: 600; color: var(--dim);
+  text-transform: uppercase; letter-spacing: .07em;
+}
+.kit ul { margin: var(--s-1) 0 0; padding-left: var(--s-4); font-size: var(--text-sm); }
+.tsessions { list-style: none; margin: var(--s-2) 0; padding: 0; font-size: var(--text-sm); }
+.tsessions li { display: flex; align-items: center; gap: var(--s-2); margin: .15rem 0; }
+.tsessions .dot.swim { background: var(--swim); box-shadow: none; }
+.tsessions .dot.bike { background: var(--bike); box-shadow: none; }
+.tsessions .dot.run { background: var(--run); box-shadow: none; }
+.tsessions .dot.strength { background: var(--strength); box-shadow: none; }
+.more {
+  display: inline-block; margin-top: var(--s-2); font-size: var(--text-sm);
+  font-weight: 600; color: var(--accent-ink); text-decoration: none;
+}
+.more:hover { text-decoration: underline; }
+.tag.when { color: var(--dim); background: var(--bg-alt); border-color: var(--line-strong); }
+
 /* ---- month view ---- */
 
 .monthgrid {
@@ -338,7 +391,7 @@ h1 {
 .season { display: flex; flex-direction: column; gap: .15rem; }
 .seasonrow {
   display: grid;
-  grid-template-columns: 7.5rem 6rem 7rem 1fr 3rem;
+  grid-template-columns: 7.5rem 6rem 7rem 3.25rem 1fr 3rem;
   align-items: center; gap: var(--s-2);
   font-size: var(--text-sm); text-decoration: none; color: var(--text);
   padding: var(--s-1) var(--s-2); border-radius: var(--r-sm);
@@ -349,6 +402,7 @@ h1 {
 .seasonrow .bar { height: .5rem; border-radius: var(--r-full); background: var(--bg-alt); }
 .seasonrow .bar > span { display: block; height: 100%; border-radius: var(--r-full); background: var(--done); }
 .seasonrow .pct { text-align: right; color: var(--dim); font-variant-numeric: var(--nums); }
+.seasonrow .hrs { text-align: right; }
 .seasonrow.recovery .label { color: var(--swim-ink); }
 .seasonrow.current { background: var(--accent-soft); border-color: var(--accent); }
 /* The week the season was zoomed out from. */
@@ -367,6 +421,7 @@ h1 {
   /* The day column becomes a header line rather than a squeezed gutter. */
   .dayrow { grid-template-columns: 1fr; gap: var(--s-2); }
   .dayrow .dow { padding-top: 0; }
+  .dayrow .dow .alarm { display: inline; margin: 0 0 0 .6em; }
 
   /* Wide enough for a two-digit week (W10-W26): at 1.75rem the label ran
      under Monday's cell. */
@@ -378,7 +433,7 @@ h1 {
   .crumbs li:nth-child(2)::before { content: none; }
   .crumbs li + li::before { margin: 0 .3em; }
   /* The header's side margin matches the page's, and Back tightens, which is
-     the room "Strength W12" needs to stay on one line on a small phone. */
+     the room "Bridge W4" needs to stay on one line on a small phone. */
   .topbar { padding-left: var(--s-2); padding-right: var(--s-2); }
   .crumbbar { gap: var(--s-2); }
   .crumbbar .back { padding: var(--s-1) var(--s-2); }
@@ -388,6 +443,6 @@ h1 {
   .mhead { letter-spacing: .04em; }
 
   /* Drop the date and phase columns; the label and bar carry the row. */
-  .seasonrow { grid-template-columns: 7rem 1fr 2.75rem; }
+  .seasonrow { grid-template-columns: 7rem 3rem 1fr 2.75rem; }
   .seasonrow .date, .seasonrow .phase { display: none; }
 }

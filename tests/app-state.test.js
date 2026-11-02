@@ -40,12 +40,12 @@ test('an unreadable log is reported alongside a status failure', () => {
 
 test('indexEntries keys planned entries and filters extras to the given date', () => {
   const entries = [
-    { date: '2026-08-25', planKey: 'prep:1:tue:bike', status: 'done', strava: { id: 1 }, note: '' },
+    { date: '2026-08-25', planKey: 'bridge:1:tue:bike', status: 'done', strava: { id: 1 }, note: '' },
     { date: '2026-08-25', planKey: null, status: 'extra', strava: { id: 2 }, note: '' },
     { date: '2026-08-26', planKey: null, status: 'extra', strava: { id: 3 }, note: '' }
   ];
   const { byKey, extras } = indexEntries(entries, '2026-08-25');
-  assert.equal(byKey.get('prep:1:tue:bike').strava.id, 1);
+  assert.equal(byKey.get('bridge:1:tue:bike').strava.id, 1);
   assert.equal(extras.length, 1);
   assert.equal(extras[0].strava.id, 2);
 });
@@ -56,9 +56,9 @@ test('route parses each view and defaults to today', () => {
   assert.equal(route('').date, null, 'no date means the caller substitutes today');
   assert.equal(route('#/today').view, 'day');
   assert.equal(route('#/today').date, null);
-  assert.equal(route('#/week/prep/4').blockId, 'prep');
-  assert.equal(route('#/week/prep/4').week, 4);
-  assert.ok(Number.isNaN(route('#/week/prep/abc').week), 'a malformed week must be NaN so the caller falls back');
+  assert.equal(route('#/week/bridge/4').blockId, 'bridge');
+  assert.equal(route('#/week/bridge/4').week, 4);
+  assert.ok(Number.isNaN(route('#/week/bridge/abc').week), 'a malformed week must be NaN so the caller falls back');
 });
 
 test('route reads a specific day', () => {

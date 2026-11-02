@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { prescribedText, summaryLine, fuelLines } from '../assets/render.js';
+import { prescribedText, summaryLine, fuelLines, whenText, weekHeadline, tonightFirst } from '../assets/render.js';
 
 test('prescribedText formats distances in metres with thousands separators', () => {
   assert.equal(prescribedText({ metric: 'distance', value: 2000, unit: 'm' }), '2,000 m');
@@ -45,7 +45,7 @@ test('summaryLine takes the first clause of an effort, whichever separator comes
 });
 
 test('summaryLine truncates a long set line rather than letting a cell grow', () => {
-  // gvtA Thursday opens with a superset that is far wider than a grid column.
+  // A superset line is far wider than a grid column.
   const long = 'SUPERSET 4×: Leg Extensions 10-12 + Leg Curls 10-12';
   const out = summaryLine({ discipline: 'strength', effort: 'Volume day.', setLines: [long] });
   assert.ok(out.length <= 38, `got ${out.length} chars: ${out}`);
@@ -109,4 +109,26 @@ test('fuelLines treats a bike or run prescribed by distance as long', () => {
     session('run', 'distance', 21100)
   ] };
   assert.deepEqual(fuelLines(fuelPlan, raceDay), ['G ride', 'G run', 'G post']);
+});
+
+test('a session names its slot in words, and an unplaced one names none', () => {
+  assert.equal(whenText('before-work'), 'before work');
+  assert.equal(whenText('lunch'), 'lunch');
+  assert.equal(whenText('anytime'), null);
+  assert.equal(whenText(undefined), null);
+});
+
+test('the week headline gives the hours and the earliest alarm by day', () => {
+  assert.equal(weekHeadline({ hours: 7.5, earliest: { date: '2026-12-08', alarm: 6 * 60 } }),
+    '7.5 h of training · earliest alarm 6:00 am Tuesday');
+  assert.equal(weekHeadline({ hours: 8, earliest: null }), '8.0 h of training', 'one decimal always');
+  // A week with no work mornings (race week) still gives its hours.
+  assert.equal(weekHeadline({ hours: 3.2, earliest: null }), '3.2 h of training');
+});
+
+test("tonight's card leads the page from midday", () => {
+  assert.equal(tonightFirst(7), false);
+  assert.equal(tonightFirst(11), false);
+  assert.equal(tonightFirst(12), true);
+  assert.equal(tonightFirst(21), true);
 });
