@@ -83,8 +83,24 @@ function fillPlaceholders(line, progression) {
     progression[name] === undefined ? token : String(progression[name]));
 }
 
+// Where and when a session happens is a fact about the athlete's week, not
+// about any one template: the Monday swim is before work at the pool in every
+// phase. So it lives once, in plan.schedule.routine, keyed by weekday and
+// discipline, and a template opts in with `routine: true`. A session can
+// still say otherwise for itself - an away day sets `when: "anytime"` - and an
+// explicit empty kit list wins over the routine's.
+function placeSession(template, routineDay) {
+  const r = (routineDay && routineDay[template.discipline]) || {};
+  const pick = key => (key in template ? template[key] : r[key]);
+  return {
+    when: pick('when') || 'anytime',
+    venue: pick('venue') || null,
+    kit: pick('kit') || []
+  };
+}
+
 function buildSession(plan, template, ctx) {
-  const { blockId, week, dayKey, progression, isRecovery, fromWeekTemplate } = ctx;
+  const { blockId, week, dayKey, progression, isRecovery, fromWeekTemplate, routineDay } = ctx;
   // Every word a session shows can carry a token, not only its set lines: the
   // title and effort are what change between an easy week and a test week.
   const fill = text => (typeof text === 'string' ? fillPlaceholders(text, progression) : text);
@@ -96,7 +112,8 @@ function buildSession(plan, template, ctx) {
     effort: fill(template.effort),
     detail: (template.detail || []).map(fill),
     setLines: [],
-    prescribed: { ...template.prescribed }
+    prescribed: { ...template.prescribed },
+    ...placeSession(template, routineDay)
   };
 
   // Weekend long sessions read their duration from the progression table.
@@ -172,6 +189,10 @@ export function resolveWeek(plan, blockId, week) {
   // deload, so it opts out of the rules while keeping the label.
   const isRecovery = !weekTemplate && progression.type === 'recovery';
 
+  const routine = weekTemplate && weekTemplate.routine && plan.schedule
+    ? plan.schedule.routine
+    : null;
+
   const days = DAY_KEYS.map((dayKey, i) => {
     // A template need not fill all seven days; the calendar still shows them.
     let templates = source[dayKey] || [];
@@ -186,7 +207,8 @@ export function resolveWeek(plan, blockId, week) {
       fuel,
       sessions: templates.map(t =>
         buildSession(plan, t, { blockId, week, dayKey, progression, isRecovery,
-                                fromWeekTemplate: Boolean(weekTemplate) }))
+                                fromWeekTemplate: Boolean(weekTemplate),
+                                routineDay: routine ? routine[dayKey] : null }))
     };
   });
 

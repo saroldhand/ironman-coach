@@ -127,8 +127,8 @@ test('the day pager names its neighbours and offers today from anywhere else', (
 });
 
 test('the week pager crosses block edges and stops at the ends of the plan', () => {
-  const edge = pager(plan, { view: 'week', blockId: 'strength', week: 12 }, TODAY);
-  assert.deepEqual(edge.next, { label: 'Arc W1', href: '#/week/arc/1' });
+  const edge = pager(plan, { view: 'week', blockId: 'strength', week: 8 }, TODAY);
+  assert.deepEqual(edge.next, { label: 'Bridge W1', href: '#/week/bridge/1' });
   assert.deepEqual(edge.home, { label: 'This week', href: '#/week/strength/4' });
   assert.equal(pager(plan, { view: 'week', blockId: 'prep', week: 1 }, TODAY).prev, null);
   assert.equal(pager(plan, { view: 'week', blockId: 'arc', week: 26 }, TODAY).next, null);

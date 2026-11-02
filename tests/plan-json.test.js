@@ -1,18 +1,19 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { blocksInOrder } from '../assets/plan-model.js';
-import { addDays } from '../assets/date-utils.js';
+import { blocksInOrder, resolveWeek } from '../assets/plan-model.js';
+import { addDays, weekdayKey } from '../assets/date-utils.js';
+import { morning, toMin, clockText } from '../assets/schedule-model.js';
 
 const plan = JSON.parse(readFileSync(new URL('../data/plan.json', import.meta.url)));
 
 test('race date and blocks are anchored correctly', () => {
   assert.equal(plan.race.date, '2027-06-05');
   const ids = plan.blocks.map(b => b.id);
-  assert.deepEqual(ids, ['prep', 'strength', 'arc']);
+  assert.deepEqual(ids, ['prep', 'strength', 'bridge', 'arc']);
   assert.deepEqual(
     plan.blocks.map(b => [b.start, b.weeks]),
-    [['2026-08-24', 3], ['2026-09-14', 12], ['2026-12-07', 26]]
+    [['2026-08-24', 3], ['2026-09-14', 8], ['2026-11-09', 4], ['2026-12-07', 26]]
   );
 });
 
@@ -25,7 +26,7 @@ test('blocks are contiguous with no gap or overlap', () => {
 });
 
 test('every block is authored, through race day', () => {
-  for (const id of ['prep', 'strength', 'arc']) {
+  for (const id of ['prep', 'strength', 'bridge', 'arc']) {
     assert.equal(plan.blocks.find(b => b.id === id).authored, true, id);
   }
 });
@@ -92,10 +93,11 @@ test('every nutrition day type named by a template is defined', () => {
   }
 });
 
-test('the strength block runs twelve weeks, PPL for the last four', () => {
-  assert.equal(plan.progression.strength.length, 12);
-  assert.deepEqual(plan.progression.strength.slice(8).map(w => w.template),
-    ['ppl', 'ppl', 'ppl', 'ppl']);
+test('the strength block is the eight GVT weeks, and nothing after', () => {
+  // Powerbuilding (weeks 9-12) was cut on 2026-11-02: the Bridge has its dates.
+  assert.equal(plan.progression.strength.length, 8);
+  assert.ok(!plan.weekTemplates.ppl, 'the powerbuilding template is gone');
+  assert.deepEqual(plan.blocks.find(b => b.id === 'strength').phases.map(p => p.label), ['GVT']);
 });
 
 test('the strength phase labels match the template each week runs', () => {
@@ -109,7 +111,7 @@ test('the strength phase labels match the template each week runs', () => {
     return p ? p.label : null;
   };
 
-  const phaseOfTemplate = { gvtA: 'GVT', gvtB: 'GVT', ppl: 'Powerbuilding' };
+  const phaseOfTemplate = { gvtA: 'GVT', gvtB: 'GVT' };
 
   for (const w of plan.progression.strength) {
     const expected = phaseOfTemplate[w.template];
@@ -117,27 +119,6 @@ test('the strength phase labels match the template each week runs', () => {
     assert.equal(labelFor(w.week), expected,
       `week ${w.week} runs ${w.template} but is labelled ${labelFor(w.week)}`);
   }
-});
-
-test('the weekend ramps monotonically through the PPL weeks', () => {
-  const ppl = plan.progression.strength.slice(8);
-  assert.deepEqual(ppl.map(w => w.rideMin), [75, 90, 105, 120]);
-  assert.deepEqual(ppl.map(w => w.runMin), [40, 45, 50, 55]);
-});
-
-test('the PPL split is legs, pull, push - in that order', () => {
-  // Squats need five clear days before the Saturday long ride, and Friday's
-  // pressing barely touches the legs. Reversing this breaks the cardio ramp.
-  const days = plan.weekTemplates.ppl.days;
-  assert.equal(days.mon[0].title, 'Legs');
-  assert.equal(days.wed[0].title, 'Pull');
-  assert.equal(days.fri[0].title, 'Push');
-});
-
-test('week 11 is the barbell deload', () => {
-  const w11 = plan.progression.strength.find(w => w.week === 11);
-  assert.equal(w11.type, 'recovery');
-  assert.match(w11.power, /70%/);
 });
 
 test('every placeholder in a template is supplied by every week that uses it', () => {
@@ -285,11 +266,122 @@ test('arc recovery weeks land every fourth week and back the load off', () => {
 test('arc running never ramps more than 15% from one loading week to the next', () => {
   // Running is where a triathlon build gets injured. Recovery weeks dip on
   // purpose; what matters is each loading week against the last one.
-  const runOf = w => (w.wedRunMin || 0) + (w.thuMin || 0) + (w.brickMin || 0) + (w.runMin || 0);
+  const runOf = w => (w.monRunMin || 0) + (w.thuMin || 0) + (w.brickMin || 0) + (w.runMin || 0);
   const loading = plan.progression.arc.filter(w => w.type === 'build');
   for (let i = 1; i < loading.length; i++) {
     const [a, b] = [loading[i - 1], loading[i]];
     assert.ok(runOf(b) <= runOf(a) * 1.15,
       `week ${b.week} runs ${runOf(b)} min after ${runOf(a)} in week ${a.week}`);
+  }
+});
+
+// ---- the Bridge, and the clock the athlete trains to (2026-11-02)
+
+// Every week trained around a work day: the Bridge and the Arc up to the
+// taper. Race week is in Hawaii, off work, and sets no alarms.
+function clockWeeks() {
+  const weeks = [];
+  for (let n = 1; n <= 4; n++) weeks.push(resolveWeek(plan, 'bridge', n));
+  for (let n = 1; n <= 25; n++) weeks.push(resolveWeek(plan, 'arc', n));
+  return weeks;
+}
+const label = (week, day) => `${week.blockLabel} W${week.week} ${day.dayKey} ${day.date}`;
+
+test('the bridge runs Nov 9 to Dec 6 and eases off over Thanksgiving', () => {
+  const rows = plan.progression.bridge;
+  assert.deepEqual(rows.map(w => w.template), ['bridge', 'bridge', 'bridgeAway', 'bridgeBack']);
+  assert.deepEqual(rows.map(w => w.type), ['build', 'build', 'recovery', 'build']);
+  // The weekend builds toward Arc W1 without reaching it.
+  const arc1 = plan.progression.arc[0];
+  assert.ok(rows[3].rideMin < arc1.rideMin && rows[3].runMin < arc1.runMin);
+});
+
+test('bridge running builds to the Arc without a jump', () => {
+  const runMin = week => week.days.flatMap(d => d.sessions)
+    .filter(s => s.discipline === 'run').reduce((t, s) => t + s.prescribed.value, 0);
+  const bridge = [1, 2, 3, 4].map(n => runMin(resolveWeek(plan, 'bridge', n)));
+  assert.deepEqual(bridge, [80, 95, 85, 110], 'the minutes agreed on 2026-11-02');
+  const arc1 = runMin(resolveWeek(plan, 'arc', 1));
+  assert.ok(arc1 <= bridge[3] * 1.15, `Arc W1 runs ${arc1} min after ${bridge[3]}`);
+});
+
+test('every work morning fits before work, and no alarm is set before 5:30', () => {
+  // The athlete's hours: pool opens at 6, leave at 7:45 on office days, at
+  // the desk by 8:15 at home. The plan must fit them, not the other way round.
+  const EARLIEST = toMin('05:30');
+  for (const week of clockWeeks()) {
+    for (const day of week.days) {
+      const am = morning(plan, day);
+      if (!am || am.status !== 'work') continue;
+      assert.equal(am.earlyBy, 0, `${label(week, day)} needs the pool ${am.earlyBy} min before it opens`);
+      assert.ok(am.alarm >= EARLIEST, `${label(week, day)} sets an alarm for ${clockText(am.alarm)}`);
+    }
+  }
+});
+
+test('a work morning happens in one place', () => {
+  for (const week of clockWeeks()) {
+    for (const day of week.days) {
+      const venues = new Set(day.sessions.filter(s => s.when === 'before-work').map(s => s.venue));
+      assert.ok(venues.size <= 1, `${label(week, day)} goes to ${[...venues].join(' and ')}`);
+    }
+  }
+});
+
+test('the Wednesday swim never outgrows its 45 minutes', () => {
+  // Pool at 6, out the door to work at 7:45. The long swims live on Friday.
+  for (const week of clockWeeks()) {
+    const wed = week.days.find(d => d.dayKey === 'wed');
+    for (const s of wed.sessions.filter(s => s.discipline === 'swim')) {
+      assert.ok(s.prescribed.value <= 2000, `${label(week, wed)} swims ${s.prescribed.value} m`);
+    }
+  }
+});
+
+test('every session on a work day is placed before work or at lunch', () => {
+  // A session with no slot sets no alarm, so it would quietly drop out of the
+  // night-before plan. Only a day off may leave a session unplaced.
+  for (const week of clockWeeks()) {
+    for (const day of week.days) {
+      if (!plan.schedule.workdays[day.dayKey] || plan.schedule.daysOff[day.date]) continue;
+      for (const s of day.sessions) {
+        assert.ok(['before-work', 'lunch'].includes(s.when), `${label(week, day)} ${s.title} is ${s.when}`);
+      }
+    }
+  }
+});
+
+test('the third run is Monday lunch, and the low day is Wednesday', () => {
+  for (const name of ['bridge', 'arcBase', 'arcBuild', 'arcRace', 'arcTaper']) {
+    const tpl = plan.weekTemplates[name];
+    assert.ok(tpl.days.mon.some(s => s.discipline === 'run'), `${name} has no Monday run`);
+    assert.ok(!tpl.days.wed.some(s => s.discipline === 'run'), `${name} still runs on Wednesday`);
+    assert.notEqual(tpl.dayTypes.mon, 'low', `${name} puts the deficit on a three-session day`);
+  }
+  for (const name of ['bridge', 'arcBase', 'arcBuild']) {
+    assert.equal(plan.weekTemplates[name].dayTypes.wed, 'low', name);
+  }
+});
+
+test('every kit and venue the plan names exists', () => {
+  const { routine, venues } = plan.schedule;
+  const named = [];
+  for (const day of Object.values(routine)) for (const r of Object.values(day)) named.push(r);
+  for (const tpl of Object.values(plan.weekTemplates)) {
+    for (const sessions of Object.values(tpl.days)) named.push(...sessions);
+  }
+  for (const r of named) {
+    for (const k of r.kit || []) assert.ok(plan.kit[k], `kit ${k} is not defined`);
+    if (r.venue) assert.ok(venues[r.venue], `venue ${r.venue} is not defined`);
+  }
+});
+
+test('every day off is a weekday inside the plan', () => {
+  const ordered = blocksInOrder(plan);
+  const first = ordered[0].start;
+  const last = addDays(ordered.at(-1).start, ordered.at(-1).weeks * 7 - 1);
+  for (const date of Object.keys(plan.schedule.daysOff)) {
+    assert.ok(date >= first && date <= last, `${date} is outside the plan`);
+    assert.ok(!['sat', 'sun'].includes(weekdayKey(date)), `${date} is a weekend`);
   }
 });
