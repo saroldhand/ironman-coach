@@ -1,5 +1,6 @@
 import { planStart, blocksInOrder } from './plan-model.js';
-import { addDays, monthLabel } from './date-utils.js';
+import { addDays, monthLabel, weekdayKey } from './date-utils.js';
+import { clockText, morning, kitFor, fuelBefore, tonight, weekSummary, weekHours, hoursText } from './schedule-model.js';
 
 const DOW = { mon: 'Monday', tue: 'Tuesday', wed: 'Wednesday', thu: 'Thursday',
               fri: 'Friday', sat: 'Saturday', sun: 'Sunday' };
@@ -106,11 +107,119 @@ function extrasSection(extras) {
   ]);
 }
 
+// ---- the clock ----
+// What a day costs before it starts: when to be up, when to be in bed the
+// night before, and what to lay out. The arithmetic is schedule-model's; this
+// only words it.
+
+const WHEN = { 'before-work': 'before work', lunch: 'lunch' };
+
+export function whenText(when) {
+  return WHEN[when] || null;
+}
+
+// "7.5 h of training · earliest alarm 5:30 am Tuesday"
+export function weekHeadline(summary) {
+  const parts = [];
+  if (summary.hours !== null && summary.hours !== undefined) parts.push(`${hoursText(summary.hours)} of training`);
+  if (summary.earliest) {
+    parts.push(`earliest alarm ${clockText(summary.earliest.alarm)} ${DOW[weekdayKey(summary.earliest.date)]}`);
+  }
+  return parts.join(' · ');
+}
+
+// "6:11" - the timeline already says morning; am/pm on every line is noise.
+function shortClock(min) {
+  return clockText(min).replace(/ (am|pm)$/, '');
+}
+
+function morningLines(am, when) {
+  const out = [el('p', { class: 'alarmline' }, [
+    el('span', { class: 'big' }, `Alarm ${clockText(am.alarm)}`),
+    el('span', { class: 'sub' }, `Lights out ${clockText(am.lightsOut)} ${when}`)
+  ])];
+  if (am.earlyBy) {
+    out.push(el('p', { class: 'warnline' },
+      `This doesn't fit: it needs you at the ${am.venue.label.toLowerCase()} ${am.earlyBy} min before it opens.`));
+  }
+  out.push(el('ol', { class: 'timeline' }, am.timeline.map(t =>
+    el('li', {}, [el('span', { class: 't' }, shortClock(t.at)), el('span', {}, t.label)]))));
+  return out;
+}
+
+function fuelLine(fuel) {
+  return fuel ? el('p', { class: 'effort' }, [el('strong', {}, 'Eat first? '), fuel]) : null;
+}
+
+function kitBlock(kit) {
+  if (!kit.length) return null;
+  return el('div', { class: 'kit' }, kit.map(k => el('div', { class: 'kitgroup' }, [
+    el('h3', {}, k.label),
+    el('ul', {}, k.items.map(i => el('li', {}, i)))
+  ])));
+}
+
+// The day's own clock card, at the top of its page.
+function dayClockCard(plan, resolved) {
+  const am = morning(plan, resolved);
+  const kit = kitFor(plan, resolved);
+  if (!am && !kit.length) return null;
+
+  const body = [];
+  if (am && am.status === 'work') {
+    body.push(el('h2', {}, ['Before work',
+      el('span', { class: 'prescribed' }, `${am.venue.label} · ${am.trainMin} min`)]));
+    body.push(...morningLines(am, 'the night before'));
+    body.push(fuelLine(fuelBefore(plan, resolved, am)));
+  } else if (am && am.status === 'off') {
+    body.push(el('h2', {}, ['Day off work', el('span', { class: 'prescribed' }, am.offLabel)]));
+    body.push(el('p', { class: 'effort' }, 'No alarm. Train when it suits.'));
+  } else {
+    body.push(el('h2', {}, 'Kit'));
+  }
+  if (kit.length && body.length > 1) body.push(el('p', { class: 'daymeta' }, 'Lay out the night before'));
+  body.push(kitBlock(kit));
+  return el('section', { class: 'card clock' }, body);
+}
+
+// Tonight, for tomorrow: the card to read before bed.
+function tonightCard(plan, today) {
+  const t = tonight(plan, today);
+  if (!t) return null;
+  const { day, morning: am, kit, fuel } = t;
+  const name = DOW[day.dayKey];
+
+  // A work day whose sessions carry no place (the lifting block predates the
+  // routine) says nothing about the alarm rather than claiming there is none.
+  const workday = Boolean(plan.schedule && plan.schedule.workdays[day.dayKey]);
+  const placed = day.sessions.every(s => s.when !== 'anytime');
+
+  const body = [el('h2', {}, ['Tonight', el('span', { class: 'prescribed' }, `for ${name}`)])];
+  if (am && am.status === 'work') body.push(...morningLines(am, 'tonight'));
+  else if (am && am.status === 'off') body.push(el('p', { class: 'effort' }, `${name} is a day off work (${am.offLabel}). No alarm.`));
+  else if (!workday) body.push(el('p', { class: 'effort' }, 'No work tomorrow. No alarm.'));
+  else if (placed) body.push(el('p', { class: 'effort' }, 'Nothing before work tomorrow.'));
+
+  body.push(day.sessions.length
+    ? el('ul', { class: 'tsessions' }, day.sessions.map(s => el('li', {}, [
+        el('span', { class: `dot ${s.discipline}` }),
+        `${s.title} · ${prescribedText(s.prescribed)}`,
+        whenText(s.when) ? ` · ${whenText(s.when)}` : '',
+        s.optional ? ' (optional)' : ''
+      ])))
+    : el('p', { class: 'effort' }, 'Nothing prescribed tomorrow.'));
+  body.push(fuelLine(fuel));
+  body.push(kitBlock(kit));
+  body.push(el('a', { class: 'more', href: `#/day/${day.date}` }, `${name} in full ›`));
+  return el('section', { class: 'card tonight' }, body);
+}
+
 function sessionCard(session, entry) {
   const status = entry ? entry.status : null;
 
   const head = el('h2', {}, [
     session.title,
+    whenText(session.when) ? el('span', { class: 'tag when' }, whenText(session.when)) : null,
     session.optional ? el('span', { class: 'tag optional' }, 'optional') : null,
     status ? el('span', { class: `tag ${status}` }, status) : null,
     el('span', { class: 'prescribed' }, prescribedText(session.prescribed))
@@ -163,11 +272,29 @@ function pageNav(nav) {
   return [pagerBar(nav.pager)];
 }
 
+// After midday the page is being read for tomorrow, so tonight's card comes
+// first; in the morning it waits at the bottom, below the work of the day.
+export function tonightFirst(hour) {
+  return hour >= 12;
+}
+
 export function renderDay(ctx) {
-  const { plan, day, week, entriesByKey, extras, date, today, nav } = ctx;
+  const { plan, date, today, nav, hour = 0 } = ctx;
   const out = el('div', { class: 'dayview' });
 
   out.append(...pageNav(nav));
+
+  const tonightEl = date === today ? tonightCard(plan, today) : null;
+  const first = Boolean(tonightEl) && tonightFirst(hour);
+  dayBody(ctx, out, first ? tonightEl : null);
+  if (tonightEl && !first) out.append(tonightEl);
+  return out;
+}
+
+// The day itself. `lead` goes straight under the heading, ahead of the day's
+// own sessions.
+function dayBody(ctx, out, lead) {
+  const { plan, day, week, entriesByKey, extras, date, today } = ctx;
 
   if (!day.inPlan) {
     const msg = day.reason === 'before-start'
@@ -199,15 +326,25 @@ export function renderDay(ctx) {
     return out;
   }
 
+  if (lead) out.append(lead);
+
   const resolved = week.days.find(d => d.dayKey === day.dayKey);
+
+  const clock = dayClockCard(plan, resolved);
+  if (clock) out.append(clock);
 
   for (const session of resolved.sessions) {
     out.append(sessionCard(session, entriesByKey.get(session.key)));
   }
 
+  // The weight target belongs on the days that do the work of reaching it.
+  const types = plan.nutrition.types;
+  const deficitDay = resolved.nutrition === types.low || resolved.nutrition === types.moderate;
+
   out.append(el('section', { class: 'card' }, [
     el('h2', {}, ['Nutrition', el('span', { class: 'prescribed' }, resolved.nutrition.label)]),
     el('p', { class: 'effort' }, resolved.nutrition.approach),
+    deficitDay && plan.nutrition.weight ? el('p', { class: 'effort' }, plan.nutrition.weight) : null,
     el('p', { class: 'daymeta' }, 'Fuelling'),
     el('ul', { class: 'detail' }, fuelLines(plan, resolved).map(l => el('li', {}, l))),
     el('ul', { class: 'detail' }, plan.nutrition.nonNegotiables.map(n => el('li', {}, n)))
@@ -223,7 +360,7 @@ const DOW_SHORT = { mon: 'Mon', tue: 'Tue', wed: 'Wed', thu: 'Thu',
                     fri: 'Fri', sat: 'Sat', sun: 'Sun' };
 
 export function renderWeek(ctx) {
-  const { week, entriesByKey, today, nav } = ctx;
+  const { plan, week, entriesByKey, today, nav } = ctx;
   const out = el('div');
 
   const title = [
@@ -239,6 +376,12 @@ export function renderWeek(ctx) {
       `Week of ${week.startDate}. Not written yet — ${week.note || ''}`));
     return out;
   }
+
+  // The week's cost, read on a Sunday night: hours, and the earliest alarm.
+  const clock = plan && plan.schedule ? weekSummary(plan, week) : null;
+  const headline = clock ? weekHeadline(clock) : '';
+  if (headline) out.append(el('p', { class: 'daymeta weekhead' }, headline));
+  const daysOff = (plan && plan.schedule && plan.schedule.daysOff) || {};
 
   const list = el('div', { class: 'weeklist' });
 
@@ -266,7 +409,12 @@ export function renderWeek(ctx) {
       class: `dayrow${day.date === today ? ' today' : ''}`,
       href: `#/day/${day.date}`
     }, [
-      el('span', { class: 'dow' }, `${DOW_SHORT[day.dayKey]} ${day.date.slice(8)}`),
+      el('span', { class: 'dow' }, [
+        `${DOW_SHORT[day.dayKey]} ${day.date.slice(8)}`,
+        clock && clock.alarms.has(day.date)
+          ? el('span', { class: 'alarm' }, `up ${shortClock(clock.alarms.get(day.date))}`)
+          : (daysOff[day.date] ? el('span', { class: 'alarm off' }, 'off work') : null)
+      ]),
       sessions
     ]));
   }
@@ -310,6 +458,8 @@ export function renderSeason(ctx) {
           `${block.label} W${n}${week.type === 'recovery' ? ' ↓' : ''}`),
         el('span', { class: 'daymeta date' }, week.startDate),
         el('span', { class: 'daymeta phase' }, phase || ''),
+        el('span', { class: 'daymeta hrs' },
+          week.authored && plan.schedule ? hoursText(weekHours(week, plan.schedule)) : ''),
         el('span', { class: 'bar' }, el('span', { style: `width:${c.pct ?? 0}%` })),
         el('span', { class: 'pct' }, c.pct === null ? '—' : `${c.pct}%`)
       ]));
