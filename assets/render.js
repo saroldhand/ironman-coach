@@ -22,16 +22,18 @@ export function el(tag, attrs = {}, children = []) {
   return node;
 }
 
-// Race-length distances read in kilometres - "90,000 m" looks like a typo -
-// while pool distances stay in metres.
-function distanceText(metres) {
-  return metres >= 10000
-    ? `${Number((metres / 1000).toFixed(1))} km`
-    : `${Math.round(metres).toLocaleString()} m`;
+const METRES_PER_MILE = 1609.344;
+
+// Rides and runs read in miles, the athlete's units. Swims stay in metres:
+// the pool sets are written in metres, and a swim in miles reads as a typo.
+// Everything underneath is metres; only the words change.
+export function distanceText(metres, discipline = 'swim') {
+  if (discipline === 'swim') return `${Math.round(metres).toLocaleString()} m`;
+  return `${(metres / METRES_PER_MILE).toFixed(1)} mi`;
 }
 
-export function prescribedText(p) {
-  return p.metric === 'distance' ? distanceText(p.value) : `${p.value} min`;
+export function prescribedText(p, discipline = 'swim') {
+  return p.metric === 'distance' ? distanceText(p.value, discipline) : `${p.value} min`;
 }
 
 const SUMMARY_MAX = 38;
@@ -61,11 +63,12 @@ function truncate(text, max) {
   return text.length <= max ? text : `${text.slice(0, max - 1)}…`;
 }
 
-function actualText(strava, metric) {
+function actualText(strava, session) {
   const mins = Math.round(strava.movingTime / 60);
-  const parts = metric === 'distance'
-    ? [distanceText(strava.distance), `${mins} min`]
-    : [`${mins} min`, `${(strava.distance / 1000).toFixed(1)} km`];
+  const distance = distanceText(strava.distance, session.discipline);
+  const parts = session.prescribed.metric === 'distance'
+    ? [distance, `${mins} min`]
+    : [`${mins} min`, distance];
   if (strava.avgHr) parts.push(`${Math.round(strava.avgHr)} bpm avg`);
   return parts.join(' · ');
 }
@@ -119,10 +122,8 @@ export function durationText(minutes) {
   return `${Math.floor(m / 60)}:${String(m % 60).padStart(2, '0')}`;
 }
 
-// Rides and runs in km whatever their length; swims in metres.
 function doneDistance(discipline, metres) {
-  if (discipline === 'swim') return distanceText(metres);
-  return `${(metres / 1000).toFixed(1)} km`;
+  return distanceText(metres, discipline);
 }
 
 const DISCIPLINE_LABEL = { swim: 'Swim', bike: 'Bike', run: 'Run', strength: 'Lift' };
@@ -319,7 +320,7 @@ function tonightCard(plan, today) {
   body.push(day.sessions.length
     ? el('ul', { class: 'tsessions' }, day.sessions.map(s => el('li', {}, [
         el('span', { class: `dot ${s.discipline}` }),
-        `${s.title} · ${prescribedText(s.prescribed)}`,
+        `${s.title} · ${prescribedText(s.prescribed, s.discipline)}`,
         whenText(s.when) ? ` · ${whenText(s.when)}` : '',
         s.optional ? ' (optional)' : ''
       ])))
@@ -338,7 +339,7 @@ function sessionCard(session, entry) {
     whenText(session.when) ? el('span', { class: 'tag when' }, whenText(session.when)) : null,
     session.optional ? el('span', { class: 'tag optional' }, 'optional') : null,
     status ? el('span', { class: `tag ${status}` }, status) : null,
-    el('span', { class: 'prescribed' }, prescribedText(session.prescribed))
+    el('span', { class: 'prescribed' }, prescribedText(session.prescribed, session.discipline))
   ]);
 
   const body = [head, el('p', { class: 'effort' }, session.effort)];
@@ -352,7 +353,7 @@ function sessionCard(session, entry) {
   if (entry && entry.strava) {
     body.push(el('div', { class: 'actual' }, [
       'Recorded: ',
-      actualText(entry.strava, session.prescribed.metric),
+      actualText(entry.strava, session),
       ' — ',
       el('a', { href: entry.strava.url, target: '_blank', rel: 'noopener' }, 'Strava')
     ]));
@@ -549,7 +550,7 @@ export function renderWeek(ctx) {
       sessions.append(el('div', { class: `wsession${s.optional ? ' optional' : ''}` }, [
         entry ? el('span', { class: `dot ${entry.status}` }) : el('span', { class: 'dot' }),
         el('span', { class: 'wname' }, s.title),
-        el('span', { class: 'wamount' }, prescribedText(s.prescribed)),
+        el('span', { class: 'wamount' }, prescribedText(s.prescribed, s.discipline)),
         summary ? el('span', { class: 'wsummary' }, summary) : null
       ]));
     }
