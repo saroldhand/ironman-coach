@@ -113,7 +113,10 @@ as lifting. A bar fills toward a target, and its label says which:
 - with no plan, your typical week or month: the median of the periods in which
   you did that discipline, so one big touring week does not flatten the rest.
 
-A period with nothing recorded shows dashes, not zeros: no data is not rest.
+Every plan week and plan month shows its bars from the start, empty against
+its planned totals, and they fill as the nightly sync records workouts: a
+period still under way reads as progress so far, from zero. Only a period that
+is over and recorded nothing shows dashes, not zeros: no data is not rest.
 
 The nightly Claude scheduled task follows `scripts/sync-runbook.md`: it fetches the
 day's activities with the Strava connector's `list_activities` and hands them to
