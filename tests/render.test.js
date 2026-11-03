@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { prescribedText, summaryLine, fuelLines, whenText, weekHeadline, tonightFirst, durationText, disciplineBars } from '../assets/render.js';
+import { prescribedText, distanceText, summaryLine, fuelLines, whenText, weekHeadline, tonightFirst, durationText, disciplineBars } from '../assets/render.js';
 
 test('prescribedText formats distances in metres with thousands separators', () => {
   assert.equal(prescribedText({ metric: 'distance', value: 2000, unit: 'm' }), '2,000 m');
@@ -66,8 +66,11 @@ test('summaryLine returns empty string when there is nothing to summarise', () =
 test('prescribedText switches to kilometres at race-length distances', () => {
   // Race day prescribes the bike and run by distance; "90,000 m" reads as a
   // typo. Pool distances stay in metres.
-  assert.equal(prescribedText({ metric: 'distance', value: 90000, unit: 'm' }), '90 km');
-  assert.equal(prescribedText({ metric: 'distance', value: 21100, unit: 'm' }), '21.1 km');
+  assert.equal(prescribedText({ metric: 'distance', value: 90000, unit: 'm' }, 'bike'), '55.9 mi');
+  assert.equal(prescribedText({ metric: 'distance', value: 21100, unit: 'm' }, 'run'), '13.1 mi');
+  // Swims stay in metres, however long: the pool sets are written in metres.
+  assert.equal(prescribedText({ metric: 'distance', value: 1900, unit: 'm' }, 'swim'), '1,900 m');
+  assert.equal(distanceText(11700, 'swim'), '11,700 m');
   assert.equal(prescribedText({ metric: 'distance', value: 9999, unit: 'm' }), '9,999 m');
   assert.equal(prescribedText({ metric: 'distance', value: 1900, unit: 'm' }), '1,900 m');
 });
@@ -157,10 +160,10 @@ test('in a planned week each bar fills toward the plan, and ride and run distanc
                                run: { minutes: 40, metres: 5520, count: 1 } });
   assert.deepEqual(pick(disciplineBars({ actuals: done, planned, typical, speed })), {
     Swim: [['0:54', '1:48 planned', 50, false], ['2,150 m', '4,300 m planned', 50, false]],
-    // 2:00 at 6 m/s is 43.2 km - an estimate, so marked ≈. Past it, the bar
+    // 2:00 at 6 m/s is 43.2 km, 26.8 mi - an estimate, so marked ≈. Past it, the bar
     // stops at full and says so.
-    Bike: [['2:30', '2:00 planned', 100, true], ['50.0 km', '≈43.2 km planned', 100, true]],
-    Run: [['0:40', '1:20 planned', 50, false], ['5.5 km', '≈11.0 km planned', 50, false]],
+    Bike: [['2:30', '2:00 planned', 100, true], ['31.1 mi', '≈26.8 mi planned', 100, true]],
+    Run: [['0:40', '1:20 planned', 50, false], ['3.4 mi', '≈6.9 mi planned', 50, false]],
     // Lifting has a time bar only.
     Lift: [['0:00', '0:35 planned', 0, false]]
   });
@@ -169,7 +172,7 @@ test('in a planned week each bar fills toward the plan, and ride and run distanc
 test('with no plan, bars fill toward the typical week or month', () => {
   const done = actuals(true, { bike: { minutes: 1600, metres: 570800, count: 6 } });
   const rows = pick(disciplineBars({ actuals: done, planned: { days: 0, byDiscipline: {} }, typical, speed, period: 'month' }));
-  assert.deepEqual(rows.Bike, [['26:40', 'typical month 1:40', 100, true], ['570.8 km', 'typical month 37.0 km', 100, true]]);
+  assert.deepEqual(rows.Bike, [['26:40', 'typical month 1:40', 100, true], ['354.7 mi', 'typical month 23.0 mi', 100, true]]);
   assert.deepEqual(rows.Swim, [['0:00', 'typical month 0:50', 0, false], ['0 m', 'typical month 1,000 m', 0, false]]);
 });
 

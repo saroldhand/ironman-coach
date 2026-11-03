@@ -802,7 +802,7 @@
             ] },
           { "discipline": "run", "title": "Race run",
             "prescribed": { "metric": "distance", "value": 21100, "unit": "m" },
-            "effort": "Ease into it - the first 5 km at the bottom of race effort. It will feel too easy; then settle in.",
+            "effort": "Ease into it - the first 3 miles at the bottom of race effort. It will feel too easy; then settle in.",
             "detail": [
               "Heat decides this leg: ice in your hat and tri suit, a sponge and a drink at every aid station.",
               "Walk the aid stations if that's what it takes to cool down, eat and drink.",
