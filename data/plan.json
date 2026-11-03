@@ -25,12 +25,12 @@
       "days": {
         "mon": [
           { "discipline": "swim", "title": "Technique swim",
-            "prescribed": { "metric": "distance", "value": 1500, "unit": "m" },
+            "prescribed": { "metric": "distance", "value": 1200, "unit": "m" },
             "effort": "Easy throughout. Technique is the point, not the distance.",
             "setLines": [
               "300 easy free",
               "8 × 50 drill - 20s rest (rotate: fingertip drag, catch-up, single-arm, 6-3-6)",
-              "6 × 100 on ONE cue only - 20s rest",
+              "3 × 100 on ONE cue only - 20s rest",
               "200 easy cooldown"
             ],
             "detail": [
@@ -129,12 +129,12 @@
       "days": {
         "mon": [
           { "discipline": "swim", "title": "Technique swim",
-            "prescribed": { "metric": "distance", "value": 1500, "unit": "m" },
+            "prescribed": { "metric": "distance", "value": 1200, "unit": "m" },
             "effort": "Easy throughout. Technique is the point, not the distance.",
             "setLines": [
               "300 easy free",
               "8 × 50 drill - 20s rest (rotate: fingertip drag, catch-up, single-arm, 6-3-6)",
-              "6 × 100 on ONE cue only - 20s rest",
+              "3 × 100 on ONE cue only - 20s rest",
               "200 easy cooldown"
             ],
             "detail": [
@@ -816,26 +816,26 @@
     "bridge": [
       { "week": 1, "type": "build", "template": "bridge", "strMin": 35, "monRunMin": 15,
         "tueTitle": "Easy bike", "tueMin": 45, "tueEffort": "Zone 2 - 65-75% max HR. Easy spinning: this is the habit, not the workout.",
-        "wedSwimM": 1800, "wedMain": "9 × 100 steady - 20s rest",
+        "wedSwimM": 1500, "wedMain": "6 × 100 steady - 20s rest",
         "thuTitle": "Easy run", "thuMin": 30, "thuEffort": "Zone 2 - 65-75% max HR.",
-        "friSwimM": 1800, "friMain": "7 × 100 steady - 15s rest",
+        "friSwimM": 1600, "friMain": "5 × 100 steady - 15s rest",
         "rideMin": 75, "satEffort": "Zone 2 - 65-75% max HR, 56-75% FTP.",
         "runMin": 35, "sunEffort": "Zone 2. Slower than you think." },
       { "week": 2, "type": "build", "template": "bridge", "strMin": 35, "monRunMin": 15,
         "tueTitle": "Easy bike", "tueMin": 60, "tueEffort": "Zone 2 with 6 × 30s spin-ups - 110+ rpm in an easy gear, 90s easy between.",
-        "wedSwimM": 2000, "wedMain": "3 × 300 steady - 30s rest, then 4 × 50 build",
+        "wedSwimM": 1700, "wedMain": "2 × 300 steady - 30s rest, then 4 × 50 build",
         "thuTitle": "Easy run + strides", "thuMin": 35, "thuEffort": "Zone 2 - 65-75% max HR. Finish with 6 × 20s strides.",
-        "friSwimM": 2000, "friMain": "3 × 300 steady - 30s rest",
+        "friSwimM": 1800, "friMain": "2 × 350 steady - 30s rest",
         "rideMin": 90, "satEffort": "Zone 2 - 65-75% max HR, 56-75% FTP.",
         "runMin": 45, "sunEffort": "Zone 2. Slower than you think." },
       { "week": 3, "type": "recovery", "template": "bridgeAway", "strMin": 30, "monRunMin": 15,
         "tueTitle": "Easy bike", "tueMin": 45, "tueEffort": "Zone 2 - 65-75% max HR. Easy spinning.",
-        "wedSwimM": 1800, "wedMain": "6 × 150 steady - 20s rest",
+        "wedSwimM": 1500, "wedMain": "4 × 150 steady - 20s rest",
         "runMin": 40, "sunEffort": "Zone 2. Slower than you think." },
       { "week": 4, "type": "build", "template": "bridgeBack",
-        "wedSwimM": 2000, "wedMain": "4 × 250 steady - 30s rest, then 2 × 50 build",
+        "wedSwimM": 1700, "wedMain": "4 × 200 steady - 30s rest",
         "thuTitle": "Easy run + strides", "thuMin": 40, "thuEffort": "Zone 2 - 65-75% max HR. Finish with 6 × 20s strides.",
-        "friSwimM": 2000, "friMain": "600 non-stop, then 3 × 100 steady - 15s rest",
+        "friSwimM": 1800, "friMain": "500 non-stop, then 2 × 100 steady - 15s rest",
         "rideMin": 105, "satEffort": "Zone 2 - 65-75% max HR, 56-75% FTP. The first ride on the new trainer, if it's here.",
         "runMin": 50, "sunEffort": "Zone 2. Slower than you think." }
     ],
@@ -1069,7 +1069,7 @@
     "wakeToDoorMin": 15,
     "afterMin": 30,
     "betweenSessionsMin": 5,
-    "swimSecPer100": 135,
+    "swimSecPer100": 150,
     "workdays": {
       "mon": { "readyBy": "08:15", "label": "At your desk" },
       "tue": { "readyBy": "07:45", "label": "Leave for work" },

@@ -30,8 +30,11 @@ Working directory: the repo root.
 3. **Run the sync:**
 
    ```bash
-   node scripts/sync.mjs <from> <to> <scratch-activities.json>
+   TZ=America/New_York node scripts/sync.mjs <from> <to> <scratch-activities.json>
    ```
+
+   `TZ` makes "today" the athlete's today (Ohio), whatever clock the machine
+   keeps. "Yesterday" is `TZ=America/New_York date -d yesterday +%F`.
 
    It matches every date's activities to that date's sessions, merges them
    into `data/log.json`, and writes a successful run to `data/sync-status.json`.

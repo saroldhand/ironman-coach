@@ -116,15 +116,17 @@ test('an hour or more, or a quality day, gets carbs before leaving', () => {
 
 // ---- against the real plan
 
-test('Bridge W1 Monday: pool at 6, desk at 8:15, alarm 5:40', () => {
+test('Bridge W1 Monday: pool at 6, desk at 8:15, alarm 5:45', () => {
   const p = dayPlan(plan, '2026-11-09');
   assert.equal(p.where.blockId, 'bridge');
   assert.equal(p.morning.venue.key, 'pool');
   assert.deepEqual(p.morning.sessions.map(s => s.discipline), ['swim', 'strength']);
-  assert.equal(clockText(p.morning.alarm), '5:40 am');
-  assert.equal(clockText(p.morning.lightsOut), '9:40 pm');
+  // 1,200 m at 2:30 per 100 m (30 min), changeover, 35 min of strength: in
+  // the building at 6:10, so up at 5:45.
+  assert.equal(clockText(p.morning.alarm), '5:45 am');
+  assert.equal(clockText(p.morning.lightsOut), '9:45 pm');
   assert.deepEqual(p.kit.map(k => k.key), ['pool', 'gym', 'run']);
-  // Seventy-odd minutes of swim and lifting: eat first.
+  // Seventy minutes of swim and lifting: eat first.
   assert.equal(p.fuel, plan.nutrition.fuel.beforeLong);
 });
 
@@ -160,14 +162,14 @@ test('the week summary counts hours and finds the earliest alarm', () => {
   assert.equal(s.hours, weekHours(week, plan.schedule));
   assert.ok(s.hours > 5 && s.hours < 6.5, `bridge W1 is ${s.hours} h`);
   assert.equal(s.alarms.size, 5);
-  assert.equal(clockText(s.earliest.alarm), '5:40 am');
+  assert.equal(clockText(s.earliest.alarm), '5:45 am');
 });
 
 test('the plan by discipline gives minutes for all and metres for the swims', () => {
   const week = resolveWeek(plan, 'bridge', 1);
   const p = plannedByDiscipline(week, plan.schedule);
-  // Swims 1,500 + 1,800 + 1,800 m at 2:15 per 100 m: 34 + 41 + 41 min.
-  assert.deepEqual(p.swim, { minutes: 116, metres: 5100 });
+  // Swims 1,200 + 1,500 + 1,600 m at 2:30 per 100 m: 30 + 38 + 40 min.
+  assert.deepEqual(p.swim, { minutes: 108, metres: 4300 });
   assert.deepEqual(p.bike, { minutes: 45 + 75, metres: 0 });
   assert.deepEqual(p.run, { minutes: 15 + 30 + 35, metres: 0 });
   assert.deepEqual(p.strength, { minutes: 35, metres: 0 });
