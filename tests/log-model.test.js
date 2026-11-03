@@ -2,7 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { resolveWeek } from '../assets/plan-model.js';
-import { statusFor, matchDay, mergeEntries, weekCompletion, weekActuals, normaliseActivity, syncRange } from '../assets/log-model.js';
+import { statusFor, matchDay, mergeEntries, weekCompletion, weekActuals, normaliseActivity, syncRange,
+         actualsBetween, typicalPeriod, usualSpeed, mondayOf, isTraining } from '../assets/log-model.js';
 
 const plan = JSON.parse(readFileSync(new URL('../data/plan.json', import.meta.url)));
 // Bridge W2, Nov 16-22: a 60-minute Tuesday ride, a 2,000 m Wednesday swim,
@@ -184,8 +185,8 @@ test('weekly actuals add up every recorded activity in the week, by discipline',
   assert.deepEqual(a.byDiscipline.run, { minutes: 26, metres: 4900, count: 2 });
   assert.deepEqual(a.byDiscipline.bike, { minutes: 90, metres: 45000, count: 1 });
   assert.deepEqual(a.byDiscipline.strength, { minutes: 0, metres: 0, count: 0 });
-  // A walk is recorded but sits outside the training total.
-  assert.deepEqual(a.byDiscipline.other, { minutes: 40, metres: 3500, count: 1 });
+  // A walk is recorded but is not training: it counts nowhere.
+  assert.deepEqual(Object.keys(a.byDiscipline), ['swim', 'bike', 'run', 'strength']);
   assert.equal(a.total.minutes, 79 + 26 + 90);
   assert.equal(a.total.count, 5);
 });
@@ -225,7 +226,8 @@ test('a sync matches each date in the range to its own sessions', () => {
   const { entries, days } = syncRange(plan, [], activities, '2026-11-08', '2026-11-11', '2026-11-11');
 
   assert.deepEqual(days, [
-    { date: '2026-11-08', activities: 0, skipped: 'before-start' },
+    // Before the plan (a history week) nothing is prescribed, so nothing is due.
+    { date: '2026-11-08', activities: 0, entries: 0 },
     { date: '2026-11-09', activities: 3, entries: 3 },
     { date: '2026-11-10', activities: 2, entries: 2 },
     // Today: the swim not done yet stays blank rather than missed.
@@ -251,4 +253,53 @@ test('re-syncing a range changes nothing', () => {
   const once = syncRange(plan, [], activities, '2026-11-10', '2026-11-10', '2026-11-12').entries;
   const twice = syncRange(plan, once, activities, '2026-11-10', '2026-11-10', '2026-11-12').entries;
   assert.deepEqual(twice, once);
+});
+
+test('walks and hikes are not training; HIIT counts as lifting', () => {
+  assert.equal(isTraining('Walk'), false);
+  assert.equal(isTraining('Hike'), false);
+  assert.equal(isTraining('Run'), true);
+  const hiit = act('2026-10-01', 'HighIntensityIntervalTraining', 42 * 60, 0, 1);
+  const a = actualsBetween([hiit], '2026-09-28', '2026-10-05');
+  assert.equal(a.byDiscipline.strength.minutes, 42);
+});
+
+test('actuals cover any range, end exclusive', () => {
+  const entries = [act('2026-09-30', 'Run', 30 * 60, 5000, 1), act('2026-10-01', 'Run', 20 * 60, 3000, 2)];
+  assert.equal(actualsBetween(entries, '2026-09-01', '2026-10-01').byDiscipline.run.metres, 5000);
+  assert.equal(actualsBetween(entries, '2026-10-01', '2026-11-01').byDiscipline.run.metres, 3000);
+});
+
+test('weeks start on Monday', () => {
+  assert.equal(mondayOf('2026-09-13'), '2026-09-07', 'a Sunday belongs to the week before');
+  assert.equal(mondayOf('2026-09-14'), '2026-09-14');
+});
+
+test('a typical week is the median of the weeks that had the discipline, so one huge week does not set it', () => {
+  const entries = [
+    act('2026-08-10', 'Ride', 60 * 60, 20000, 1),
+    act('2026-08-17', 'Ride', 90 * 60, 30000, 2),
+    act('2026-09-07', 'Ride', 1600 * 60, 570000, 3),   // the touring week
+    act('2026-08-10', 'Swim', 40 * 60, 1000, 4)
+  ];
+  const t = typicalPeriod(entries, 'week');
+  assert.deepEqual(t.bike, { minutes: 90, metres: 30000 });
+  assert.deepEqual(t.swim, { minutes: 40, metres: 1000 }, 'weeks without a swim are not zeros in the median');
+  assert.deepEqual(t.strength, { minutes: 0, metres: 0 });
+  // By month: August (150 min) and September (1,600): the median of two is their mean.
+  assert.deepEqual(typicalPeriod(entries, 'month').bike, { minutes: 875, metres: 310000 });
+});
+
+test('usual speed is all the distance over all the moving time', () => {
+  const s = usualSpeed([act('2026-08-10', 'Run', 1000, 2500, 1), act('2026-08-12', 'Run', 1000, 2000, 2)]);
+  assert.ok(Math.abs(s.run - 4500 / 2000) < 1e-9, `run speed ${s.run}`);
+  assert.equal(s.bike, null, 'no rides, no speed');
+});
+
+test('the back-filled history keeps every activity, walks included, as extras', () => {
+  // The log is real data: whatever it holds, nothing before the Bridge can be
+  // matched to a session, because no session was set.
+  for (const e of JSON.parse(readFileSync(new URL('../data/log.json', import.meta.url))).entries) {
+    if (e.date < '2026-11-09') assert.equal(e.status, 'extra', `${e.date} ${e.planKey}`);
+  }
 });

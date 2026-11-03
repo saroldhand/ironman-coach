@@ -11,11 +11,12 @@ test('race date and blocks are anchored correctly', () => {
   assert.equal(plan.race.date, '2027-06-05');
   const ids = plan.blocks.map(b => b.id);
   // The plan starts at the Bridge: Prep and the lifting block were cut on
-  // 2026-11-02, once nothing before Nov 9 mattered any more.
-  assert.deepEqual(ids, ['bridge', 'arc']);
+  // 2026-11-02. The weeks before it are history: what Strava recorded, from
+  // the first recorded activity (Mon 2026-08-03) up to the Bridge.
+  assert.deepEqual(ids, ['history', 'bridge', 'arc']);
   assert.deepEqual(
     plan.blocks.map(b => [b.start, b.weeks]),
-    [['2026-11-09', 4], ['2026-12-07', 26]]
+    [['2026-08-03', 14], ['2026-11-09', 4], ['2026-12-07', 26]]
   );
 });
 
@@ -31,6 +32,13 @@ test('every block is authored, through race day', () => {
   for (const id of ['bridge', 'arc']) {
     assert.equal(plan.blocks.find(b => b.id === id).authored, true, id);
   }
+});
+
+test('the history block prescribes nothing', () => {
+  const history = plan.blocks.find(b => b.id === 'history');
+  assert.equal(history.history, true);
+  assert.ok(!history.authored, 'no sessions, by design');
+  assert.ok(!plan.progression.history, 'and no progression rows');
 });
 
 test('nothing from before the Bridge is left in the plan', () => {

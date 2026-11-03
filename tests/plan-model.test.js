@@ -6,7 +6,22 @@ import { dayForDate, planStart, blocksInOrder, weekNav, monthRows } from '../ass
 const plan = JSON.parse(readFileSync(new URL('../data/plan.json', import.meta.url)));
 
 test('a date before the plan starts is not in the plan', () => {
-  assert.deepEqual(dayForDate(plan, '2026-11-08'), { inPlan: false, reason: 'before-start' });
+  assert.deepEqual(dayForDate(plan, '2026-08-02'), { inPlan: false, reason: 'before-start' });
+});
+
+test('a day before the Bridge is a history day: in the site, with nothing prescribed', () => {
+  const d = dayForDate(plan, '2026-11-08');
+  assert.equal(d.inPlan, true);
+  assert.equal(d.blockId, 'history');
+  assert.equal(d.week, 14);
+  assert.equal(d.history, true);
+  assert.equal(d.authored, false);
+  assert.equal(d.weekType, 'history');
+  const w = resolveWeek(plan, 'history', 6);
+  assert.equal(w.history, true);
+  assert.equal(w.type, 'history');
+  assert.equal(w.startDate, '2026-09-07');
+  assert.deepEqual(w.days, []);
 });
 
 test('a date after the plan ends is not in the plan', () => {
@@ -56,13 +71,13 @@ test('block order in plan.json does not affect the result', () => {
   assert.equal(d.week, 1);
 
   // And the out-of-plan reasons must still be the right way round.
-  assert.deepEqual(dayForDate(shuffled, '2026-11-08'), { inPlan: false, reason: 'before-start' });
+  assert.deepEqual(dayForDate(shuffled, '2026-08-02'), { inPlan: false, reason: 'before-start' });
   assert.deepEqual(dayForDate(shuffled, '2027-06-07'), { inPlan: false, reason: 'after-end' });
 });
 
 test('planStart is the earliest block regardless of array order', () => {
-  assert.equal(planStart(plan), '2026-11-09');
-  assert.equal(planStart({ ...plan, blocks: [...plan.blocks].reverse() }), '2026-11-09');
+  assert.equal(planStart(plan), '2026-08-03');
+  assert.equal(planStart({ ...plan, blocks: [...plan.blocks].reverse() }), '2026-08-03');
 });
 
 import { resolveWeek } from '../assets/plan-model.js';
@@ -181,27 +196,28 @@ test('each day carries the nutrition day type its template names', () => {
 });
 
 test('blocksInOrder sorts chronologically regardless of array order', () => {
-  assert.deepEqual(blocksInOrder(plan).map(b => b.id), ['bridge', 'arc']);
+  assert.deepEqual(blocksInOrder(plan).map(b => b.id), ['history', 'bridge', 'arc']);
   const shuffled = { ...plan, blocks: [...plan.blocks].reverse() };
-  assert.deepEqual(blocksInOrder(shuffled).map(b => b.id), ['bridge', 'arc']);
+  assert.deepEqual(blocksInOrder(shuffled).map(b => b.id), ['history', 'bridge', 'arc']);
 });
 
 test('weekNav walks across block boundaries', () => {
   // Last week of the Bridge -> first week of the Arc, and back.
   assert.deepEqual(weekNav(plan, 'bridge', 1).next, { blockId: 'bridge', week: 2 });
+  assert.deepEqual(weekNav(plan, 'bridge', 1).prev, { blockId: 'history', week: 14 });
   assert.deepEqual(weekNav(plan, 'bridge', 4).next, { blockId: 'arc', week: 1 });
   assert.deepEqual(weekNav(plan, 'arc', 1).prev, { blockId: 'bridge', week: 4 });
 });
 
 test('weekNav returns null at both ends of the plan', () => {
-  assert.equal(weekNav(plan, 'bridge', 1).prev, null);
+  assert.equal(weekNav(plan, 'history', 1).prev, null);
   assert.equal(weekNav(plan, 'arc', 26).next, null);
 });
 
 test('weekNav does not depend on the order blocks appear in plan.json', () => {
   const shuffled = { ...plan, blocks: [...plan.blocks].reverse() };
   assert.deepEqual(weekNav(shuffled, 'bridge', 4).next, { blockId: 'arc', week: 1 });
-  assert.equal(weekNav(shuffled, 'bridge', 1).prev, null);
+  assert.equal(weekNav(shuffled, 'history', 1).prev, null);
   assert.equal(weekNav(shuffled, 'arc', 26).next, null);
 });
 
@@ -250,20 +266,20 @@ test('monthRows resolves sessions for an authored day with the same keys as the 
 });
 
 test('monthRows marks dates outside every block as not in the plan', () => {
-  const rows = monthRows(plan, '2026-11');
+  const rows = monthRows(plan, '2026-08');
   const cells = rows.flatMap(r => r.cells).filter(Boolean);
-  const before = cells.find(c => c.date === '2026-11-08');
+  const before = cells.find(c => c.date === '2026-08-02');
   assert.equal(before.inPlan, false);
   assert.deepEqual(before.sessions, []);
-  assert.equal(cells.find(c => c.date === '2026-11-09').inPlan, true);
+  assert.equal(cells.find(c => c.date === '2026-08-03').inPlan, true);
+  assert.equal(cells.find(c => c.date === '2026-08-03').history, true);
 });
 
 test('monthRows leaves a row with no plan days unlabelled', () => {
-  // The first two rows of November 2026 are entirely before the plan starts.
-  const rows = monthRows(plan, '2026-11');
+  // August 2026 opens on Sat 1 Aug, two days before the first history week.
+  const rows = monthRows(plan, '2026-08');
   assert.equal(rows[0].week, null);
-  assert.equal(rows[1].week, null);
-  assert.deepEqual(rows[2].week && [rows[2].week.blockId, rows[2].week.week], ['bridge', 1]);
+  assert.deepEqual(rows[1].week && [rows[1].week.blockId, rows[1].week.week], ['history', 1]);
 });
 
 test('monthRows flags recovery weeks so the calendar can mark them', () => {

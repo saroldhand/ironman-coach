@@ -237,3 +237,12 @@ The clock now reads:
 | Arc W19 | 12.3 h | 5:40 | 5:30 | 5:35 | 6:00 | 5:40 |
 
 The earliest alarm is still 5:30, on the 90′ Tuesday rides.
+
+## 11. Amended 2026-11-03: history and what was done
+
+The athlete asked for every week from August to be back-filled with only their Strava data, for each week to show a time bar and a distance bar per discipline (time only for lifting), and for months to combine them into monthly totals. Walks and hikes are left out.
+
+- **History block.** `{ "id": "history", "start": "2026-08-03", "weeks": 14, "history": true }` runs from the first recorded activity to the day before Bridge W1. It has no progression, so nothing is prescribed. Day, week and month pages show what Strava recorded instead of "not written yet". The sync records its activities as `extra`.
+- **Back-fill.** 81 activities from Aug 3 to Nov 2 were fetched with `list_activities` and written by `scripts/sync.mjs`. Thirteen of them are walks and hikes, which stay in the log but are not counted or shown.
+- **Bars.** Each bar fills toward the plan where one exists: planned time, or planned swim metres. Ride and run distance fill toward the planned time at the athlete's usual speed (marked `≈`), and with no plan, toward their typical week or month (the median). The median matters here: the Sep 7–13 tour (570 km, 26:41) would otherwise make every other week's bike bars look empty. Past its target, a bar turns to the discipline's ink colour.
+- **Types.** HIIT and CrossFit count as lifting; walks, hikes and anything else unmapped count nowhere.

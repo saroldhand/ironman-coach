@@ -43,8 +43,10 @@ Working directory: the repo root.
    or apply them by hand.
 
    What it does, so the output makes sense:
-   - A date outside the plan records nothing, and the status says why
+   - A date outside the site's blocks records nothing, and the status says why
      (`before-start` or `after-end`). That still counts as a successful sync.
+   - A date in the History block (before Nov 9) has no sessions, so all its
+     activities are kept as `extra`. The week and month bars count them.
    - Only a date before today can mark a session missed.
    - An activity that matches no session is kept as `extra`. Weekly totals count it.
    - Re-running a date changes nothing, and keeps any hand-written `note`.

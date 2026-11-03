@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import {
   toMin, clockText, sessionMinutes, weekHours, morning, kitFor, fuelBefore,
-  dayPlan, tonight, weekSummary, plannedByDiscipline
+  dayPlan, tonight, weekSummary, plannedByDiscipline, plannedBetween
 } from '../assets/schedule-model.js';
 import { resolveWeek } from '../assets/plan-model.js';
 
@@ -175,4 +175,14 @@ test('the plan by discipline gives minutes for all and metres for the swims', ()
   assert.deepEqual(p.strength, { minutes: 35, metres: 0 });
   const total = Object.values(p).reduce((t, d) => t + d.minutes, 0);
   assert.equal(weekHours(week, plan.schedule), Math.round(total / 6) / 10);
+});
+
+test('the plan over a month counts only its plan days', () => {
+  assert.deepEqual(plannedBetween(plan, '2026-10-01', '2026-11-01'), { days: 0, byDiscipline: {} },
+    'October is all history: no plan, not a plan of nothing');
+  assert.equal(plannedBetween(plan, '2026-11-01', '2026-12-01').days, 22, 'the Bridge starts on the 9th');
+  // Over a whole plan week it agrees with the week's own totals.
+  const week = resolveWeek(plan, 'bridge', 2);
+  assert.deepEqual(plannedBetween(plan, '2026-11-16', '2026-11-23').byDiscipline,
+    plannedByDiscipline(week, plan.schedule));
 });

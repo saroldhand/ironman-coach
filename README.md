@@ -15,12 +15,16 @@ Static training site for IRONMAN 70.3 Hawaii on 2027-06-05. No build step, no de
 
 | Block | Weeks | Start | End |
 |---|---|---|---|
+| History | 14 | 2026-08-03 | 2026-11-08 |
 | Bridge | 4 | 2026-11-09 | 2026-12-06 |
 | Arc | 26 | 2026-12-07 | 2027-06-06 |
 
-The plan starts on Monday 9 November 2026. Everything before it (a three-week
-prep block and an eight-week lifting block) was cut from the site on 2026-11-02;
-its designs stay in `docs/superpowers/` as history.
+The plan starts on Monday 9 November 2026. Its first designs (a three-week prep
+block and an eight-week lifting block) were cut from the site on 2026-11-02 and
+stay in `docs/superpowers/` as history. The weeks before the plan are a
+**History** block (`"history": true`): nothing is prescribed, and each week, day
+and month shows only what Strava recorded, back-filled from the first recorded
+activity on 2026-08-03.
 
 Each block numbers its weeks from 1, so week labels always name their block.
 Every week is a named template in `weekTemplates`, filled from that week's row
@@ -95,10 +99,21 @@ npm test                     # node --test, no install needed
 
 ## Syncing
 
-Weekly totals count every activity in `data/log.json` dated inside the week,
-whether it matched a planned session or not (`extra`). Walks, hikes and other
-non-training types are shown apart and left out of the total. A week with
-nothing recorded shows dashes, not zeros: no data is not the same as rest.
+### What was done
+
+The week and month pages show a time bar and a distance bar for swim, bike and
+run, and a time bar for lifting. They count every training activity in
+`data/log.json` dated inside the period, matched to a session or not. Walks and
+hikes stay in the log but are never counted or listed; HIIT and CrossFit count
+as lifting. A bar fills toward a target, and its label says which:
+
+- the plan, where the period has one: planned time, planned swim metres;
+- for ride and run distance in a planned period, the planned time at your
+  usual speed (all recorded distance over all moving time), marked `≈`;
+- with no plan, your typical week or month: the median of the periods in which
+  you did that discipline, so one big touring week does not flatten the rest.
+
+A period with nothing recorded shows dashes, not zeros: no data is not rest.
 
 The nightly Claude scheduled task follows `scripts/sync-runbook.md`: it fetches the
 day's activities with the Strava connector's `list_activities` and hands them to
