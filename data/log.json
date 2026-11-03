@@ -1,3 +1,1219 @@
 {
-  "entries": []
+  "entries": [
+    {
+      "date": "2026-08-03",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "19826863686",
+        "type": "Swim",
+        "name": "Afternoon Swim",
+        "movingTime": 3218,
+        "distance": 1150,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/19826863686"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-08-05",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "19826863778",
+        "type": "Walk",
+        "name": "Evening Walk",
+        "movingTime": 1240,
+        "distance": 1532.91,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/19826863778"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-08-05",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "19826863808",
+        "type": "Run",
+        "name": "Afternoon Run",
+        "movingTime": 2206,
+        "distance": 5049.13,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/19826863808"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-08-06",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "19826863487",
+        "type": "Swim",
+        "name": "Evening Swim",
+        "movingTime": 2084,
+        "distance": 825,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/19826863487"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-08-10",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "19826864123",
+        "type": "Ride",
+        "name": "Afternoon Ride",
+        "movingTime": 3966,
+        "distance": 24222.5,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/19826864123"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-08-11",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "19826863292",
+        "type": "Run",
+        "name": "Morning Run",
+        "movingTime": 1819,
+        "distance": 4105.31,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/19826863292"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-08-12",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "19826863287",
+        "type": "Run",
+        "name": "Morning Run",
+        "movingTime": 993,
+        "distance": 2045.2,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/19826863287"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-08-12",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "19826863309",
+        "type": "Swim",
+        "name": "Evening Swim",
+        "movingTime": 3353,
+        "distance": 1800,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/19826863309"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-08-16",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "19826864002",
+        "type": "Ride",
+        "name": "Afternoon Ride",
+        "movingTime": 2764,
+        "distance": 9876,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/19826864002"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-08-16",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "19826864099",
+        "type": "Ride",
+        "name": "Afternoon Ride",
+        "movingTime": 2740,
+        "distance": 10082.7,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/19826864099"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-08-17",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "19826863154",
+        "type": "Run",
+        "name": "Lunch Run",
+        "movingTime": 2183,
+        "distance": 4481.75,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/19826863154"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-08-18",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "19826862875",
+        "type": "Run",
+        "name": "Afternoon Run",
+        "movingTime": 1999,
+        "distance": 4518.27,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/19826862875"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-08-19",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "19826862626",
+        "type": "Swim",
+        "name": "Evening Swim",
+        "movingTime": 5664,
+        "distance": 675,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/19826862626"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-08-19",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "19826862966",
+        "type": "Run",
+        "name": "Morning Run",
+        "movingTime": 1825,
+        "distance": 4280.02,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/19826862966"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-08-20",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "19830499669",
+        "type": "Run",
+        "name": "Evening Run",
+        "movingTime": 2034,
+        "distance": 4258.08,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/19830499669"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-08-21",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "19836722807",
+        "type": "Ride",
+        "name": "Morning Ride",
+        "movingTime": 8129,
+        "distance": 44494.2,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/19836722807"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-08-22",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "20163418744",
+        "type": "Hike",
+        "name": "Lunch Hike",
+        "movingTime": 10833,
+        "distance": 10027,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/20163418744"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-08-25",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "19900248638",
+        "type": "Ride",
+        "name": "Afternoon Ride",
+        "movingTime": 3313,
+        "distance": 24360.8,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/19900248638"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-08-25",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "19900541865",
+        "type": "Run",
+        "name": "Evening Run",
+        "movingTime": 1228,
+        "distance": 3005.81,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/19900541865"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-08-26",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "19922965874",
+        "type": "Run",
+        "name": "Evening Run",
+        "movingTime": 3780,
+        "distance": 8881.63,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/19922965874"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-08-27",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "19928984372",
+        "type": "Run",
+        "name": "Evening Run",
+        "movingTime": 1848,
+        "distance": 4303.6,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/19928984372"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-08-28",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "19934863766",
+        "type": "Ride",
+        "name": "Morning Ride",
+        "movingTime": 3284,
+        "distance": 23770.5,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/19934863766"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-08-31",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "20163418256",
+        "type": "Run",
+        "name": "Afternoon Run",
+        "movingTime": 2126,
+        "distance": 4752.54,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/20163418256"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-09-01",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "19998296630",
+        "type": "Run",
+        "name": "Evening Run",
+        "movingTime": 1974,
+        "distance": 4580.75,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/19998296630"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-09-02",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "20011712617",
+        "type": "Run",
+        "name": "Afternoon Run",
+        "movingTime": 1616,
+        "distance": 3319.86,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/20011712617"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-09-03",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "20163417420",
+        "type": "Run",
+        "name": "Morning Run",
+        "movingTime": 1756,
+        "distance": 3438.63,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/20163417420"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-09-03",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "20163417426",
+        "type": "Swim",
+        "name": "Evening Swim",
+        "movingTime": 1561,
+        "distance": 552,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/20163417426"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-09-03",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "20163417468",
+        "type": "Walk",
+        "name": "Evening Walk",
+        "movingTime": 976,
+        "distance": 1339.34,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/20163417468"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-09-07",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "20080513997",
+        "type": "Ride",
+        "name": "Morning Ride",
+        "movingTime": 8294,
+        "distance": 47938.2,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/20080513997"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-09-08",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "20104896280",
+        "type": "Walk",
+        "name": "Evening Walk",
+        "movingTime": 3804,
+        "distance": 4583.83,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/20104896280"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-09-10",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "20118621070",
+        "type": "Ride",
+        "name": "Morning Ride",
+        "movingTime": 7473,
+        "distance": 42258.5,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/20118621070"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-09-10",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "20122264854",
+        "type": "Ride",
+        "name": "Afternoon Ride",
+        "movingTime": 11452,
+        "distance": 68021,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/20122264854"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-09-11",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "20135038331",
+        "type": "Ride",
+        "name": "Morning Ride",
+        "movingTime": 21786,
+        "distance": 128822,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/20135038331"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-09-12",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "20163417624",
+        "type": "Ride",
+        "name": "Morning Ride",
+        "movingTime": 31345,
+        "distance": 179646,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/20163417624"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-09-13",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "20162382383",
+        "type": "Ride",
+        "name": "Morning Ride",
+        "movingTime": 15696,
+        "distance": 104094,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/20162382383"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-09-15",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "20192133458",
+        "type": "Run",
+        "name": "Evening Run",
+        "movingTime": 1965,
+        "distance": 2537.14,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/20192133458"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-09-18",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "20246840469",
+        "type": "Swim",
+        "name": "Afternoon Swim",
+        "movingTime": 3046,
+        "distance": 1200,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/20246840469"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-09-19",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "20246840390",
+        "type": "Run",
+        "name": "Morning Run",
+        "movingTime": 3204,
+        "distance": 8055.78,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/20246840390"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-09-19",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "20260324104",
+        "type": "Walk",
+        "name": "Night Walk",
+        "movingTime": 1641,
+        "distance": 1896.23,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/20260324104"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-09-19",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "20295269660",
+        "type": "Walk",
+        "name": "Evening Walk",
+        "movingTime": 2642,
+        "distance": 3328.68,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/20295269660"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-09-21",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "20280028257",
+        "type": "WeightTraining",
+        "name": "Morning Weight Training",
+        "movingTime": 4192,
+        "distance": 0,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/20280028257"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-09-22",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "20280028263",
+        "type": "WeightTraining",
+        "name": "Morning Weight Training",
+        "movingTime": 2585,
+        "distance": 0,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/20280028263"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-09-23",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "20295261832",
+        "type": "WeightTraining",
+        "name": "Morning Weight Training",
+        "movingTime": 1989,
+        "distance": 0,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/20295261832"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-09-24",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "20317444826",
+        "type": "Swim",
+        "name": "Evening Swim",
+        "movingTime": 2938,
+        "distance": 840,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/20317444826"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-09-25",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "20424388110",
+        "type": "WeightTraining",
+        "name": "Afternoon Weight Training",
+        "movingTime": 3066,
+        "distance": 0,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/20424388110"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-09-26",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "20424388225",
+        "type": "Ride",
+        "name": "Morning Ride",
+        "movingTime": 5714,
+        "distance": 30513.2,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/20424388225"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-09-27",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "20355530675",
+        "type": "Walk",
+        "name": "Lunch Walk",
+        "movingTime": 2516,
+        "distance": 2863.55,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/20355530675"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-09-27",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "20357744992",
+        "type": "Walk",
+        "name": "Afternoon Walk",
+        "movingTime": 1992,
+        "distance": 2471.31,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/20357744992"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-09-28",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "20390744977",
+        "type": "WeightTraining",
+        "name": "Morning Weight Training",
+        "movingTime": 2392,
+        "distance": 0,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/20390744977"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-09-29",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "20391203967",
+        "type": "Run",
+        "name": "Evening Run",
+        "movingTime": 1296,
+        "distance": 3423.46,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/20391203967"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-09-30",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "20419926266",
+        "type": "WeightTraining",
+        "name": "Evening Weight Training",
+        "movingTime": 4774,
+        "distance": 0,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/20419926266"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-10-01",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "20419926310",
+        "type": "HighIntensityIntervalTraining",
+        "name": "Lunch HIIT",
+        "movingTime": 2528,
+        "distance": 0,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/20419926310"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-10-03",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "20436591611",
+        "type": "Run",
+        "name": "Lunch Run",
+        "movingTime": 953,
+        "distance": 2173.11,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/20436591611"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-10-03",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "20436593751",
+        "type": "Run",
+        "name": "Lunch Run",
+        "movingTime": 1297,
+        "distance": 3146.97,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/20436593751"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-10-03",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "20436594287",
+        "type": "Run",
+        "name": "Lunch Run",
+        "movingTime": 551,
+        "distance": 1223.14,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/20436594287"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-10-06",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "20501403332",
+        "type": "Run",
+        "name": "Morning Run",
+        "movingTime": 1102,
+        "distance": 2544.52,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/20501403332"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-10-07",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "20501403343",
+        "type": "WeightTraining",
+        "name": "Afternoon Weight Training",
+        "movingTime": 3239,
+        "distance": 0,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/20501403343"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-10-08",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "20509190942",
+        "type": "Run",
+        "name": "Evening Run",
+        "movingTime": 1235,
+        "distance": 2961.45,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/20509190942"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-10-08",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "20509191067",
+        "type": "Ride",
+        "name": "Evening Ride",
+        "movingTime": 3217,
+        "distance": 16541.9,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/20509191067"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-10-09",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "20575471032",
+        "type": "Swim",
+        "name": "Morning Swim",
+        "movingTime": 2202,
+        "distance": 823,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/20575471032"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-10-13",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "20575470944",
+        "type": "Swim",
+        "name": "Afternoon Swim",
+        "movingTime": 1822,
+        "distance": 914.4,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/20575470944"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-10-13",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "20575471043",
+        "type": "Run",
+        "name": "Lunch Run",
+        "movingTime": 1665,
+        "distance": 3887.41,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/20575471043"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-10-14",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "20588667825",
+        "type": "WeightTraining",
+        "name": "Evening Weight Training",
+        "movingTime": 2298,
+        "distance": 0,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/20588667825"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-10-15",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "20602735913",
+        "type": "Swim",
+        "name": "Evening Swim",
+        "movingTime": 3702,
+        "distance": 1600.2,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/20602735913"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-10-16",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "20626715998",
+        "type": "WeightTraining",
+        "name": "Afternoon Weight Training",
+        "movingTime": 2265,
+        "distance": 0,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/20626715998"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-10-16",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "20626716013",
+        "type": "Run",
+        "name": "Afternoon Run",
+        "movingTime": 1474,
+        "distance": 4093.28,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/20626716013"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-10-17",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "20626716081",
+        "type": "Hike",
+        "name": "Lunch Hike",
+        "movingTime": 13070,
+        "distance": 11623.7,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/20626716081"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-10-17",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "20641279366",
+        "type": "Walk",
+        "name": "Evening Walk",
+        "movingTime": 2368,
+        "distance": 2564.06,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/20641279366"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-10-18",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "20641279513",
+        "type": "Hike",
+        "name": "Morning Hike",
+        "movingTime": 7625,
+        "distance": 8088.82,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/20641279513"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-10-19",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "20653023275",
+        "type": "WeightTraining",
+        "name": "Afternoon Weight Training",
+        "movingTime": 2284,
+        "distance": 0,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/20653023275"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-10-19",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "20653653337",
+        "type": "Ride",
+        "name": "Evening Ride",
+        "movingTime": 2250,
+        "distance": 16164.3,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/20653653337"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-10-20",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "20663819455",
+        "type": "Run",
+        "name": "Morning Run",
+        "movingTime": 1472,
+        "distance": 2619.65,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/20663819455"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-10-22",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "20694562232",
+        "type": "Swim",
+        "name": "Evening Swim",
+        "movingTime": 2634,
+        "distance": 1211.6,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/20694562232"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-10-22",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "20694562233",
+        "type": "Swim",
+        "name": "Evening Swim",
+        "movingTime": 90,
+        "distance": 0,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/20694562233"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-10-23",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "20704676160",
+        "type": "Run",
+        "name": "Afternoon Run",
+        "movingTime": 4022,
+        "distance": 8334.28,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/20704676160"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-10-23",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "20705694979",
+        "type": "Walk",
+        "name": "Evening Walk",
+        "movingTime": 2362,
+        "distance": 2903.63,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/20705694979"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-10-26",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "20744292299",
+        "type": "Run",
+        "name": "Afternoon Run",
+        "movingTime": 6349,
+        "distance": 13750.7,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/20744292299"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-10-28",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "20763286234",
+        "type": "Swim",
+        "name": "Morning Swim",
+        "movingTime": 1926,
+        "distance": 731.5,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/20763286234"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-10-28",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "20772344838",
+        "type": "Walk",
+        "name": "Evening Walk",
+        "movingTime": 857,
+        "distance": 1138.81,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/20772344838"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-10-30",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "20820473361",
+        "type": "Ride",
+        "name": "Afternoon Ride",
+        "movingTime": 3341,
+        "distance": 24200.9,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/20820473361"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-11-02",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "20832259201",
+        "type": "Run",
+        "name": "Lunch Run",
+        "movingTime": 1440,
+        "distance": 4249.88,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/20832259201"
+      },
+      "note": ""
+    }
+  ]
 }
