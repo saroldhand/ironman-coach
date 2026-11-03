@@ -1,6 +1,8 @@
 import { planStart, blocksInOrder } from './plan-model.js';
 import { addDays, monthLabel, weekdayKey, dayLabel } from './date-utils.js';
-import { clockText, morning, kitFor, fuelBefore, tonight, weekSummary, weekHours, hoursText } from './schedule-model.js';
+import { clockText, morning, kitFor, fuelBefore, tonight, weekSummary, weekHours, hoursText,
+         plannedByDiscipline } from './schedule-model.js';
+import { weekActuals, TRAINING_DISCIPLINES } from './log-model.js';
 
 const DOW = { mon: 'Monday', tue: 'Tuesday', wed: 'Wednesday', thu: 'Thursday',
               fri: 'Friday', sat: 'Saturday', sun: 'Sunday' };
@@ -103,6 +105,73 @@ function extrasSection(extras) {
     el('h2', {}, 'Not on the plan'),
     el('ul', { class: 'detail' }, extras.map(e =>
       el('li', {}, `${e.strava.name} — ${Math.round(e.strava.movingTime / 60)} min`)))
+  ]);
+}
+
+// ---- what was actually done ----
+// The plan says how long; Strava says how long and how far. Durations read as
+// h:mm in one column, so a 45-minute run and a 3-hour ride line up.
+
+export function durationText(minutes) {
+  const m = Math.round(minutes);
+  return `${Math.floor(m / 60)}:${String(m % 60).padStart(2, '0')}`;
+}
+
+// Rides and runs in km whatever their length; swims in metres.
+function doneDistance(discipline, metres) {
+  if (discipline === 'swim') return distanceText(metres);
+  if (discipline === 'bike' || discipline === 'run') return `${(metres / 1000).toFixed(1)} km`;
+  return null;
+}
+
+const DISCIPLINE_LABEL = { swim: 'Swim', bike: 'Bike', run: 'Run', strength: 'Strength', other: 'Other' };
+
+// The rows of a week's totals table: planned against done, per discipline,
+// then the total. `done` is null for the whole table when nothing was
+// recorded: unknown, which the page must not show as zero.
+export function weekTotalsRows(planned, actuals) {
+  const rows = [];
+  for (const d of TRAINING_DISCIPLINES) {
+    const p = planned[d] || { minutes: 0, metres: 0 };
+    const a = actuals.byDiscipline[d];
+    if (!p.minutes && !a.count) continue;
+    rows.push({
+      label: DISCIPLINE_LABEL[d],
+      planned: [durationText(p.minutes), p.metres ? distanceText(p.metres) : null].filter(Boolean).join(' · '),
+      done: actuals.recorded
+        ? [durationText(a.minutes), a.count ? doneDistance(d, a.metres) : null].filter(Boolean).join(' · ')
+        : null
+    });
+  }
+  const plannedMin = TRAINING_DISCIPLINES.reduce((t, d) => t + ((planned[d] && planned[d].minutes) || 0), 0);
+  rows.push({
+    label: 'Total',
+    planned: hoursText(Math.round(plannedMin / 6) / 10),
+    done: actuals.recorded ? hoursText(Math.round(actuals.total.minutes / 6) / 10) : null,
+    total: true
+  });
+  const other = actuals.byDiscipline.other;
+  if (other.count) {
+    rows.push({ label: 'Other', planned: '', done: `${durationText(other.minutes)} · not in the total`, other: true });
+  }
+  return rows;
+}
+
+function weekTotalsCard(plan, week, entries) {
+  const actuals = weekActuals(week, entries);
+  const rows = weekTotalsRows(plannedByDiscipline(week, plan.schedule), actuals);
+  const total = rows.find(r => r.total);
+  return el('section', { class: 'card totals' }, [
+    el('h2', {}, ['Done this week', el('span', { class: 'prescribed' },
+      actuals.recorded ? `${total.done.replace(' h', '')} of ${total.planned}` : 'nothing from Strava yet')]),
+    el('table', { class: 'totals' }, [
+      el('thead', {}, el('tr', {}, [el('th', {}, ''), el('th', {}, 'Planned'), el('th', {}, 'Done')])),
+      el('tbody', {}, rows.map(r => el('tr', { class: r.total ? 'total' : (r.other ? 'other' : null) }, [
+        el('th', { scope: 'row' }, r.label),
+        el('td', {}, r.planned),
+        el('td', {}, r.done === null ? '—' : r.done)
+      ])))
+    ])
   ]);
 }
 
@@ -362,7 +431,7 @@ const DOW_SHORT = { mon: 'Mon', tue: 'Tue', wed: 'Wed', thu: 'Thu',
                     fri: 'Fri', sat: 'Sat', sun: 'Sun' };
 
 export function renderWeek(ctx) {
-  const { plan, week, entriesByKey, today, nav } = ctx;
+  const { plan, week, entriesByKey, entries = [], today, nav } = ctx;
   const out = el('div');
 
   const title = [
@@ -383,6 +452,8 @@ export function renderWeek(ctx) {
   const clock = plan && plan.schedule ? weekSummary(plan, week) : null;
   const headline = clock ? weekHeadline(clock) : '';
   if (headline) out.append(el('p', { class: 'daymeta weekhead' }, headline));
+  // Once a week has started, what was done sits beside what was planned.
+  if (plan && plan.schedule && week.startDate <= today) out.append(weekTotalsCard(plan, week, entries));
   const daysOff = (plan && plan.schedule && plan.schedule.daysOff) || {};
 
   const list = el('div', { class: 'weeklist' });
@@ -425,6 +496,15 @@ export function renderWeek(ctx) {
   return out;
 }
 
+// "4.9/5.9 h" once anything is recorded for the week: done, then planned.
+function seasonHours(plan, week, entries) {
+  if (!week.authored || !plan.schedule) return '';
+  const planned = weekHours(week, plan.schedule);
+  const done = weekActuals(week, entries);
+  if (!done.recorded) return hoursText(planned);
+  return `${(Math.round(done.total.minutes / 6) / 10).toFixed(1)}/${hoursText(planned)}`;
+}
+
 export function renderSeason(ctx) {
   const { plan, entries, today, resolveWeek, weekCompletion, nav, focusWeek } = ctx;
   const out = el('div');
@@ -460,8 +540,7 @@ export function renderSeason(ctx) {
           `${block.label} W${n}${week.type === 'recovery' ? ' ↓' : ''}`),
         el('span', { class: 'daymeta date' }, week.startDate),
         el('span', { class: 'daymeta phase' }, phase || ''),
-        el('span', { class: 'daymeta hrs' },
-          week.authored && plan.schedule ? hoursText(weekHours(week, plan.schedule)) : ''),
+        el('span', { class: 'daymeta hrs' }, seasonHours(plan, week, entries)),
         el('span', { class: 'bar' }, el('span', { style: `width:${c.pct ?? 0}%` })),
         el('span', { class: 'pct' }, c.pct === null ? '—' : `${c.pct}%`)
       ]));

@@ -9,7 +9,7 @@ Static training site for IRONMAN 70.3 Hawaii on 2027-06-05. No build step, no de
 - `data/plan.json` — the plan. The only file to edit when training changes.
 - `data/log.json` — what actually happened. Written by the nightly Strava sync.
 - `assets/` — ES modules, loaded directly by the browser and importable by `node --test`.
-- `scripts/sync-runbook.md` — what the nightly sync does.
+- `scripts/sync-runbook.md` — what the nightly sync does; `scripts/sync.mjs` does it.
 
 ## Calendar
 
@@ -60,9 +60,9 @@ Four zoom levels: Season › Month › Week › Day.
 | View | Hash | Shows |
 |---|---|---|
 | Day | `#/day/2026-11-17`, `#/today` | Every session prescribed that day, plus what Strava recorded. A work day opens with its alarm, lights-out and kit; today also has a *Tonight* card for tomorrow, which leads the page after midday. |
-| Week | `#/week/bridge/2` | The seven days side by side, with the week's hours and each morning's alarm |
+| Week | `#/week/bridge/2` | The seven days side by side, with the week's hours and each morning's alarm. Once the week starts, *Done this week* sets the time and distance Strava recorded against the plan, per discipline. |
 | Month | `#/month/2026-10` | A calendar grid; one dot per session, coloured by discipline |
-| Season | `#/season`, `#/season/arc/21` | Every week of every block, with hours and completion bars; opened on a week, it scrolls to it |
+| Season | `#/season`, `#/season/arc/21` | Every week of every block, with hours (done/planned once anything is recorded) and completion bars; opened on a week, it scrolls to it |
 
 In the month grid the left gutter names each row's plan week and links to it;
 each day cell links to its day. A malformed date in the hash falls back to today
@@ -95,5 +95,14 @@ npm test                     # node --test, no install needed
 
 ## Syncing
 
-The nightly Claude scheduled task follows `scripts/sync-runbook.md`. To sync manually,
-ask Claude in this repo: "sync the last 7 days from Strava".
+Weekly totals count every activity in `data/log.json` dated inside the week,
+whether it matched a planned session or not (`extra`). Walks, hikes and other
+non-training types are shown apart and left out of the total. A week with
+nothing recorded shows dashes, not zeros: no data is not the same as rest.
+
+The nightly Claude scheduled task follows `scripts/sync-runbook.md`: it fetches the
+day's activities with the Strava connector's `list_activities` and hands them to
+`node scripts/sync.mjs <from> <to> <activities.json>`, which matches them to the
+plan and writes `data/log.json` and `data/sync-status.json`. To sync manually, ask
+Claude in this repo: "sync the last 7 days from Strava". The Strava connector must
+be connected in that session.

@@ -206,3 +206,34 @@ Every work morning in the plan falls between **5:30 and 6:30**. The earliest is 
 8. **Lunch runs work on Mon and Fri.** Monday it is; Friday stays free (§4).
 9. **The alarm times (5:30–6:30) work.**
 10. **Phone calendar:** keep the idea, not now.
+
+## 10. Amended 2026-11-03: swim pace from Strava
+
+With Strava connected, the athlete's last two pool swims came to about 3:37 and 4:23 per 100 m including rest. The plan had assumed 2:15. The athlete says the pace varies by day and asked to resize "just a little":
+
+- **The clock's swim pace goes from 2:15 to 2:30 per 100 m** (`schedule.swimSecPer100`: 135 → 150). That's a step toward what Strava shows, and every Arc morning still fits the pool's 6:00 opening with that number.
+- **Bridge swims are about 15% shorter:**
+
+  | Wk | Mon | Wed | Fri |
+  |---|---|---|---|
+  | 1 | 1,200 | 1,500 · 6 × 100 | 1,600 · 5 × 100 |
+  | 2 | 1,200 | 1,700 · 2 × 300, 4 × 50 build | 1,800 · 2 × 350 |
+  | 3 | 1,200 | 1,500 · 4 × 150 | away |
+  | 4 | away | 1,700 · 4 × 200 | 1,800 · 500 non-stop, 2 × 100 |
+
+- **The Arc is unchanged for now.** The Arc W1 CSS test (Wed Dec 9) gives a measured pace. Recalibrate the Arc swims and `swimSecPer100` from it, rather than guessing twice.
+- The Strava distances (731.5 m = 800 yd, 1,211.6 m = 1,325 yd) suggest a 25-yard pool. The plan is still written in metres; 100 m is about 109 yd.
+
+The clock now reads:
+
+| Week | Hours | Mon | Tue | Wed | Thu | Fri |
+|---|---|---|---|---|---|---|
+| Bridge W1 | 5.7 h | 5:45 | 6:15 | 5:45 | 6:30 | 6:15 |
+| Bridge W2 | 6.6 h | 5:45 | 6:00 | 5:40 | 6:25 | 6:10 |
+| Bridge W3 ↓ | 3.8 h | 5:50 | 6:15 | 5:45 | off | off |
+| Bridge W4 | 5.4 h | off | off | 5:40 | 6:20 | 6:10 |
+| Arc W1 | 7.7 h | 5:35 | 6:00 | 5:40 | 6:20 | 6:05 |
+| Arc W15 | 12.0 h | 5:35 | 5:30 | 5:35 | 6:00 | 5:40 |
+| Arc W19 | 12.3 h | 5:40 | 5:30 | 5:35 | 6:00 | 5:40 |
+
+The earliest alarm is still 5:30, on the 90′ Tuesday rides.
