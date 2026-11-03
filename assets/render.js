@@ -214,9 +214,16 @@ function barsCard(title, { actuals, planned, typical, speed, period }) {
   ]);
 }
 
-function periodBars(plan, entries, from, to, period) {
+// Everything a period's bars need. A period that has not finished yet - the
+// current week, or a plan week still to come - is progress so far: nothing
+// recorded reads as zero, so its bars start empty and fill as the nightly sync
+// brings workouts in. Only a period that is over and recorded nothing is
+// unknown, shown as dashes: the sync may not have run, and that is not rest.
+export function periodBars(plan, entries, from, to, period, today) {
+  const actuals = actualsBetween(entries, from, to);
+  if (!actuals.recorded && today < to) actuals.recorded = true;
   return {
-    actuals: actualsBetween(entries, from, to),
+    actuals,
     planned: plan.schedule ? plannedBetween(plan, from, to) : null,
     typical: typicalPeriod(entries, period),
     speed: usualSpeed(entries),
@@ -510,11 +517,10 @@ export function renderWeek(ctx) {
   out.append(el('h1', {}, title));
 
   const weekEnd = addDays(week.startDate, 7);
-  const started = week.startDate <= today;
 
   if (week.history) {
     out.append(el('p', { class: 'daymeta weekhead' }, 'Before the plan: what Strava recorded.'));
-    out.append(barsCard('Done this week', periodBars(plan, entries, week.startDate, weekEnd, 'week')));
+    out.append(barsCard('Done this week', periodBars(plan, entries, week.startDate, weekEnd, 'week', today)));
     out.append(historyDays(week, entries, today));
     return out;
   }
@@ -529,9 +535,10 @@ export function renderWeek(ctx) {
   const clock = plan && plan.schedule ? weekSummary(plan, week) : null;
   const headline = clock ? weekHeadline(clock) : '';
   if (headline) out.append(el('p', { class: 'daymeta weekhead' }, headline));
-  // Once a week has started, what was done sits beside what was planned.
-  if (plan && plan.schedule && started) {
-    out.append(barsCard('Done this week', periodBars(plan, entries, week.startDate, weekEnd, 'week')));
+  // Every plan week shows its bars, filling toward the week's planned totals:
+  // empty before it starts, and filling as the nightly sync records workouts.
+  if (plan && plan.schedule) {
+    out.append(barsCard('Done this week', periodBars(plan, entries, week.startDate, weekEnd, 'week', today)));
   }
   const daysOff = (plan && plan.schedule && plan.schedule.daysOff) || {};
 
@@ -699,10 +706,13 @@ export function renderMonth(ctx) {
   out.append(...pageNav(nav));
   out.append(el('h1', {}, monthLabel(ym)));
 
-  // The month's totals, once it has begun: every week of it combined.
+  // The month's totals, every week of it combined: shown once the month has
+  // begun, or ahead of time when it holds plan days to fill toward.
   const from = `${ym}-01`;
-  if (plan && from <= today) {
-    out.append(barsCard('This month', periodBars(plan, entries, from, `${addMonths(ym, 1)}-01`, 'month')));
+  const to = `${addMonths(ym, 1)}-01`;
+  if (plan) {
+    const bars = periodBars(plan, entries, from, to, 'month', today);
+    if (from <= today || (bars.planned && bars.planned.days)) out.append(barsCard('This month', bars));
   }
 
   // Days before the plan carry a dot per recorded training activity.

@@ -1,6 +1,7 @@
 import test from 'node:test';
+import { readFileSync } from 'node:fs';
 import assert from 'node:assert/strict';
-import { prescribedText, distanceText, summaryLine, fuelLines, whenText, weekHeadline, tonightFirst, durationText, disciplineBars } from '../assets/render.js';
+import { prescribedText, distanceText, periodBars, summaryLine, fuelLines, whenText, weekHeadline, tonightFirst, durationText, disciplineBars } from '../assets/render.js';
 
 test('prescribedText formats distances in metres with thousands separators', () => {
   assert.equal(prescribedText({ metric: 'distance', value: 2000, unit: 'm' }), '2,000 m');
@@ -179,4 +180,35 @@ test('with no plan, bars fill toward the typical week or month', () => {
 test('a period with nothing recorded shows dashes and empty bars, not zeros', () => {
   const rows = disciplineBars({ actuals: actuals(false), planned: null, typical, speed });
   assert.ok(rows.every(r => r.bars.every(b => b.text === '—' && b.pct === 0)));
+});
+
+// ---- progress so far
+
+const realPlan = JSON.parse(readFileSync(new URL('../data/plan.json', import.meta.url)));
+
+test('a plan week still to come starts at zero against its planned totals', () => {
+  // Bridge W1, seen the week before: nothing recorded yet, and none expected.
+  const bars = periodBars(realPlan, [], '2026-11-09', '2026-11-16', 'week', '2026-11-03');
+  assert.equal(bars.actuals.recorded, true, 'progress so far, not unknown');
+  const rows = disciplineBars(bars);
+  assert.deepEqual(rows.map(r => [r.label, r.bars[0].text, r.bars[0].targetText, r.bars[0].pct]), [
+    ['Swim', '0:00', '1:48 planned', 0],
+    ['Bike', '0:00', '2:00 planned', 0],
+    ['Run', '0:00', '1:20 planned', 0],
+    ['Lift', '0:00', '0:35 planned', 0]
+  ]);
+});
+
+test('as workouts are recorded, the week fills toward its plan', () => {
+  const ride = { date: '2026-11-10', planKey: 'bridge:1:tue:bike', status: 'done', note: '',
+                 strava: { id: '1', type: 'VirtualRide', name: 'Ride', movingTime: 45 * 60, distance: 20000 } };
+  const rows = disciplineBars(periodBars(realPlan, [ride], '2026-11-09', '2026-11-16', 'week', '2026-11-11'));
+  const bike = rows.find(r => r.label === 'Bike').bars[0];
+  assert.deepEqual([bike.text, bike.targetText, bike.pct], ['0:45', '2:00 planned', 38]);
+});
+
+test('a week that is over and recorded nothing stays unknown', () => {
+  const bars = periodBars(realPlan, [], '2026-11-09', '2026-11-16', 'week', '2026-11-20');
+  assert.equal(bars.actuals.recorded, false);
+  assert.ok(disciplineBars(bars).every(r => r.bars.every(b => b.text === '—')));
 });
