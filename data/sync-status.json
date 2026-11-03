@@ -1,7 +1,7 @@
 {
-  "lastRun": null,
-  "lastSuccess": null,
-  "ok": false,
-  "reason": "never-run",
-  "activitiesFound": 0
+  "lastRun": "2026-11-03T15:55:38.348Z",
+  "lastSuccess": "2026-11-03T15:55:38.348Z",
+  "ok": true,
+  "reason": "before-start",
+  "activitiesFound": 1
 }
