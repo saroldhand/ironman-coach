@@ -9,6 +9,9 @@ Static training site for IRONMAN 70.3 Hawaii on 2027-06-05. No build step, no de
 - `data/plan.json` — the plan. The only file to edit when training changes.
 - `data/log.json` — what actually happened. Written by the nightly Strava sync.
 - `assets/` — ES modules, loaded directly by the browser and importable by `node --test`.
+  The look lives in `app.css` (design tokens at the top: warm paper, white cards,
+  one scarlet `#C8102E`, a colour per discipline) and the icons in `icons.js`
+  (stroke SVG as data). The design is `docs/superpowers/specs/2026-11-03-restyle-design.md`.
 - `scripts/sync-runbook.md` — what the nightly sync does; `scripts/sync.mjs` does it.
 
 ## Calendar

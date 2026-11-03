@@ -142,6 +142,9 @@ export function morning(plan, day) {
     trainMin,
     alarm,
     lightsOut,
+    // When the session itself begins: in the water, on the bike, out of the
+    // door running. The page leads with it - a practice time, not an alarm.
+    start,
     readyBy: ready,
     readyLabel: work.label,
     timeline,
@@ -191,12 +194,16 @@ export function tonight(plan, todayIso) {
 // A week at a glance: its hours and every work-morning alarm.
 export function weekSummary(plan, week) {
   const alarms = new Map();
+  const starts = new Map();
   let earliest = null;
+  let earliestStart = null;
   for (const day of week.days) {
     const am = morning(plan, day);
     if (!am || am.status !== 'work') continue;
     alarms.set(day.date, am.alarm);
+    starts.set(day.date, am.start);
     if (!earliest || am.alarm < earliest.alarm) earliest = { date: day.date, alarm: am.alarm };
+    if (!earliestStart || am.start < earliestStart.start) earliestStart = { date: day.date, start: am.start };
   }
-  return { hours: plan.schedule ? weekHours(week, plan.schedule) : null, alarms, earliest };
+  return { hours: plan.schedule ? weekHours(week, plan.schedule) : null, alarms, starts, earliest, earliestStart };
 }

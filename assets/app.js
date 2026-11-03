@@ -64,9 +64,9 @@ async function start() {
     // must not keep rendering yesterday as "today".
     const today = todayISO();
     const daysToRace = daysBetween(today, plan.race.date);
-    countdownEl.textContent = daysToRace >= 0
-      ? `${daysToRace} days to ${plan.race.date}`
-      : 'race day passed';
+    countdownEl.textContent = daysToRace > 0 ? `${daysToRace} days to go`
+      : daysToRace === 0 ? 'Race day' : 'Race day passed';
+    countdownEl.title = `${plan.race.name}, ${plan.race.date}`;
 
     const hash = location.hash || '#/today';
     if (index !== null) scrolledTo.set(index, window.scrollY);

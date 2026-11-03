@@ -1,7 +1,8 @@
 import test from 'node:test';
 import { readFileSync } from 'node:fs';
 import assert from 'node:assert/strict';
-import { prescribedText, distanceText, periodBars, summaryLine, fuelLines, whenText, weekHeadline, tonightFirst, durationText, disciplineBars } from '../assets/render.js';
+import { prescribedText, distanceText, periodBars, summaryLine, fuelLines, whenText, weekHeadline, tonightFirst, durationText,
+         disciplineBars, weekRangeText, ringDash } from '../assets/render.js';
 
 test('prescribedText formats distances in metres with thousands separators', () => {
   assert.equal(prescribedText({ metric: 'distance', value: 2000, unit: 'm' }), '2,000 m');
@@ -122,12 +123,36 @@ test('a session names its slot in words, and an unplaced one names none', () => 
   assert.equal(whenText(undefined), null);
 });
 
-test('the week headline gives the hours and the earliest alarm by day', () => {
-  assert.equal(weekHeadline({ hours: 7.5, earliest: { date: '2026-12-08', alarm: 6 * 60 } }),
-    '7.5 h of training · earliest alarm 6:00 am Tuesday');
-  assert.equal(weekHeadline({ hours: 8, earliest: null }), '8.0 h of training', 'one decimal always');
+test('the week headline gives the hours and the earliest practice start by day', () => {
+  // The start leads, as the practice time; each day's alarm is on its own row.
+  assert.equal(weekHeadline({ hours: 7.5, earliestStart: { date: '2026-12-08', start: 6 * 60 } }),
+    '7.5 h planned · earliest start 6:00 am Tuesday');
+  assert.equal(weekHeadline({ hours: 8, earliestStart: null }), '8.0 h planned', 'one decimal always');
   // A week with no work mornings (race week) still gives its hours.
-  assert.equal(weekHeadline({ hours: 3.2, earliest: null }), '3.2 h of training');
+  assert.equal(weekHeadline({ hours: 3.2, earliestStart: null }), '3.2 h planned');
+});
+
+test('a week reads as its dates, across a month end too', () => {
+  assert.equal(weekRangeText('2026-11-09'), 'Nov 9 – 15');
+  assert.equal(weekRangeText('2026-11-30'), 'Nov 30 – Dec 6');
+  assert.equal(weekRangeText('2026-12-28'), 'Dec 28 – Jan 3');
+});
+
+test('a ring fills its share of the circumference, and never past it', () => {
+  const c = 2 * Math.PI * 60;
+  assert.equal(ringDash(0, 60), `0.0 ${c.toFixed(1)}`);
+  assert.equal(ringDash(50, 60), `${(c / 2).toFixed(1)} ${c.toFixed(1)}`);
+  assert.equal(ringDash(140, 60), `${c.toFixed(1)} ${c.toFixed(1)}`, 'past target is a full ring');
+});
+
+test('each bar carries a short target to sit after a slash', () => {
+  const planned = { days: 7, byDiscipline: { swim: { minutes: 108, metres: 4300 }, bike: { minutes: 120, metres: 0 },
+                                            run: { minutes: 80, metres: 0 }, strength: { minutes: 35, metres: 0 } } };
+  const rows = disciplineBars({ actuals: actuals(true), planned, typical, speed });
+  assert.deepEqual(rows.map(r => r.bars.map(b => b.shortTarget)),
+    [['1:48', '4,300 m'], ['2:00', '≈26.8 mi'], ['1:20', '≈6.9 mi'], ['0:35']]);
+  const none = disciplineBars({ actuals: actuals(true), planned: null, typical, speed });
+  assert.deepEqual(none[0].bars.map(b => b.shortTarget), ['typ. 0:50', 'typ. 1,000 m']);
 });
 
 test("tonight's card leads the page from midday", () => {

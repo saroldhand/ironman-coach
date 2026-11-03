@@ -57,6 +57,7 @@ test('the morning is worked back from the time you have to be ready', () => {
   const am = morning(tiny, day([swim(2000)]));
   assert.equal(am.status, 'work');
   assert.equal(am.trainMin, 40);
+  assert.equal(clockText(am.start), '6:30 am', 'the practice starts when the swim does');
   assert.equal(clockText(am.alarm), '6:00 am');
   assert.equal(clockText(am.lightsOut), '10:00 pm');
   assert.equal(am.earlyBy, 0);
@@ -163,6 +164,10 @@ test('the week summary counts hours and finds the earliest alarm', () => {
   assert.ok(s.hours > 5 && s.hours < 6.5, `bridge W1 is ${s.hours} h`);
   assert.equal(s.alarms.size, 5);
   assert.equal(clockText(s.earliest.alarm), '5:45 am');
+  // Mon 6:15, Tue 6:30, Wed 6:17, Thu 6:45, Fri 6:45: the earliest practice.
+  assert.deepEqual([...s.starts.values()].map(clockText),
+    ['6:15 am', '6:30 am', '6:17 am', '6:45 am', '6:45 am']);
+  assert.deepEqual(s.earliestStart, { date: '2026-11-09', start: toMin('06:15') });
 });
 
 test('the plan by discipline gives minutes for all and metres for the swims', () => {
