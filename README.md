@@ -9,7 +9,7 @@ Static training site for IRONMAN 70.3 Hawaii on 2027-06-05. No build step, no de
 - `data/plan.json` — the plan. The only file to edit when training changes.
 - `data/log.json` — what actually happened. Written by the nightly Strava sync.
 - `assets/` — ES modules, loaded directly by the browser and importable by `node --test`.
-- `scripts/sync-runbook.md` — what the nightly sync does.
+- `scripts/sync-runbook.md` — what the nightly sync does; `scripts/sync.mjs` does it.
 
 ## Calendar
 
@@ -100,5 +100,9 @@ whether it matched a planned session or not (`extra`). Walks, hikes and other
 non-training types are shown apart and left out of the total. A week with
 nothing recorded shows dashes, not zeros: no data is not the same as rest.
 
-The nightly Claude scheduled task follows `scripts/sync-runbook.md`. To sync manually,
-ask Claude in this repo: "sync the last 7 days from Strava".
+The nightly Claude scheduled task follows `scripts/sync-runbook.md`: it fetches the
+day's activities with the Strava connector's `list_activities` and hands them to
+`node scripts/sync.mjs <from> <to> <activities.json>`, which matches them to the
+plan and writes `data/log.json` and `data/sync-status.json`. To sync manually, ask
+Claude in this repo: "sync the last 7 days from Strava". The Strava connector must
+be connected in that session.

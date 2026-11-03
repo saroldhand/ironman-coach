@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { resolveWeek } from '../assets/plan-model.js';
-import { statusFor, matchDay, mergeEntries, weekCompletion, weekActuals } from '../assets/log-model.js';
+import { statusFor, matchDay, mergeEntries, weekCompletion, weekActuals, normaliseActivity, syncRange } from '../assets/log-model.js';
 
 const plan = JSON.parse(readFileSync(new URL('../data/plan.json', import.meta.url)));
 // Bridge W2, Nov 16-22: a 60-minute Tuesday ride, a 2,000 m Wednesday swim,
@@ -194,4 +194,61 @@ test('a week with nothing recorded is unknown, not zero', () => {
   const missedOnly = [{ date: '2026-11-17', planKey: 'bridge:2:tue:bike', status: 'missed', strava: null, note: '' }];
   assert.equal(weekActuals(week, []).recorded, false);
   assert.equal(weekActuals(week, missedOnly).recorded, false);
+});
+
+// ---- the sync: the connector's activities in, log entries out
+
+// The shape list_activities returns from the Strava connector.
+const fromConnector = (id, sport_type, start_local, moving_time, distance) =>
+  ({ id: String(id), name: `${sport_type} ${id}`, sport_type, start_local,
+     summary: { distance, moving_time, elapsed_time: moving_time, elevation_gain: 0 } });
+
+test("the connector's activity shape becomes the one matching reads", () => {
+  assert.deepEqual(normaliseActivity(fromConnector(42, 'VirtualRide', '2026-11-10T06:31:00', 2700, 18000)), {
+    id: '42', type: 'VirtualRide', name: 'VirtualRide 42', moving_time: 2700, distance: 18000,
+    average_heartrate: null, start_date_local: '2026-11-10T06:31:00'
+  });
+  // The Strava API's own shape passes through unchanged.
+  const api = { id: 7, type: 'Run', name: 'Run', moving_time: 1800, distance: 5000,
+                average_heartrate: 141, start_date_local: '2026-11-12T06:40:00Z' };
+  assert.deepEqual(normaliseActivity(api), { ...api, id: '7' });
+});
+
+test('a sync matches each date in the range to its own sessions', () => {
+  const activities = [
+    fromConnector(1, 'Swim', '2026-11-09T06:08:00', 2100, 1500),
+    fromConnector(2, 'WeightTraining', '2026-11-09T06:50:00', 2100, 0),
+    fromConnector(3, 'Run', '2026-11-09T12:20:00', 900, 2500),
+    fromConnector(4, 'Ride', '2026-11-10T06:30:00', 2700, 20000),
+    fromConnector(5, 'Walk', '2026-11-10T18:00:00', 1800, 2400)
+  ];
+  const { entries, days } = syncRange(plan, [], activities, '2026-11-08', '2026-11-11', '2026-11-11');
+
+  assert.deepEqual(days, [
+    { date: '2026-11-08', activities: 0, skipped: 'before-start' },
+    { date: '2026-11-09', activities: 3, entries: 3 },
+    { date: '2026-11-10', activities: 2, entries: 2 },
+    // Today: the swim not done yet stays blank rather than missed.
+    { date: '2026-11-11', activities: 0, entries: 0 }
+  ]);
+  // Within a day the log is ordered by Strava id.
+  assert.deepEqual(entries.map(e => [e.date, e.planKey, e.status]), [
+    ['2026-11-09', 'bridge:1:mon:swim', 'done'],
+    ['2026-11-09', 'bridge:1:mon:strength', 'done'],
+    ['2026-11-09', 'bridge:1:mon:run', 'done'],
+    ['2026-11-10', 'bridge:1:tue:bike', 'done'],
+    ['2026-11-10', null, 'extra']
+  ]);
+});
+
+test('a sync the day after marks what was not done as missed', () => {
+  const { entries } = syncRange(plan, [], [], '2026-11-11', '2026-11-11', '2026-11-12');
+  assert.deepEqual(entries.map(e => [e.planKey, e.status]), [['bridge:1:wed:swim', 'missed']]);
+});
+
+test('re-syncing a range changes nothing', () => {
+  const activities = [fromConnector(4, 'Ride', '2026-11-10T06:30:00', 2700, 20000)];
+  const once = syncRange(plan, [], activities, '2026-11-10', '2026-11-10', '2026-11-12').entries;
+  const twice = syncRange(plan, once, activities, '2026-11-10', '2026-11-10', '2026-11-12').entries;
+  assert.deepEqual(twice, once);
 });
