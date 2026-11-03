@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import {
   toMin, clockText, sessionMinutes, weekHours, morning, kitFor, fuelBefore,
-  dayPlan, tonight, weekSummary
+  dayPlan, tonight, weekSummary, plannedByDiscipline
 } from '../assets/schedule-model.js';
 import { resolveWeek } from '../assets/plan-model.js';
 
@@ -161,4 +161,16 @@ test('the week summary counts hours and finds the earliest alarm', () => {
   assert.ok(s.hours > 5 && s.hours < 6.5, `bridge W1 is ${s.hours} h`);
   assert.equal(s.alarms.size, 5);
   assert.equal(clockText(s.earliest.alarm), '5:40 am');
+});
+
+test('the plan by discipline gives minutes for all and metres for the swims', () => {
+  const week = resolveWeek(plan, 'bridge', 1);
+  const p = plannedByDiscipline(week, plan.schedule);
+  // Swims 1,500 + 1,800 + 1,800 m at 2:15 per 100 m: 34 + 41 + 41 min.
+  assert.deepEqual(p.swim, { minutes: 116, metres: 5100 });
+  assert.deepEqual(p.bike, { minutes: 45 + 75, metres: 0 });
+  assert.deepEqual(p.run, { minutes: 15 + 30 + 35, metres: 0 });
+  assert.deepEqual(p.strength, { minutes: 35, metres: 0 });
+  const total = Object.values(p).reduce((t, d) => t + d.minutes, 0);
+  assert.equal(weekHours(week, plan.schedule), Math.round(total / 6) / 10);
 });

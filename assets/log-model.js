@@ -1,3 +1,5 @@
+import { addDays } from './date-utils.js';
+
 export const DISCIPLINE_BY_STRAVA_TYPE = {
   Swim: 'swim',
   Ride: 'bike',
@@ -142,4 +144,40 @@ export function weekCompletion(resolvedWeek, entries) {
 
   const done = relevant.filter(e => e.status === 'done' || e.status === 'partial').length;
   return { done, planned: keys.size, pct: Math.round((done / keys.size) * 100) };
+}
+
+export const TRAINING_DISCIPLINES = ['swim', 'bike', 'run', 'strength'];
+
+// What was actually done in a week, by discipline. Every recorded activity
+// dated inside the week counts - one matched to a session and one that was not
+// on the plan alike - because the question is how much training happened, not
+// how much of the plan. A 'missed' entry has no activity and adds nothing.
+//
+// Activities Strava types as something else (a walk, a hike) go in `other`,
+// outside the total, so the total compares like with like against the plan.
+//
+// `recorded` says whether anything at all came back for the week. A week with
+// nothing recorded is unknown - the sync may not have run - not a week of rest.
+export function weekActuals(week, entries) {
+  const end = addDays(week.startDate, 7);
+  const blank = () => ({ minutes: 0, metres: 0, count: 0 });
+  const byDiscipline = Object.fromEntries([...TRAINING_DISCIPLINES, 'other'].map(d => [d, blank()]));
+
+  let recorded = false;
+  for (const e of entries) {
+    if (!e.strava || e.date < week.startDate || e.date >= end) continue;
+    recorded = true;
+    const d = DISCIPLINE_BY_STRAVA_TYPE[e.strava.type] || 'other';
+    byDiscipline[d].minutes += (e.strava.movingTime || 0) / 60;
+    byDiscipline[d].metres += e.strava.distance || 0;
+    byDiscipline[d].count += 1;
+  }
+
+  const total = blank();
+  for (const d of TRAINING_DISCIPLINES) {
+    total.minutes += byDiscipline[d].minutes;
+    total.metres += byDiscipline[d].metres;
+    total.count += byDiscipline[d].count;
+  }
+  return { recorded, byDiscipline, total };
 }

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { prescribedText, summaryLine, fuelLines, whenText, weekHeadline, tonightFirst } from '../assets/render.js';
+import { prescribedText, summaryLine, fuelLines, whenText, weekHeadline, tonightFirst, durationText, weekTotalsRows } from '../assets/render.js';
 
 test('prescribedText formats distances in metres with thousands separators', () => {
   assert.equal(prescribedText({ metric: 'distance', value: 2000, unit: 'm' }), '2,000 m');
@@ -131,4 +131,44 @@ test("tonight's card leads the page from midday", () => {
   assert.equal(tonightFirst(11), false);
   assert.equal(tonightFirst(12), true);
   assert.equal(tonightFirst(21), true);
+});
+
+test('durations read as h:mm so a column of them lines up', () => {
+  assert.equal(durationText(45), '0:45');
+  assert.equal(durationText(106), '1:46');
+  assert.equal(durationText(179.6), '3:00', 'rounded to the minute first');
+});
+
+const blankActuals = () => ({
+  recorded: false,
+  byDiscipline: Object.fromEntries(['swim', 'bike', 'run', 'strength', 'other']
+    .map(d => [d, { minutes: 0, metres: 0, count: 0 }])),
+  total: { minutes: 0, metres: 0, count: 0 }
+});
+const planned = { swim: { minutes: 116, metres: 5100 }, bike: { minutes: 120, metres: 0 },
+                  run: { minutes: 80, metres: 0 }, strength: { minutes: 35, metres: 0 } };
+
+test('the week totals table shows planned against done, with distance where it means something', () => {
+  const a = blankActuals();
+  a.recorded = true;
+  Object.assign(a.byDiscipline.swim, { minutes: 79, metres: 3500, count: 2 });
+  Object.assign(a.byDiscipline.bike, { minutes: 90, metres: 45000, count: 1 });
+  Object.assign(a.byDiscipline.run, { minutes: 26, metres: 4900, count: 2 });
+  Object.assign(a.byDiscipline.other, { minutes: 40, metres: 3500, count: 1 });
+  a.total = { minutes: 195, metres: 53400, count: 5 };
+
+  assert.deepEqual(weekTotalsRows(planned, a).map(r => [r.label, r.planned, r.done]), [
+    ['Swim', '1:56 · 5,100 m', '1:19 · 3,500 m'],
+    ['Bike', '2:00', '1:30 · 45.0 km'],
+    ['Run', '1:20', '0:26 · 4.9 km'],
+    ['Strength', '0:35', '0:00'],
+    ['Total', '5.9 h', '3.3 h'],
+    ['Other', '', '0:40 · not in the total']
+  ]);
+});
+
+test('a week with nothing recorded shows no done figures at all, not zeros', () => {
+  const rows = weekTotalsRows(planned, blankActuals());
+  assert.ok(rows.every(r => r.done === null));
+  assert.deepEqual(rows.map(r => r.label), ['Swim', 'Bike', 'Run', 'Strength', 'Total']);
 });

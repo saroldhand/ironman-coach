@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { resolveWeek } from '../assets/plan-model.js';
-import { statusFor, matchDay, mergeEntries, weekCompletion } from '../assets/log-model.js';
+import { statusFor, matchDay, mergeEntries, weekCompletion, weekActuals } from '../assets/log-model.js';
 
 const plan = JSON.parse(readFileSync(new URL('../data/plan.json', import.meta.url)));
 // Bridge W2, Nov 16-22: a 60-minute Tuesday ride, a 2,000 m Wednesday swim,
@@ -156,4 +156,42 @@ test('merging the same batch repeatedly is stable', () => {
   const thrice = mergeEntries(twice, incoming);
   assert.equal(twice.length, once.length);
   assert.deepEqual(thrice, once);
+});
+
+// ---- what was actually done in a week
+
+const act = (date, type, secs, metres, id) =>
+  ({ date, planKey: null, status: 'extra', note: '',
+     strava: { id, type, name: type, movingTime: secs, distance: metres, avgHr: null, url: '' } });
+
+test('weekly actuals add up every recorded activity in the week, by discipline', () => {
+  // Bridge W2 runs Mon 2026-11-16 to Sun 2026-11-22.
+  const entries = [
+    { ...act('2026-11-16', 'Swim', 35 * 60, 1500, 1), planKey: 'bridge:2:mon:swim', status: 'done' },
+    act('2026-11-16', 'Run', 16 * 60, 2900, 2),
+    act('2026-11-18', 'Swim', 44 * 60, 2000, 3),
+    act('2026-11-21', 'VirtualRide', 90 * 60, 45000, 4),
+    act('2026-11-21', 'Run', 10 * 60, 2000, 5),
+    act('2026-11-22', 'Walk', 40 * 60, 3500, 6),
+    // A missed session has no activity, and days outside the week do not count.
+    { date: '2026-11-19', planKey: 'bridge:2:thu:run', status: 'missed', strava: null, note: '' },
+    act('2026-11-15', 'Run', 35 * 60, 6000, 7),
+    act('2026-11-23', 'Swim', 34 * 60, 1500, 8)
+  ];
+  const a = weekActuals(week, entries);
+  assert.equal(a.recorded, true);
+  assert.deepEqual(a.byDiscipline.swim, { minutes: 79, metres: 3500, count: 2 });
+  assert.deepEqual(a.byDiscipline.run, { minutes: 26, metres: 4900, count: 2 });
+  assert.deepEqual(a.byDiscipline.bike, { minutes: 90, metres: 45000, count: 1 });
+  assert.deepEqual(a.byDiscipline.strength, { minutes: 0, metres: 0, count: 0 });
+  // A walk is recorded but sits outside the training total.
+  assert.deepEqual(a.byDiscipline.other, { minutes: 40, metres: 3500, count: 1 });
+  assert.equal(a.total.minutes, 79 + 26 + 90);
+  assert.equal(a.total.count, 5);
+});
+
+test('a week with nothing recorded is unknown, not zero', () => {
+  const missedOnly = [{ date: '2026-11-17', planKey: 'bridge:2:tue:bike', status: 'missed', strava: null, note: '' }];
+  assert.equal(weekActuals(week, []).recorded, false);
+  assert.equal(weekActuals(week, missedOnly).recorded, false);
 });

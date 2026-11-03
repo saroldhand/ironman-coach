@@ -114,6 +114,7 @@ async function start() {
       return renderWeek({
         plan,
         week: resolveWeek(plan, page.blockId, page.week),
+        entries: log.entries,
         entriesByKey: indexEntries(log.entries, today).byKey,
         today,
         nav

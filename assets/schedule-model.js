@@ -36,16 +36,26 @@ export function sessionMinutes(session, schedule) {
   return null;
 }
 
-// Training time in a week, in hours to one decimal. Optional sessions are
+// The week's plan by discipline: minutes for everything, and metres where the
+// plan prescribes a distance (the swims, and race day). Optional sessions are
 // left out, as the design's weekly hours always have been.
-export function weekHours(week, schedule) {
-  let total = 0;
+export function plannedByDiscipline(week, schedule) {
+  const out = {};
   for (const day of week.days) {
     for (const s of day.sessions) {
       if (s.optional) continue;
-      total += sessionMinutes(s, schedule) || 0;
+      const d = out[s.discipline] || (out[s.discipline] = { minutes: 0, metres: 0 });
+      d.minutes += sessionMinutes(s, schedule) || 0;
+      if (s.prescribed.metric === 'distance') d.metres += s.prescribed.value;
     }
   }
+  return out;
+}
+
+// Training time in a week, in hours to one decimal.
+export function weekHours(week, schedule) {
+  const total = Object.values(plannedByDiscipline(week, schedule))
+    .reduce((t, d) => t + d.minutes, 0);
   return Math.round(total / 6) / 10;
 }
 
