@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { prescribedText, summaryLine, fuelLines, whenText, weekHeadline, tonightFirst, durationText, weekTotalsRows } from '../assets/render.js';
+import { prescribedText, summaryLine, fuelLines, whenText, weekHeadline, tonightFirst, durationText, disciplineBars } from '../assets/render.js';
 
 test('prescribedText formats distances in metres with thousands separators', () => {
   assert.equal(prescribedText({ metric: 'distance', value: 2000, unit: 'm' }), '2,000 m');
@@ -139,36 +139,41 @@ test('durations read as h:mm so a column of them lines up', () => {
   assert.equal(durationText(179.6), '3:00', 'rounded to the minute first');
 });
 
-const blankActuals = () => ({
-  recorded: false,
-  byDiscipline: Object.fromEntries(['swim', 'bike', 'run', 'strength', 'other']
-    .map(d => [d, { minutes: 0, metres: 0, count: 0 }])),
+const actuals = (recorded, values = {}) => ({
+  recorded,
+  byDiscipline: Object.fromEntries(['swim', 'bike', 'run', 'strength'].map(d =>
+    [d, { minutes: 0, metres: 0, count: 0, ...(values[d] || {}) }])),
   total: { minutes: 0, metres: 0, count: 0 }
 });
-const planned = { swim: { minutes: 116, metres: 5100 }, bike: { minutes: 120, metres: 0 },
-                  run: { minutes: 80, metres: 0 }, strength: { minutes: 35, metres: 0 } };
+const typical = { swim: { minutes: 50, metres: 1000 }, bike: { minutes: 100, metres: 37000 },
+                  run: { minutes: 80, metres: 10000 }, strength: { minutes: 75, metres: 0 } };
+const speed = { swim: 0.4, bike: 6, run: 2.3, strength: null };
+const pick = rows => Object.fromEntries(rows.map(r => [r.label, r.bars.map(b => [b.text, b.targetText, b.pct, b.over])]));
 
-test('the week totals table shows planned against done, with distance where it means something', () => {
-  const a = blankActuals();
-  a.recorded = true;
-  Object.assign(a.byDiscipline.swim, { minutes: 79, metres: 3500, count: 2 });
-  Object.assign(a.byDiscipline.bike, { minutes: 90, metres: 45000, count: 1 });
-  Object.assign(a.byDiscipline.run, { minutes: 26, metres: 4900, count: 2 });
-  Object.assign(a.byDiscipline.other, { minutes: 40, metres: 3500, count: 1 });
-  a.total = { minutes: 195, metres: 53400, count: 5 };
-
-  assert.deepEqual(weekTotalsRows(planned, a).map(r => [r.label, r.planned, r.done]), [
-    ['Swim', '1:56 · 5,100 m', '1:19 · 3,500 m'],
-    ['Bike', '2:00', '1:30 · 45.0 km'],
-    ['Run', '1:20', '0:26 · 4.9 km'],
-    ['Strength', '0:35', '0:00'],
-    ['Total', '5.9 h', '3.3 h'],
-    ['Other', '', '0:40 · not in the total']
-  ]);
+test('in a planned week each bar fills toward the plan, and ride and run distance toward an estimate', () => {
+  const planned = { days: 7, byDiscipline: { swim: { minutes: 108, metres: 4300 }, bike: { minutes: 120, metres: 0 },
+                                            run: { minutes: 80, metres: 0 }, strength: { minutes: 35, metres: 0 } } };
+  const done = actuals(true, { swim: { minutes: 54, metres: 2150, count: 2 }, bike: { minutes: 150, metres: 50000, count: 2 },
+                               run: { minutes: 40, metres: 5520, count: 1 } });
+  assert.deepEqual(pick(disciplineBars({ actuals: done, planned, typical, speed })), {
+    Swim: [['0:54', '1:48 planned', 50, false], ['2,150 m', '4,300 m planned', 50, false]],
+    // 2:00 at 6 m/s is 43.2 km - an estimate, so marked ≈. Past it, the bar
+    // stops at full and says so.
+    Bike: [['2:30', '2:00 planned', 100, true], ['50.0 km', '≈43.2 km planned', 100, true]],
+    Run: [['0:40', '1:20 planned', 50, false], ['5.5 km', '≈11.0 km planned', 50, false]],
+    // Lifting has a time bar only.
+    Lift: [['0:00', '0:35 planned', 0, false]]
+  });
 });
 
-test('a week with nothing recorded shows no done figures at all, not zeros', () => {
-  const rows = weekTotalsRows(planned, blankActuals());
-  assert.ok(rows.every(r => r.done === null));
-  assert.deepEqual(rows.map(r => r.label), ['Swim', 'Bike', 'Run', 'Strength', 'Total']);
+test('with no plan, bars fill toward the typical week or month', () => {
+  const done = actuals(true, { bike: { minutes: 1600, metres: 570800, count: 6 } });
+  const rows = pick(disciplineBars({ actuals: done, planned: { days: 0, byDiscipline: {} }, typical, speed, period: 'month' }));
+  assert.deepEqual(rows.Bike, [['26:40', 'typical month 1:40', 100, true], ['570.8 km', 'typical month 37.0 km', 100, true]]);
+  assert.deepEqual(rows.Swim, [['0:00', 'typical month 0:50', 0, false], ['0 m', 'typical month 1,000 m', 0, false]]);
+});
+
+test('a period with nothing recorded shows dashes and empty bars, not zeros', () => {
+  const rows = disciplineBars({ actuals: actuals(false), planned: null, typical, speed });
+  assert.ok(rows.every(r => r.bars.every(b => b.text === '—' && b.pct === 0)));
 });

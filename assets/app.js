@@ -102,6 +102,8 @@ async function start() {
 
     if (page.view === 'month') {
       return renderMonth({
+        plan,
+        entries: log.entries,
         rows: monthRows(plan, page.ym),
         ym: page.ym,
         entriesByKey: indexEntries(log.entries, today).byKey,

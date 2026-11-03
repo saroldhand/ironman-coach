@@ -1,4 +1,4 @@
-import { addDays } from './date-utils.js';
+import { addDays, weekdayKey } from './date-utils.js';
 import { dayForDate, resolveWeek } from './plan-model.js';
 
 export const DISCIPLINE_BY_STRAVA_TYPE = {
@@ -11,8 +11,17 @@ export const DISCIPLINE_BY_STRAVA_TYPE = {
   TrailRun: 'run',
   VirtualRun: 'run',
   WeightTraining: 'strength',
-  Workout: 'strength'
+  Workout: 'strength',
+  HighIntensityIntervalTraining: 'strength',
+  Crossfit: 'strength'
 };
+
+// Walks, hikes and anything else Strava types outside the four disciplines are
+// kept in the log, so nothing is lost, but they are not training: no total,
+// bar or list on the site counts them.
+export function isTraining(type) {
+  return Boolean(DISCIPLINE_BY_STRAVA_TYPE[type]);
+}
 
 const DONE_AT = 0.85;
 const PARTIAL_AT = 0.40;
@@ -149,38 +158,99 @@ export function weekCompletion(resolvedWeek, entries) {
 
 export const TRAINING_DISCIPLINES = ['swim', 'bike', 'run', 'strength'];
 
-// What was actually done in a week, by discipline. Every recorded activity
-// dated inside the week counts - one matched to a session and one that was not
-// on the plan alike - because the question is how much training happened, not
-// how much of the plan. A 'missed' entry has no activity and adds nothing.
-//
-// Activities Strava types as something else (a walk, a hike) go in `other`,
-// outside the total, so the total compares like with like against the plan.
-//
-// `recorded` says whether anything at all came back for the week. A week with
-// nothing recorded is unknown - the sync may not have run - not a week of rest.
-export function weekActuals(week, entries) {
-  const end = addDays(week.startDate, 7);
-  const blank = () => ({ minutes: 0, metres: 0, count: 0 });
-  const byDiscipline = Object.fromEntries([...TRAINING_DISCIPLINES, 'other'].map(d => [d, blank()]));
+const blankTotals = () => Object.fromEntries(
+  TRAINING_DISCIPLINES.map(d => [d, { minutes: 0, metres: 0, count: 0 }]));
 
+// What was actually done between two dates (`to` exclusive), by discipline.
+// Every recorded training activity in the range counts - one matched to a
+// session and one that was not on the plan alike - because the question is
+// how much training happened, not how much of the plan. Walks and hikes do
+// not count. A 'missed' entry has no activity and adds nothing.
+//
+// `recorded` says whether anything at all came back for the range. A range
+// with nothing recorded is unknown - the sync may not have run - not rest.
+export function actualsBetween(entries, from, to) {
+  const byDiscipline = blankTotals();
   let recorded = false;
   for (const e of entries) {
-    if (!e.strava || e.date < week.startDate || e.date >= end) continue;
+    if (!e.strava || e.date < from || e.date >= to) continue;
     recorded = true;
-    const d = DISCIPLINE_BY_STRAVA_TYPE[e.strava.type] || 'other';
+    const d = DISCIPLINE_BY_STRAVA_TYPE[e.strava.type];
+    if (!d) continue;
     byDiscipline[d].minutes += (e.strava.movingTime || 0) / 60;
     byDiscipline[d].metres += e.strava.distance || 0;
     byDiscipline[d].count += 1;
   }
-
-  const total = blank();
+  const total = { minutes: 0, metres: 0, count: 0 };
   for (const d of TRAINING_DISCIPLINES) {
     total.minutes += byDiscipline[d].minutes;
     total.metres += byDiscipline[d].metres;
     total.count += byDiscipline[d].count;
   }
   return { recorded, byDiscipline, total };
+}
+
+export function weekActuals(week, entries) {
+  return actualsBetween(entries, week.startDate, addDays(week.startDate, 7));
+}
+
+// The Monday of the week a date falls in, and the month it falls in: the two
+// ways the site groups training.
+const DAY_INDEX = { mon: 0, tue: 1, wed: 2, thu: 3, fri: 4, sat: 5, sun: 6 };
+export function mondayOf(date) {
+  return addDays(date, -DAY_INDEX[weekdayKey(date)]);
+}
+const PERIOD_KEY = { week: mondayOf, month: date => date.slice(0, 7) };
+
+function median(values) {
+  const v = [...values].sort((a, b) => a - b);
+  if (!v.length) return 0;
+  const mid = Math.floor(v.length / 2);
+  return v.length % 2 ? v[mid] : (v[mid - 1] + v[mid]) / 2;
+}
+
+// A typical week (or month) per discipline: the median over the periods in
+// which that discipline was done at all. The median, not the biggest: one
+// 570 km touring week would otherwise make every other week look empty.
+export function typicalPeriod(entries, period) {
+  const key = PERIOD_KEY[period];
+  const totals = new Map();
+  for (const e of entries) {
+    if (!e.strava) continue;
+    const d = DISCIPLINE_BY_STRAVA_TYPE[e.strava.type];
+    if (!d) continue;
+    const k = key(e.date);
+    if (!totals.has(k)) totals.set(k, blankTotals());
+    const t = totals.get(k)[d];
+    t.minutes += (e.strava.movingTime || 0) / 60;
+    t.metres += e.strava.distance || 0;
+    t.count += 1;
+  }
+  const out = {};
+  for (const d of TRAINING_DISCIPLINES) {
+    const done = [...totals.values()].map(t => t[d]).filter(t => t.count);
+    out[d] = { minutes: median(done.map(t => t.minutes)), metres: median(done.map(t => t.metres)) };
+  }
+  return out;
+}
+
+// The athlete's usual speed per discipline, in metres per second: all the
+// distance recorded over all the moving time. Used to turn a planned ride or
+// run time into an approximate distance - an estimate, and labelled as one.
+export function usualSpeed(entries) {
+  const sums = blankTotals();
+  for (const e of entries) {
+    if (!e.strava) continue;
+    const d = DISCIPLINE_BY_STRAVA_TYPE[e.strava.type];
+    if (!d || !e.strava.distance || !e.strava.movingTime) continue;
+    sums[d].metres += e.strava.distance;
+    sums[d].minutes += e.strava.movingTime / 60;
+  }
+  const out = {};
+  for (const d of TRAINING_DISCIPLINES) {
+    out[d] = sums[d].minutes ? sums[d].metres / (sums[d].minutes * 60) : null;
+  }
+  return out;
 }
 
 // The Strava connector and the Strava API name the same things differently:

@@ -1,8 +1,9 @@
 import { planStart, blocksInOrder } from './plan-model.js';
-import { addDays, monthLabel, weekdayKey, dayLabel } from './date-utils.js';
+import { addDays, addMonths, monthLabel, weekdayKey, dayLabel } from './date-utils.js';
 import { clockText, morning, kitFor, fuelBefore, tonight, weekSummary, weekHours, hoursText,
-         plannedByDiscipline } from './schedule-model.js';
-import { weekActuals, TRAINING_DISCIPLINES } from './log-model.js';
+         plannedBetween } from './schedule-model.js';
+import { weekActuals, actualsBetween, typicalPeriod, usualSpeed, isTraining,
+         DISCIPLINE_BY_STRAVA_TYPE, TRAINING_DISCIPLINES } from './log-model.js';
 
 const DOW = { mon: 'Monday', tue: 'Tuesday', wed: 'Wednesday', thu: 'Thursday',
               fri: 'Friday', sat: 'Saturday', sun: 'Sunday' };
@@ -99,18 +100,19 @@ export function fuelLines(plan, resolved) {
 // Activities Strava recorded with no matching planned slot. Shared between the
 // unauthored-block early return and the normal path so an unauthored day's
 // extras are never dropped from the view — see log-model's `extra` status.
-function extrasSection(extras) {
-  if (!extras.length) return null;
+function extrasSection(extras, title = 'Not on the plan') {
+  // Walks and hikes stay in the log but are not training: they are not listed.
+  const training = extras.filter(e => isTraining(e.strava.type));
+  if (!training.length) return null;
   return el('section', { class: 'card' }, [
-    el('h2', {}, 'Not on the plan'),
-    el('ul', { class: 'detail' }, extras.map(e =>
-      el('li', {}, `${e.strava.name} — ${Math.round(e.strava.movingTime / 60)} min`)))
+    el('h2', {}, title),
+    el('ul', { class: 'activities' }, training.map(activityItem))
   ]);
 }
 
 // ---- what was actually done ----
 // The plan says how long; Strava says how long and how far. Durations read as
-// h:mm in one column, so a 45-minute run and a 3-hour ride line up.
+// h:mm, so a 45-minute run and a 3-hour ride line up.
 
 export function durationText(minutes) {
   const m = Math.round(minutes);
@@ -120,59 +122,105 @@ export function durationText(minutes) {
 // Rides and runs in km whatever their length; swims in metres.
 function doneDistance(discipline, metres) {
   if (discipline === 'swim') return distanceText(metres);
-  if (discipline === 'bike' || discipline === 'run') return `${(metres / 1000).toFixed(1)} km`;
-  return null;
+  return `${(metres / 1000).toFixed(1)} km`;
 }
 
-const DISCIPLINE_LABEL = { swim: 'Swim', bike: 'Bike', run: 'Run', strength: 'Strength', other: 'Other' };
+const DISCIPLINE_LABEL = { swim: 'Swim', bike: 'Bike', run: 'Run', strength: 'Lift' };
 
-// The rows of a week's totals table: planned against done, per discipline,
-// then the total. `done` is null for the whole table when nothing was
-// recorded: unknown, which the page must not show as zero.
-export function weekTotalsRows(planned, actuals) {
-  const rows = [];
-  for (const d of TRAINING_DISCIPLINES) {
-    const p = planned[d] || { minutes: 0, metres: 0 };
-    const a = actuals.byDiscipline[d];
-    if (!p.minutes && !a.count) continue;
-    rows.push({
-      label: DISCIPLINE_LABEL[d],
-      planned: [durationText(p.minutes), p.metres ? distanceText(p.metres) : null].filter(Boolean).join(' · '),
-      done: actuals.recorded
-        ? [durationText(a.minutes), a.count ? doneDistance(d, a.metres) : null].filter(Boolean).join(' · ')
-        : null
-    });
-  }
-  const plannedMin = TRAINING_DISCIPLINES.reduce((t, d) => t + ((planned[d] && planned[d].minutes) || 0), 0);
-  rows.push({
-    label: 'Total',
-    planned: hoursText(Math.round(plannedMin / 6) / 10),
-    done: actuals.recorded ? hoursText(Math.round(actuals.total.minutes / 6) / 10) : null,
-    total: true
-  });
-  const other = actuals.byDiscipline.other;
-  if (other.count) {
-    rows.push({ label: 'Other', planned: '', done: `${durationText(other.minutes)} · not in the total`, other: true });
-  }
-  return rows;
-}
-
-function weekTotalsCard(plan, week, entries) {
-  const actuals = weekActuals(week, entries);
-  const rows = weekTotalsRows(plannedByDiscipline(week, plan.schedule), actuals);
-  const total = rows.find(r => r.total);
-  return el('section', { class: 'card totals' }, [
-    el('h2', {}, ['Done this week', el('span', { class: 'prescribed' },
-      actuals.recorded ? `${total.done.replace(' h', '')} of ${total.planned}` : 'nothing from Strava yet')]),
-    el('table', { class: 'totals' }, [
-      el('thead', {}, el('tr', {}, [el('th', {}, ''), el('th', {}, 'Planned'), el('th', {}, 'Done')])),
-      el('tbody', {}, rows.map(r => el('tr', { class: r.total ? 'total' : (r.other ? 'other' : null) }, [
-        el('th', { scope: 'row' }, r.label),
-        el('td', {}, r.planned),
-        el('td', {}, r.done === null ? '—' : r.done)
-      ])))
-    ])
+// One recorded activity, as a list item: name, then time and distance.
+function activityItem(e) {
+  const d = DISCIPLINE_BY_STRAVA_TYPE[e.strava.type];
+  const parts = [durationText(e.strava.movingTime / 60)];
+  if (d !== 'strength' && e.strava.distance) parts.push(doneDistance(d, e.strava.distance));
+  return el('li', {}, [
+    el('span', { class: `dot ${d}` }),
+    el('a', { href: e.strava.url, target: '_blank', rel: 'noopener' }, e.strava.name),
+    el('span', { class: 'amount' }, parts.join(' · '))
   ]);
+}
+
+// A bar fills toward a target, and says which:
+//   - the plan, where the period has one (planned time; planned swim metres);
+//   - for ride and run distance in a planned period, the planned time at the
+//     athlete's usual speed - an estimate, marked ≈;
+//   - with no plan, the athlete's typical week or month (the median), so one
+//     huge touring week does not make every other week look empty.
+// Lifting has a time bar only. Nothing recorded is unknown, not zero: the
+// value reads "—" and the bar stays empty.
+export function disciplineBars({ actuals, planned, typical, speed, period = 'week' }) {
+  const plannedFor = d => (planned && planned.days ? planned.byDiscipline[d] : null);
+  return TRAINING_DISCIPLINES.map(d => {
+    const a = actuals.byDiscipline[d];
+    const p = plannedFor(d);
+    const t = typical[d] || { minutes: 0, metres: 0 };
+
+    const timeTarget = p && p.minutes ? { value: p.minutes, kind: 'plan' }
+      : t.minutes ? { value: t.minutes, kind: 'typical' } : null;
+    const bars = [bar('time', a.minutes, timeTarget, actuals.recorded, durationText, period)];
+
+    if (d !== 'strength') {
+      let distTarget = null;
+      if (d === 'swim' && p && p.metres) distTarget = { value: p.metres, kind: 'plan' };
+      else if (d !== 'swim' && p && p.minutes && speed[d]) distTarget = { value: p.minutes * 60 * speed[d], kind: 'estimate' };
+      else if (t.metres) distTarget = { value: t.metres, kind: 'typical' };
+      bars.push(bar('distance', a.metres, distTarget, actuals.recorded, m => doneDistance(d, m), period));
+    }
+    return { discipline: d, label: DISCIPLINE_LABEL[d], bars };
+  });
+}
+
+function bar(kind, value, target, recorded, format, period) {
+  const pct = !recorded || !value ? 0
+    : target ? Math.min(100, Math.round((value / target.value) * 100)) : 100;
+  let targetText = null;
+  if (target) {
+    const amount = format(target.value);
+    targetText = target.kind === 'plan' ? `${amount} planned`
+      : target.kind === 'estimate' ? `≈${amount} planned`
+      : `typical ${period} ${amount}`;
+  }
+  return {
+    kind, pct,
+    over: Boolean(recorded && target && value > target.value),
+    text: recorded ? format(value) : '—',
+    targetText
+  };
+}
+
+// The bars for a period - a week or a month - as a card.
+function barsCard(title, { actuals, planned, typical, speed, period }) {
+  const rows = disciplineBars({ actuals, planned, typical, speed, period });
+  const plannedMin = planned && planned.days
+    ? TRAINING_DISCIPLINES.reduce((t, d) => t + ((planned.byDiscipline[d] || {}).minutes || 0), 0)
+    : 0;
+  const doneH = hoursText(Math.round(actuals.total.minutes / 6) / 10);
+  const summary = !actuals.recorded ? 'nothing from Strava yet'
+    : plannedMin ? `${doneH.replace(' h', '')} of ${hoursText(Math.round(plannedMin / 6) / 10)}`
+    : doneH;
+
+  return el('section', { class: 'card bars' }, [
+    el('h2', {}, [title, el('span', { class: 'prescribed' }, summary)]),
+    ...rows.map(r => el('div', { class: `dgroup ${r.discipline}` }, [
+      el('div', { class: 'dname' }, r.label),
+      ...r.bars.map(b => el('div', { class: `brow${b.over ? ' over' : ''}` }, [
+        el('span', { class: 'bk' }, b.kind === 'time' ? 'Time' : 'Distance'),
+        el('span', { class: 'track', role: 'img',
+                     'aria-label': `${r.label} ${b.kind}: ${b.text}${b.targetText ? ` of ${b.targetText}` : ''}` },
+          el('span', { class: 'fill', style: `width:${b.pct}%` })),
+        el('span', { class: 'bval' }, [b.text, b.targetText ? el('span', { class: 'btarget' }, ` / ${b.targetText}`) : null])
+      ]))
+    ]))
+  ]);
+}
+
+function periodBars(plan, entries, from, to, period) {
+  return {
+    actuals: actualsBetween(entries, from, to),
+    planned: plan.schedule ? plannedBetween(plan, from, to) : null,
+    typical: typicalPeriod(entries, period),
+    speed: usualSpeed(entries),
+    period
+  };
 }
 
 // ---- the clock ----
@@ -389,10 +437,11 @@ function dayBody(ctx, out, lead) {
   ]));
 
   if (!day.authored) {
-    out.append(el('p', { class: 'placeholder' },
-      'This block has not been written yet. Nothing prescribed for today.'));
+    out.append(el('p', { class: 'placeholder' }, day.history
+      ? 'Before the plan: no sessions were set. This is what Strava recorded.'
+      : 'This block has not been written yet. Nothing prescribed for today.'));
     if (lead) out.append(lead);
-    const extrasEl = extrasSection(extras);
+    const extrasEl = extrasSection(extras, day.history ? 'Recorded' : 'Not on the plan');
     if (extrasEl) out.append(extrasEl);
     return out;
   }
@@ -430,6 +479,23 @@ function dayBody(ctx, out, lead) {
 const DOW_SHORT = { mon: 'Mon', tue: 'Tue', wed: 'Wed', thu: 'Thu',
                     fri: 'Fri', sat: 'Sat', sun: 'Sun' };
 
+// A week with no plan, day by day: what Strava recorded each day.
+function historyDays(week, entries, today) {
+  const list = el('div', { class: 'weeklist' });
+  const DOW_KEYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+  DOW_KEYS.forEach((dayKey, i) => {
+    const date = addDays(week.startDate, i);
+    const done = entries.filter(e => e.date === date && e.strava && isTraining(e.strava.type));
+    list.append(el('a', { class: `dayrow${date === today ? ' today' : ''}`, href: `#/day/${date}` }, [
+      el('span', { class: 'dow' }, `${DOW_SHORT[dayKey]} ${date.slice(8)}`),
+      done.length
+        ? el('ul', { class: 'activities' }, done.map(activityItem))
+        : el('div', { class: 'wrest' }, date > today ? '' : 'Nothing recorded')
+    ]));
+  });
+  return list;
+}
+
 export function renderWeek(ctx) {
   const { plan, week, entriesByKey, entries = [], today, nav } = ctx;
   const out = el('div');
@@ -442,6 +508,16 @@ export function renderWeek(ctx) {
   out.append(...pageNav(nav));
   out.append(el('h1', {}, title));
 
+  const weekEnd = addDays(week.startDate, 7);
+  const started = week.startDate <= today;
+
+  if (week.history) {
+    out.append(el('p', { class: 'daymeta weekhead' }, 'Before the plan: what Strava recorded.'));
+    out.append(barsCard('Done this week', periodBars(plan, entries, week.startDate, weekEnd, 'week')));
+    out.append(historyDays(week, entries, today));
+    return out;
+  }
+
   if (!week.authored) {
     out.append(el('p', { class: 'placeholder' },
       `Week of ${week.startDate}. Not written yet — ${week.note || ''}`));
@@ -453,7 +529,9 @@ export function renderWeek(ctx) {
   const headline = clock ? weekHeadline(clock) : '';
   if (headline) out.append(el('p', { class: 'daymeta weekhead' }, headline));
   // Once a week has started, what was done sits beside what was planned.
-  if (plan && plan.schedule && week.startDate <= today) out.append(weekTotalsCard(plan, week, entries));
+  if (plan && plan.schedule && started) {
+    out.append(barsCard('Done this week', periodBars(plan, entries, week.startDate, weekEnd, 'week')));
+  }
   const daysOff = (plan && plan.schedule && plan.schedule.daysOff) || {};
 
   const list = el('div', { class: 'weeklist' });
@@ -498,6 +576,10 @@ export function renderWeek(ctx) {
 
 // "4.9/5.9 h" once anything is recorded for the week: done, then planned.
 function seasonHours(plan, week, entries) {
+  if (week.history) {
+    const done = weekActuals(week, entries);
+    return done.recorded ? hoursText(Math.round(done.total.minutes / 6) / 10) : '';
+  }
   if (!week.authored || !plan.schedule) return '';
   const planned = weekHours(week, plan.schedule);
   const done = weekActuals(week, entries);
@@ -566,12 +648,14 @@ function monthDot(session, entry) {
   return el('span', { class: classes.join(' '), title });
 }
 
-function monthCell(cell, entriesByKey, today) {
+function monthCell(cell, entriesByKey, today, recordedOn) {
   if (!cell) return el('div', { class: 'mcell blank' });
 
   const classes = ['mcell'];
   if (!cell.inPlan) classes.push('out');
+  else if (cell.history) classes.push('history');
   else if (!cell.authored) classes.push('unauthored');
+  const recorded = cell.history ? (recordedOn.get(cell.date) || []) : [];
   if (cell.date === today) classes.push('today');
   if (cell.weekType === 'recovery') classes.push('recovery');
 
@@ -580,16 +664,19 @@ function monthCell(cell, entriesByKey, today) {
   const label = [
     cell.date,
     cell.inPlan ? `${cell.blockLabel} W${cell.week}` : 'not in the plan',
-    cell.sessions.length
-      ? cell.sessions.map(s => s.discipline).join(', ')
-      : (cell.inPlan && !cell.authored ? 'not written yet' : 'nothing prescribed'),
+    cell.history
+      ? (recorded.length ? `recorded: ${recorded.join(', ')}` : 'nothing recorded')
+      : cell.sessions.length
+        ? cell.sessions.map(s => s.discipline).join(', ')
+        : (cell.inPlan && !cell.authored ? 'not written yet' : 'nothing prescribed'),
     cell.date === today ? 'today' : null
   ].filter(Boolean).join(' — ');
 
   return el('a', { class: classes.join(' '), href: `#/day/${cell.date}`, 'aria-label': label }, [
     el('span', { class: 'dnum' }, String(Number(cell.date.slice(8)))),
-    el('span', { class: 'mdots', 'aria-hidden': 'true' },
-      cell.sessions.map(s => monthDot(s, entriesByKey.get(s.key))))
+    el('span', { class: 'mdots', 'aria-hidden': 'true' }, cell.history
+      ? recorded.map(d => el('span', { class: `mdot ${d} done`, title: d }))
+      : cell.sessions.map(s => monthDot(s, entriesByKey.get(s.key))))
   ]);
 }
 
@@ -605,11 +692,25 @@ function weekGutter(week) {
 }
 
 export function renderMonth(ctx) {
-  const { rows, ym, entriesByKey, today, nav } = ctx;
+  const { plan, rows, ym, entriesByKey, entries = [], today, nav } = ctx;
   const out = el('div');
 
   out.append(...pageNav(nav));
   out.append(el('h1', {}, monthLabel(ym)));
+
+  // The month's totals, once it has begun: every week of it combined.
+  const from = `${ym}-01`;
+  if (plan && from <= today) {
+    out.append(barsCard('This month', periodBars(plan, entries, from, `${addMonths(ym, 1)}-01`, 'month')));
+  }
+
+  // Days before the plan carry a dot per recorded training activity.
+  const recordedOn = new Map();
+  for (const e of entries) {
+    if (!e.strava || !isTraining(e.strava.type)) continue;
+    if (!recordedOn.has(e.date)) recordedOn.set(e.date, []);
+    recordedOn.get(e.date).push(DISCIPLINE_BY_STRAVA_TYPE[e.strava.type]);
+  }
 
   const grid = el('div', { class: 'monthgrid' });
   grid.append(el('div', { class: 'mhead' }));
@@ -617,12 +718,12 @@ export function renderMonth(ctx) {
 
   for (const row of rows) {
     grid.append(weekGutter(row.week));
-    for (const cell of row.cells) grid.append(monthCell(cell, entriesByKey, today));
+    for (const cell of row.cells) grid.append(monthCell(cell, entriesByKey, today, recordedOn));
   }
 
   out.append(grid);
   out.append(el('div', { class: 'legend' }, DISCIPLINES.map(d =>
-    el('span', { class: 'legenditem' }, [el('span', { class: `mdot ${d}` }), d]))));
+    el('span', { class: 'legenditem' }, [el('span', { class: `mdot ${d}` }), DISCIPLINE_LABEL[d]]))));
 
   return out;
 }

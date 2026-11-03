@@ -38,16 +38,21 @@ export function dayForDate(plan, iso) {
     const week = Math.floor(offset / 7) + 1;
     const progression = (plan.progression[block.id] || []).find(w => w.week === week);
 
+    // A history block is the weeks before the plan: nothing is prescribed by
+    // design, and the page shows what Strava recorded instead. That is not
+    // the same as a block whose weeks have not been written yet.
+    const history = Boolean(block.history);
     return {
       inPlan: true,
       blockId: block.id,
       blockLabel: block.label,
       week,
-      weekType: block.authored && progression ? progression.type : 'unauthored',
+      weekType: history ? 'history' : (block.authored && progression ? progression.type : 'unauthored'),
       dayKey: weekdayKey(iso),
       date: iso,
       phaseLabel: phaseFor(block, week),
-      authored: Boolean(block.authored && progression)
+      authored: Boolean(block.authored && progression),
+      history
     };
   }
 
@@ -120,9 +125,10 @@ export function resolveWeek(plan, blockId, week) {
   const startDate = addDays(block.start, (week - 1) * 7);
 
   if (!block.authored || !progression) {
+    const history = Boolean(block.history);
     return {
       blockId, blockLabel: block.label, week,
-      type: 'unauthored', authored: false, startDate, days: [],
+      type: history ? 'history' : 'unauthored', authored: false, history, startDate, days: [],
       note: block.note
     };
   }
@@ -185,6 +191,7 @@ export function monthRows(plan, ym) {
       week: day.week,
       weekType: day.weekType,
       authored: day.authored,
+      history: day.history,
       sessions: (resolvedDay ? resolvedDay.sessions : []).map(s => ({
         key: s.key, discipline: s.discipline, optional: s.optional
       }))

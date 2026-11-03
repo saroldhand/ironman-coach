@@ -52,6 +52,31 @@ export function plannedByDiscipline(week, schedule) {
   return out;
 }
 
+// The plan between two dates (`to` exclusive), by discipline, for ranges that
+// do not line up with plan weeks - a calendar month. `days` counts the plan
+// days in the range, so a month before the plan reads as having no plan at
+// all rather than a plan of nothing.
+export function plannedBetween(plan, from, to) {
+  const weeks = new Map();
+  const out = {};
+  let days = 0;
+  for (let date = from; date < to; date = addDays(date, 1)) {
+    const where = dayForDate(plan, date);
+    if (!where.inPlan || !where.authored) continue;
+    const k = `${where.blockId}:${where.week}`;
+    if (!weeks.has(k)) weeks.set(k, resolveWeek(plan, where.blockId, where.week));
+    const day = weeks.get(k).days.find(d => d.dayKey === where.dayKey);
+    days += 1;
+    for (const s of day.sessions) {
+      if (s.optional) continue;
+      const d = out[s.discipline] || (out[s.discipline] = { minutes: 0, metres: 0 });
+      d.minutes += sessionMinutes(s, plan.schedule) || 0;
+      if (s.prescribed.metric === 'distance') d.metres += s.prescribed.value;
+    }
+  }
+  return { days, byDiscipline: out };
+}
+
 // Training time in a week, in hours to one decimal.
 export function weekHours(week, schedule) {
   const total = Object.values(plannedByDiscipline(week, schedule))

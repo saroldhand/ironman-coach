@@ -2,6 +2,8 @@
   "race": { "name": "IRONMAN 70.3 Hawaii", "date": "2027-06-05" },
 
   "blocks": [
+    { "id": "history", "label": "History", "start": "2026-08-03", "weeks": 14, "history": true,
+      "note": "Before the plan: no sessions were set. Each week shows only what Strava recorded." },
     { "id": "bridge", "label": "Bridge", "start": "2026-11-09", "weeks": 4,
       "authored": true,
       "note": "Four weeks back into triathlon: the Arc's week at lower volume, all Zone 2, three swims a week." },
