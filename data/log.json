@@ -1214,6 +1214,21 @@
         "url": "https://www.strava.com/activities/20832259201"
       },
       "note": ""
+    },
+    {
+      "date": "2026-11-04",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "20856714572",
+        "type": "Swim",
+        "name": "Morning Swim",
+        "movingTime": 2766,
+        "distance": 960.1,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/20856714572"
+      },
+      "note": ""
     }
   ]
 }
