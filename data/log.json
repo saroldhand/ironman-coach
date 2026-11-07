@@ -1229,6 +1229,21 @@
         "url": "https://www.strava.com/activities/20856714572"
       },
       "note": ""
+    },
+    {
+      "date": "2026-11-06",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "20886354232",
+        "type": "Ride",
+        "name": "Afternoon Ride",
+        "movingTime": 1996,
+        "distance": 0,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/20886354232"
+      },
+      "note": ""
     }
   ]
 }
