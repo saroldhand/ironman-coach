@@ -121,9 +121,41 @@ its planned totals, and they fill as the nightly sync records workouts: a
 period still under way reads as progress so far, from zero. Only a period that
 is over and recorded nothing shows dashes, not zeros: no data is not rest.
 
-The nightly Claude scheduled task follows `scripts/sync-runbook.md`: it fetches the
-day's activities with the Strava connector's `list_activities` and hands them to
+The Claude scheduled task follows `scripts/sync-runbook.md` every night: it fetches
+yesterday's and today's activities with the Strava connector's `list_activities` and hands them to
 `node scripts/sync.mjs <from> <to> <activities.json>`, which matches them to the
 plan and writes `data/log.json` and `data/sync-status.json`. To sync manually, ask
 Claude in this repo: "sync the last 7 days from Strava". The Strava connector must
 be connected in that session.
+
+### Sync now
+
+The round button at the top right of every page runs the Strava sync now, so a
+workout is on the plan a minute or two after Strava has it. A static page cannot
+start the Claude scheduled task itself (its fire endpoint takes no calls from a
+browser), so the button asks GitHub to run `.github/workflows/sync-now.yml`, and
+that fires the task. The task syncs yesterday and today and pushes to `main` as
+it does every night. The page watches `data/sync-status.json` and redraws when
+the run lands.
+
+One-time setup:
+
+1. **Give the workflow the task's token.** At claude.ai/code/routines, open
+   *Nightly Strava sync — 70.3 training site*, open the menu next to its name
+   and choose **Edit**. In the **Trigger** row click **+**, choose **API**, then
+   **Generate token**, and copy it: it is shown once. Check that the **Fire URL**
+   shown there matches `FIRE_URL` in `.github/workflows/sync-now.yml`. Then, in
+   this repo on GitHub: **Settings → Secrets and variables → Actions → New
+   repository secret**, named `SYNC_FIRE_TOKEN`.
+2. **Make a GitHub token for the button.** GitHub **Settings → Developer
+   settings → Personal access tokens → Fine-grained tokens → Generate new
+   token**. Name it "70.3 Sync button", set it to expire after race day, choose
+   **Only select repositories → ironman-coach**, and under **Repository
+   permissions** set **Actions** to **Read and write**. Nothing else.
+3. **Tap Sync on the site** on each phone or computer you use, paste the token
+   and tap **Save and sync**. It is kept in that browser's storage only, never
+   in the repo, and it can do nothing but run and read this repo's workflows.
+
+If GitHub turns the token down (expired, revoked), the button asks for a new
+one. On a device with no token, open the task at claude.ai/code/routines and
+tap **Run now**: it is the same sync.

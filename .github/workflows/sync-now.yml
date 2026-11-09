@@ -1,0 +1,49 @@
+# The site's Sync button. A static page cannot fire the Claude scheduled task
+# itself (its endpoint answers no browser calls), so the button asks GitHub to
+# run this workflow, and this fires the nightly Strava sync task now. The task
+# syncs yesterday and today and pushes the data to main, as it does every night.
+#
+# Needs one repository secret, SYNC_FIRE_TOKEN: the scheduled task's API
+# trigger token (README, "Sync now"). The fire URL below is the task's own;
+# if the task is ever recreated, copy its new Fire URL here.
+
+name: Sync now
+
+on:
+  workflow_dispatch:
+
+permissions: {}
+
+# Taps that land together start one sync, not several racing pushes to main.
+concurrency:
+  group: sync-now
+  cancel-in-progress: false
+
+jobs:
+  fire:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    env:
+      FIRE_URL: https://api.anthropic.com/v1/claude_code/routines/trig_019KiL6fmkSpMUnNRZX7W2Nc/fire
+    steps:
+      - name: Fire the Strava sync task
+        env:
+          FIRE_TOKEN: ${{ secrets.SYNC_FIRE_TOKEN }}
+        run: |
+          if [ -z "$FIRE_TOKEN" ]; then
+            echo "::error::Add the SYNC_FIRE_TOKEN repository secret: the scheduled task's API trigger token (README, Sync now)."
+            exit 1
+          fi
+          code=$(curl -sS -o response.json -w '%{http_code}' -X POST "$FIRE_URL" \
+            -H "Authorization: Bearer $FIRE_TOKEN" \
+            -H "anthropic-beta: experimental-cc-routine-2026-04-01" \
+            -H "anthropic-version: 2023-06-01" \
+            -H "Content-Type: application/json" \
+            -d '{}')
+          if [ "$code" -lt 200 ] || [ "$code" -ge 300 ]; then
+            echo "::error::The scheduled task refused the fire request (HTTP $code). A 401 means SYNC_FIRE_TOKEN is wrong or was regenerated."
+            cat response.json
+            exit 1
+          fi
+          session=$(jq -r '.claude_code_session_url // empty' response.json)
+          echo "Sync task started: ${session:-(no session link returned)}" | tee -a "$GITHUB_STEP_SUMMARY"
