@@ -35,12 +35,39 @@
         </a>
       </nav>
       <div class="countdown" id="countdown"></div>
+      <!-- Sync now: asks GitHub to run the Strava sync (app.js, README). -->
+      <button class="syncbtn" id="syncbtn" type="button" aria-label="Sync from Strava" title="Sync from Strava">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12a8 8 0 0 1 13.7-5.6L20 8.5"/><path d="M20 4v4.5h-4.5"/><path d="M20 12a8 8 0 0 1-13.7 5.6L4 15.5"/><path d="M4 20v-4.5h4.5"/></svg>
+      </button>
     </div>
     <nav class="crumbbar" id="crumbbar" aria-label="Breadcrumb"></nav>
+    <div class="syncnote" id="syncnote" role="status" aria-live="polite" hidden></div>
   </header>
 
   <div id="banner" class="banner" role="status" hidden></div>
   <main id="main">Loading…</main>
+
+  <!-- Shown the first time Sync is tapped on a device, or when GitHub turns
+       the saved token down. The token stays in this browser's storage. -->
+  <dialog class="sheet" id="syncsetup" aria-labelledby="syncsetup-title">
+    <form method="dialog">
+      <h2 id="syncsetup-title">Sync from Strava</h2>
+      <p>One tap runs the Strava sync now, so a workout is on the plan a couple of minutes after you save it. To start the sync, this device needs a GitHub token, once.</p>
+      <p class="sheet-error" id="syncsetup-error" hidden></p>
+      <label class="field">
+        <span>GitHub token</span>
+        <input type="password" name="token" id="syncsetup-token" required
+               autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"
+               placeholder="github_pat_…">
+      </label>
+      <p class="sheet-small">It is kept in this browser only, and can only run this repo's GitHub workflows. <a href="https://github.com/saroldhand/ironman-coach#sync-now" target="_blank" rel="noopener">How to make one</a></p>
+      <div class="sheet-actions">
+        <button type="button" class="btn" id="syncsetup-cancel">Cancel</button>
+        <button type="submit" value="save" class="btn primary">Save and sync</button>
+      </div>
+      <p class="sheet-small sheet-alt">No token on this device? <a href="https://claude.ai/code/routines" target="_blank" rel="noopener">Run it in Claude</a>: open the nightly Strava sync and tap Run now.</p>
+    </form>
+  </dialog>
 
   <script type="module" src="assets/app.js"></script>
 </body>

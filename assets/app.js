@@ -1,14 +1,25 @@
 import { dayForDate, resolveWeek, monthRows } from './plan-model.js';
 import { weekCompletion } from './log-model.js';
-import { renderDay, renderWeek, renderMonth, renderSeason, renderCrumbs } from './render.js';
+import { renderDay, renderWeek, renderMonth, renderSeason, renderCrumbs, el } from './render.js';
+import { icon } from './icons.js';
 import { daysBetween, todayISO, localHour } from './date-utils.js';
-import { syncMessages, indexEntries, route } from './app-state.js';
+import {
+  syncMessages, indexEntries, route, dispatchRequest, runsRequest, dispatchFailure, workflowVerdict,
+  syncLanded, syncResultText, SYNC_POLL_MS, SYNC_GIVE_UP_MS
+} from './app-state.js';
 import { historyStep, resolvePage, focusFor, levelHrefs, crumbs, upHref, pager } from './nav-model.js';
 
 const main = document.getElementById('main');
 const bannerEl = document.getElementById('banner');
 const countdownEl = document.getElementById('countdown');
 const crumbbarEl = document.getElementById('crumbbar');
+const syncBtn = document.getElementById('syncbtn');
+const syncNoteEl = document.getElementById('syncnote');
+const setupEl = document.getElementById('syncsetup');
+const setupTokenEl = document.getElementById('syncsetup-token');
+const setupErrorEl = document.getElementById('syncsetup-error');
+
+const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 async function loadJSON(path) {
   const res = await fetch(`${path}?t=${Date.now()}`, { cache: 'no-store' });
@@ -144,6 +155,140 @@ async function start() {
     if (!back || !(index > 0)) return;
     e.preventDefault();
     history.back();
+  });
+
+  // ---- Sync now
+  // The header button asks GitHub to run the sync workflow, which fires the
+  // Strava sync task; the page then watches sync-status.json until the run
+  // lands and redraws with the new log. Each step's rules are in app-state.js.
+
+  // The GitHub token lives in this browser only. Storage can be missing (a
+  // private window); then it lasts as long as the tab.
+  const TOKEN_KEY = 'ironman-coach.githubToken';
+  let tabToken = '';
+  const readToken = () => { try { return localStorage.getItem(TOKEN_KEY) || tabToken; } catch { return tabToken; } };
+  const keepToken = token => { tabToken = token; try { localStorage.setItem(TOKEN_KEY, token); } catch { /* tab only */ } };
+  const dropToken = () => { tabToken = ''; try { localStorage.removeItem(TOKEN_KEY); } catch { /* nothing kept */ } };
+
+  let noteTimer = null;
+  function syncNote(kind, text, link = null) {
+    clearTimeout(noteTimer);
+    if (!kind) { syncNoteEl.hidden = true; return; }
+    syncNoteEl.hidden = false;
+    syncNoteEl.dataset.kind = kind;
+    syncNoteEl.replaceChildren(...[
+      kind === 'busy' ? el('span', { class: 'spinner', 'aria-hidden': 'true' })
+                      : icon(kind === 'done' ? 'check' : 'warn', { size: 16 }),
+      el('span', { class: 'syncnote-text' }, text),
+      link && el('a', { href: link, target: '_blank', rel: 'noopener' }, 'Details'),
+      kind !== 'busy' && el('button', { type: 'button', class: 'syncnote-close', 'aria-label': 'Dismiss' },
+                            icon('cross', { size: 14 }))
+    ].filter(Boolean));
+    if (kind === 'done') noteTimer = setTimeout(() => syncNote(null), 10000);
+  }
+  syncNoteEl.addEventListener('click', e => { if (e.target.closest('.syncnote-close')) syncNote(null); });
+
+  let syncing = false;
+  function busy(on) {
+    syncing = on;
+    syncBtn.disabled = on;
+    syncBtn.setAttribute('aria-busy', String(on));
+  }
+
+  async function syncNow(token) {
+    if (syncing) return;
+    busy(true);
+    const tappedAt = new Date().toISOString();
+    syncNote('busy', 'Starting the Strava sync…');
+
+    let before = status;
+    try { before = await loadJSON('data/sync-status.json'); } catch { /* keep the one loaded */ }
+    const beforeEntries = log.entries;
+
+    let res;
+    try {
+      const { url, init } = dispatchRequest(token);
+      res = await fetch(url, init);
+    } catch {
+      res = { ok: false, status: 0 };
+    }
+    if (!res.ok) {
+      const failure = dispatchFailure(res.status);
+      busy(false);
+      if (failure.tokenProblem) {
+        dropToken();
+        syncNote(null);
+        openSetup(failure.text);
+      } else {
+        syncNote('fail', failure.text);
+      }
+      return;
+    }
+
+    syncNote('busy', 'Syncing from Strava. This usually takes a minute or two.');
+    let fired = false;
+    for (const deadline = Date.now() + SYNC_GIVE_UP_MS; Date.now() < deadline;) {
+      await wait(SYNC_POLL_MS);
+
+      // Until GitHub has fired the task, a failed workflow run is the only way
+      // to learn early that nothing is coming.
+      if (!fired) {
+        try {
+          const { url, init } = runsRequest(token);
+          const runs = await fetch(url, init);
+          if (runs.ok) {
+            const verdict = workflowVerdict((await runs.json()).workflow_runs, tappedAt);
+            if (verdict.state === 'failed') {
+              syncNote('fail', 'The sync workflow failed on GitHub, so nothing was synced.', verdict.url);
+              busy(false);
+              return;
+            }
+            fired = verdict.state === 'fired';
+          }
+        } catch { /* ask again next time round */ }
+      }
+
+      let after = null;
+      try { after = await loadJSON('data/sync-status.json'); } catch { /* not yet */ }
+      if (!syncLanded(before, after)) continue;
+
+      status = after;
+      statusFailed = false;
+      try {
+        log = await loadJSON('data/log.json');
+        logFailed = false;
+        syncNote(after.ok ? 'done' : 'fail', syncResultText(beforeEntries, log.entries, after));
+      } catch {
+        syncNote('fail', 'The sync finished, but the training log did not reload. Reload the page.');
+      }
+      banner(syncMessages(status, logFailed, statusFailed));
+      draw();
+      busy(false);
+      return;
+    }
+
+    syncNote('fail', 'The sync started but has not shown up after six minutes. It may still be running: reload in a few minutes.');
+    busy(false);
+  }
+
+  function openSetup(error = null) {
+    setupErrorEl.hidden = !error;
+    setupErrorEl.textContent = error || '';
+    setupEl.returnValue = '';
+    setupEl.showModal();
+  }
+  document.getElementById('syncsetup-cancel').addEventListener('click', () => setupEl.close(''));
+  setupEl.addEventListener('close', () => {
+    const token = setupTokenEl.value.trim();
+    setupTokenEl.value = '';
+    if (setupEl.returnValue !== 'save' || !token) return;
+    keepToken(token);
+    syncNow(token);
+  });
+  syncBtn.addEventListener('click', () => {
+    const token = readToken();
+    if (token) syncNow(token);
+    else openSetup();
   });
 
   window.addEventListener('hashchange', draw);

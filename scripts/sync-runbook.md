@@ -1,11 +1,14 @@
 # Strava sync runbook
 
-Run by the nightly scheduled task, and on request ("sync the last 7 days").
+Run by the Strava sync scheduled task, every night and whenever Sync is tapped
+on the site, and on request ("sync the last 7 days").
 Working directory: the repo root.
 
 ## Inputs
 
-- Default target: **yesterday**, local date.
+- Default target: **yesterday through today**, local dates. Today is included
+  so a sync started from the site's button picks up a workout just finished;
+  the next night's run syncs it again once the day is over.
 - On request, an explicit date or an inclusive date range.
 - A date that has not finished yet (today, or the end of a range) is synced
   without marking anything missed. Sessions you have not done yet stay blank.

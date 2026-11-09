@@ -1,6 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { syncMessages, indexEntries, route } from '../assets/app-state.js';
+import {
+  syncMessages, indexEntries, route,
+  dispatchRequest, runsRequest, dispatchFailure, workflowVerdict, syncLanded, syncResultText
+} from '../assets/app-state.js';
 
 test('never-run reports that the sync has never run', () => {
   const msgs = syncMessages({ ok: false, reason: 'never-run', lastSuccess: null }, false, false);
@@ -84,4 +87,59 @@ test('route rejects an out-of-range or malformed month', () => {
   for (const bad of ['#/month/2026-13', '#/month/2026-00', '#/month/october', '#/month/2026']) {
     assert.equal(route(bad).ym, null, bad);
   }
+});
+
+// ---- Sync now
+
+test('the button asks GitHub to run the sync workflow on main', () => {
+  const { url, init } = dispatchRequest('tok');
+  assert.equal(url, 'https://api.github.com/repos/saroldhand/ironman-coach/actions/workflows/sync-now.yml/dispatches');
+  assert.equal(init.method, 'POST');
+  assert.equal(init.headers.Authorization, 'Bearer tok');
+  assert.deepEqual(JSON.parse(init.body), { ref: 'main' });
+  // Only headers GitHub's CORS policy allows from a browser.
+  assert.deepEqual(Object.keys(init.headers).sort(), ['Accept', 'Authorization', 'Content-Type']);
+  assert.match(runsRequest('tok').url, /sync-now\.yml\/runs\?event=workflow_dispatch/);
+});
+
+test('a refused token is told apart from GitHub being unavailable', () => {
+  for (const status of [401, 403, 404]) assert.equal(dispatchFailure(status).tokenProblem, true, status);
+  for (const status of [0, 422, 500]) assert.equal(dispatchFailure(status).tokenProblem, false, status);
+  assert.match(dispatchFailure(403).text, /Actions: Read and write/);
+  assert.match(dispatchFailure(500).text, /500/);
+});
+
+test('the workflow run is the newest one since the tap', () => {
+  const tap = '2026-11-09T12:00:00Z';
+  const run = (created_at, status, conclusion) => ({ created_at, status, conclusion, html_url: `u/${created_at}` });
+  assert.deepEqual(workflowVerdict([], tap), { state: 'starting' });
+  // An old failure from an earlier tap is not this tap's.
+  assert.deepEqual(workflowVerdict([run('2026-11-09T11:00:00Z', 'completed', 'failure')], tap), { state: 'starting' });
+  assert.deepEqual(workflowVerdict([run('2026-11-09T12:00:05Z', 'in_progress', null)], tap), { state: 'starting' });
+  assert.deepEqual(workflowVerdict([run('2026-11-09T12:00:05Z', 'completed', 'success')], tap), { state: 'fired' });
+  // A phone clock a minute fast still finds the run.
+  assert.deepEqual(workflowVerdict([run('2026-11-09T11:59:00Z', 'completed', 'failure')], tap),
+    { state: 'failed', url: 'u/2026-11-09T11:59:00Z' });
+  assert.deepEqual(workflowVerdict([
+    run('2026-11-09T12:00:05Z', 'completed', 'failure'),
+    run('2026-11-09T12:01:00Z', 'completed', 'success')
+  ], tap), { state: 'fired' }, 'the newest run decides');
+});
+
+test('the sync has landed when the status file shows a new run', () => {
+  const before = { lastRun: '2026-11-09T09:52:00Z', ok: true };
+  assert.equal(syncLanded(before, before), false);
+  assert.equal(syncLanded(before, { ...before, lastRun: '2026-11-09T12:01:00Z' }), true);
+  assert.equal(syncLanded(before, null), false, 'an unreadable status is not news');
+  assert.equal(syncLanded(null, { lastRun: '2026-11-09T12:01:00Z' }), true);
+});
+
+test('the result line counts new workouts, not walks or resyncs', () => {
+  const act = (id, type) => ({ date: '2026-11-09', status: 'extra', strava: { id, type } });
+  const before = [act('1', 'Swim')];
+  assert.equal(syncResultText(before, before, { ok: true }), 'Synced from Strava. Nothing new since the last sync.');
+  assert.equal(syncResultText(before, [...before, act('2', 'Run')], { ok: true }), 'Synced from Strava: 1 new workout.');
+  assert.equal(syncResultText(before, [...before, act('2', 'Run'), act('3', 'Ride'), act('4', 'Walk')], { ok: true }),
+    'Synced from Strava: 2 new workouts.');
+  assert.match(syncResultText(before, before, { ok: false, reason: 'strava-unreachable' }), /strava-unreachable/);
 });
