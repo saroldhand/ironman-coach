@@ -1244,6 +1244,51 @@
         "url": "https://www.strava.com/activities/20886354232"
       },
       "note": ""
+    },
+    {
+      "date": "2026-11-09",
+      "planKey": "bridge:1:mon:strength",
+      "status": "done",
+      "strava": {
+        "id": "20919819272",
+        "type": "WeightTraining",
+        "name": "Morning Weight Training",
+        "movingTime": 2661,
+        "distance": 0,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/20919819272"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-11-09",
+      "planKey": "bridge:1:mon:swim",
+      "status": "done",
+      "strava": {
+        "id": "20919819289",
+        "type": "Swim",
+        "name": "Morning Swim",
+        "movingTime": 2886,
+        "distance": 1120.1,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/20919819289"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-11-09",
+      "planKey": "bridge:1:mon:run",
+      "status": "done",
+      "strava": {
+        "id": "20925387064",
+        "type": "Run",
+        "name": "Afternoon Run",
+        "movingTime": 899,
+        "distance": 2686.75,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/20925387064"
+      },
+      "note": ""
     }
   ]
 }
