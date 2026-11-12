@@ -1296,6 +1296,28 @@
       "status": "missed",
       "strava": null,
       "note": ""
+    },
+    {
+      "date": "2026-11-11",
+      "planKey": "bridge:1:wed:swim",
+      "status": "missed",
+      "strava": null,
+      "note": ""
+    },
+    {
+      "date": "2026-11-11",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "20945906188",
+        "type": "Run",
+        "name": "Morning Run",
+        "movingTime": 1794,
+        "distance": 4266.64,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/20945906188"
+      },
+      "note": ""
     }
   ]
 }
