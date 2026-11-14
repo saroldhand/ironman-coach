@@ -1325,6 +1325,13 @@
       "status": "missed",
       "strava": null,
       "note": ""
+    },
+    {
+      "date": "2026-11-13",
+      "planKey": "bridge:1:fri:swim",
+      "status": "missed",
+      "strava": null,
+      "note": ""
     }
   ]
 }
