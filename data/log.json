@@ -1354,6 +1354,13 @@
         "url": "https://www.strava.com/activities/20986247254"
       },
       "note": ""
+    },
+    {
+      "date": "2026-11-15",
+      "planKey": "bridge:1:sun:run",
+      "status": "missed",
+      "strava": null,
+      "note": ""
     }
   ]
 }
