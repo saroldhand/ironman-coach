@@ -1361,6 +1361,35 @@
       "status": "missed",
       "strava": null,
       "note": ""
+    },
+    {
+      "date": "2026-11-16",
+      "planKey": "bridge:2:mon:strength",
+      "status": "missed",
+      "strava": null,
+      "note": ""
+    },
+    {
+      "date": "2026-11-16",
+      "planKey": "bridge:2:mon:swim",
+      "status": "missed",
+      "strava": null,
+      "note": ""
+    },
+    {
+      "date": "2026-11-16",
+      "planKey": "bridge:2:mon:run",
+      "status": "done",
+      "strava": {
+        "id": "21014100564",
+        "type": "Run",
+        "name": "Afternoon Run",
+        "movingTime": 1694,
+        "distance": 5012.25,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/21014100564"
+      },
+      "note": ""
     }
   ]
 }
