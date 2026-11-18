@@ -1390,6 +1390,21 @@
         "url": "https://www.strava.com/activities/21014100564"
       },
       "note": ""
+    },
+    {
+      "date": "2026-11-17",
+      "planKey": "bridge:2:tue:bike",
+      "status": "partial",
+      "strava": {
+        "id": "21020689690",
+        "type": "Ride",
+        "name": "Morning Ride",
+        "movingTime": 2559,
+        "distance": 0,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/21020689690"
+      },
+      "note": ""
     }
   ]
 }
