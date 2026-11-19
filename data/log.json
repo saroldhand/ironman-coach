@@ -1405,6 +1405,21 @@
         "url": "https://www.strava.com/activities/21020689690"
       },
       "note": ""
+    },
+    {
+      "date": "2026-11-18",
+      "planKey": "bridge:2:wed:swim",
+      "status": "missed",
+      "strava": {
+        "id": "21033553957",
+        "type": "Swim",
+        "name": "Morning Swim",
+        "movingTime": 2314,
+        "distance": 662.9,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/21033553957"
+      },
+      "note": ""
     }
   ]
 }
