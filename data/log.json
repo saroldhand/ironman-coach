@@ -1420,6 +1420,21 @@
         "url": "https://www.strava.com/activities/21033553957"
       },
       "note": ""
+    },
+    {
+      "date": "2026-11-19",
+      "planKey": "bridge:2:thu:run",
+      "status": "done",
+      "strava": {
+        "id": "21050265331",
+        "type": "Run",
+        "name": "Afternoon Run",
+        "movingTime": 2304,
+        "distance": 4645.25,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/21050265331"
+      },
+      "note": ""
     }
   ]
 }
