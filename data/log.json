@@ -1435,6 +1435,21 @@
         "url": "https://www.strava.com/activities/21050265331"
       },
       "note": ""
+    },
+    {
+      "date": "2026-11-20",
+      "planKey": "bridge:2:fri:swim",
+      "status": "done",
+      "strava": {
+        "id": "21062148803",
+        "type": "Swim",
+        "name": "Lunch Swim",
+        "movingTime": 3808,
+        "distance": 1874.5,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/21062148803"
+      },
+      "note": ""
     }
   ]
 }
