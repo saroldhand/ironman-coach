@@ -1464,6 +1464,43 @@
       "status": "missed",
       "strava": null,
       "note": ""
+    },
+    {
+      "date": "2026-11-23",
+      "planKey": "bridge:3:mon:strength",
+      "status": "missed",
+      "strava": null,
+      "note": ""
+    },
+    {
+      "date": "2026-11-23",
+      "planKey": "bridge:3:mon:swim",
+      "status": "partial",
+      "strava": {
+        "id": "21094712586",
+        "type": "Swim",
+        "name": "Morning Swim",
+        "movingTime": 1940,
+        "distance": 754.4,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/21094712586"
+      },
+      "note": ""
+    },
+    {
+      "date": "2026-11-23",
+      "planKey": "bridge:3:mon:run",
+      "status": "done",
+      "strava": {
+        "id": "21100143423",
+        "type": "Run",
+        "name": "Afternoon Run",
+        "movingTime": 874,
+        "distance": 2467.04,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/21100143423"
+      },
+      "note": ""
     }
   ]
 }
