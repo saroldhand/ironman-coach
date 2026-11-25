@@ -1501,6 +1501,13 @@
         "url": "https://www.strava.com/activities/21100143423"
       },
       "note": ""
+    },
+    {
+      "date": "2026-11-24",
+      "planKey": "bridge:3:tue:bike",
+      "status": "missed",
+      "strava": null,
+      "note": ""
     }
   ]
 }
