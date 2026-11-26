@@ -1508,6 +1508,28 @@
       "status": "missed",
       "strava": null,
       "note": ""
+    },
+    {
+      "date": "2026-11-25",
+      "planKey": "bridge:3:wed:swim",
+      "status": "missed",
+      "strava": null,
+      "note": ""
+    },
+    {
+      "date": "2026-11-25",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "21124500103",
+        "type": "Run",
+        "name": "Afternoon Run",
+        "movingTime": 2076,
+        "distance": 5567.95,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/21124500103"
+      },
+      "note": ""
     }
   ]
 }
