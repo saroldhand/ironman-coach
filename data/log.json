@@ -1530,6 +1530,13 @@
         "url": "https://www.strava.com/activities/21124500103"
       },
       "note": ""
+    },
+    {
+      "date": "2026-11-26",
+      "planKey": "bridge:3:thu:run",
+      "status": "missed",
+      "strava": null,
+      "note": ""
     }
   ]
 }
