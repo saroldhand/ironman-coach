@@ -1537,6 +1537,21 @@
       "status": "missed",
       "strava": null,
       "note": ""
+    },
+    {
+      "date": "2026-11-27",
+      "planKey": null,
+      "status": "extra",
+      "strava": {
+        "id": "21147181254",
+        "type": "Hike",
+        "name": "Morning Hike",
+        "movingTime": 12510,
+        "distance": 11634.3,
+        "avgHr": null,
+        "url": "https://www.strava.com/activities/21147181254"
+      },
+      "note": ""
     }
   ]
 }
